@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dynasty – Recruiting Board</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f1117;
+    color: #e8e8e8;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #1a1d27;
+    border-bottom: 1px solid #2a2d3a;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  header h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #c9a84c;
+  }
+
+  header span {
+    font-size: 0.8rem;
+    color: #888;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr 280px;
+    gap: 0;
+    height: calc(100vh - 57px);
+  }
+
+  .panel {
+    background: #1a1d27;
+    border-right: 1px solid #2a2d3a;
+    overflow-y: auto;
+  }
+
+  .panel-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #666;
+    padding: 1rem 1rem 0.5rem;
+    border-bottom: 1px solid #2a2d3a;
+  }
+
+  .filter-section {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #2a2d3a;
+  }
+
+  .filter-label {
+    font-size: 0.72rem;
+    color: #888;
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+  }
+
+  select, input[type="text"] {
+    width: 100%;
+    background: #0f1117;
+    border: 1px solid #2a2d3a;
+    border-radius: 6px;
+    color: #e8e8e8;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.82rem;
+    outline: none;
+  }
+
+  select:focus, input[type="text"]:focus {
+    border-color: #c9a84c;
+  }
+
+  .star-filter {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+  }
+
+  .star-btn {
+    background: #0f1117;
+    border: 1px solid #2a2d3a;
+    border-radius: 4px;
+    color: #888;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .star-btn.active {
+    background: #c9a84c22;
+    border-color: #c9a84c;
+    color: #c9a84c;
+  }
+
+  .main {
+    overflow-y: auto;
+    background: #0f1117;
+  }
+
+  .recruit-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+
+  .recruit-table thead th {
+    background: #1a1d27;
+    color: #666;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #2a2d3a;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .recruit-table thead th:hover { color: #c9a84c; }
+
+  .recruit-table tbody tr {
+    border-bottom: 1px solid #1e2130;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+
+  .recruit-table tbody tr:hover { background: #1a1d2788; }
+  .recruit-table tbody tr.selected { background: #c9a84c11; }
+
+  .recruit-table td {
+    padding: 0.55rem 0.75rem;
+    vertical-align: middle;
+  }
+
+  .stars {
+    color: #c9a84c;
+    font-size: 0.75rem;
+    letter-spacing: -1px;
+  }
+
+  .pos-badge {
+    display: inline-block;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .pos-QB { background: #1e3a5f; color: #5ba3e0; }
+  .pos-RB { background: #1e3a2a; color: #5bc47a; }
+  .pos-WR { background: #3a1e3a; color: #c07ad4; }
+  .pos-TE { background: #2a2a1e; color: #c4b45b; }
+  .pos-OL { background: #2a1e1e; color: #c47a5b; }
+  .pos-DL { background: #1e2a2a; color: #5bc4c4; }
+  .pos-LB { background: #2a1e2a; color: #c45b9a; }
+  .pos-CB { background: #1e2a1e; color: #7ac45b; }
+  .pos-S  { background: #1e1e2a; color: #7a7ac4; }
+  .pos-K  { background: #2a2a2a; color: #aaa; }
+  .pos-P  { background: #2a2a2a; color: #aaa; }
+
+  .interest-bar {
+    width: 60px;
+    height: 5px;
+    background: #2a2d3a;
+    border-radius: 3px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .interest-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  .fit-chip {
+    font-size: 0.68rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+
+  .fit-high { background: #1e3a2a; color: #5bc47a; }
+  .fit-med  { background: #2a2a1e; color: #c4b45b; }
+  .fit-low  { background: #2a1e1e; color: #c47a5b; }
+
+  .add-btn {
+    background: none;
+    border: 1px solid #2a2d3a;
+    border-radius: 4px;
+    color: #666;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .add-btn:hover { border-color: #c9a84c; color: #c9a84c; }
+  .add-btn.added { border-color: #5bc47a; color: #5bc47a; }
+
+  .right-panel {
+    background: #1a1d27;
+    border-left: 1px solid #2a2d3a;
+    overflow-y: auto;
+  }
+
+  .detail-empty {
+    padding: 2rem 1rem;
+    color: #444;
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  .detail-header {
+    padding: 1rem;
+    border-bottom: 1px solid #2a2d3a;
+  }
+
+  .detail-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e8e8e8;
+    margin-bottom: 0.25rem;
+  }
+
+  .detail-sub {
+    font-size: 0.78rem;
+    color: #888;
+  }
+
+  .detail-section {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #2a2d3a;
+  }
+
+  .detail-section-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 0.6rem;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0;
+    font-size: 0.8rem;
+  }
+
+  .detail-row-label { color: #888; }
+  .detail-row-val { color: #e8e8e8; font-weight: 500; }
+
+  .service-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.3rem 0;
+    font-size: 0.8rem;
+  }
+
+  .service-name { color: #888; font-size: 0.75rem; }
+
+  .composite-score {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #c9a84c;
+    margin-top: 0.25rem;
+  }
+
+  .bigboard-section {
+    padding: 0.75rem 1rem;
+  }
+
+  .bigboard-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #1e2130;
+    font-size: 0.78rem;
+  }
+
+  .bigboard-rank {
+    color: #555;
+    font-size: 0.7rem;
+    width: 16px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .bigboard-name { color: #e8e8e8; flex: 1; }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    color: #444;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
+    padding: 0 0.2rem;
+    transition: color 0.1s;
+  }
+
+  .remove-btn:hover { color: #c45b5b; }
+
+  .results-count {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.72rem;
+    color: #555;
+    border-bottom: 1px solid #1e2130;
+    background: #0f1117;
+    position: sticky;
+    top: 41px;
+    z-index: 1;
+  }
+
+  .scheme-display {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #2a2d3a;
+  }
+
+  .scheme-select-label {
+    font-size: 0.68rem;
+    color: #666;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .trait-tag {
+    display: inline-block;
+    background: #0f1117;
+    border: 1px solid #2a2d3a;
+    border-radius: 3px;
+    font-size: 0.68rem;
+    padding: 0.15rem 0.4rem;
+    color: #888;
+    margin: 0.15rem 0.15rem 0 0;
+  }
+
+  .trait-tag.positive { border-color: #1e4a2a; color: #5bc47a; }
+  .trait-tag.negative { border-color: #4a1e1e; color: #c45b5b; }
+
+  .empty-board {
+    padding: 1rem;
+    font-size: 0.78rem;
+    color: #444;
+    text-align: center;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>THE DYNASTY</h1>
+  <span id="header-info">Recruiting Board · Class of 2026</span>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT PANEL: Filters -->
+  <div class="panel">
+    <div class="panel-title">Filters</div>
+
+    <div class="filter-section">
+      <div class="filter-label">Search recruit</div>
+      <input type="text" id="search-input" placeholder="Name or hometown…">
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">Stars</div>
+      <div class="star-filter" id="star-filter">
+        <button class="star-btn active" data-star="0">All</button>
+        <button class="star-btn" data-star="5">★★★★★</button>
+        <button class="star-btn" data-star="4">★★★★</button>
+        <button class="star-btn" data-star="3">★★★</button>
+        <button class="star-btn" data-star="2">★★</button>
+        <button class="star-btn" data-star="1">★</button>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">Position</div>
+      <select id="pos-filter">
+        <option value="">All positions</option>
+        <option>QB</option><option>RB</option><option>WR</option>
+        <option>TE</option><option>OL</option><option>DL</option>
+        <option>LB</option><option>CB</option><option>S</option>
+        <option>K</option><option>P</option>
+      </select>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">Region</div>
+      <select id="region-filter">
+        <option value="">All regions</option>
+        <option>Southeast</option><option>Texas</option>
+        <option>California</option><option>Midwest</option>
+        <option>Northeast</option><option>Florida</option>
+        <option>Mid-Atlantic</option><option>Mountain West</option>
+      </select>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">HS Scheme</div>
+      <select id="scheme-filter">
+        <option value="">Any scheme</option>
+        <option>Air Raid</option><option>Spread RPO</option>
+        <option>Pro Style</option><option>Power Run</option>
+        <option>Triple Option</option><option>West Coast</option>
+      </select>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">Class year</div>
+      <select id="year-filter">
+        <option value="2026">2026 (Seniors)</option>
+        <option value="2027">2027 (Juniors)</option>
+      </select>
+    </div>
+
+    <div class="scheme-display">
+      <div class="scheme-select-label">Your scheme</div>
+      <select id="my-scheme">
+        <option>Spread RPO</option>
+        <option>Air Raid</option>
+        <option>Pro Style</option>
+        <option>Power Run</option>
+        <option>Triple Option</option>
+        <option>West Coast</option>
+        <option>Run-and-Shoot</option>
+      </select>
+    </div>
+
+    <div class="bigboard-section">
+      <div class="panel-title" style="padding: 0 0 0.5rem;">Big Board (<span id="bb-count">0</span>)</div>
+      <div id="bigboard-list"><div class="empty-board">No recruits added yet</div></div>
+    </div>
+  </div>
+
+  <!-- MAIN: Recruit table -->
+  <div class="main">
+    <div class="results-count" id="results-count">Loading recruits…</div>
+    <table class="recruit-table">
+      <thead>
+        <tr>
+          <th data-sort="stars">Stars</th>
+          <th data-sort="composite">Comp.</th>
+          <th data-sort="name">Name</th>
+          <th data-sort="pos">Pos</th>
+          <th data-sort="height">Ht</th>
+          <th data-sort="weight">Wt</th>
+          <th data-sort="region">Region</th>
+          <th data-sort="hsScheme">HS Scheme</th>
+          <th data-sort="fit">Fit</th>
+          <th data-sort="interest">Interest</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="recruit-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- RIGHT PANEL: Detail + Big Board -->
+  <div class="right-panel">
+    <div class="panel-title">Recruit Detail</div>
+    <div id="detail-panel"><div class="detail-empty">Click a recruit to view details</div></div>
+  </div>
+
+</div>
+
+<script>
+const POSITIONS = ['QB','RB','WR','WR','WR','TE','OL','OL','OL','DL','DL','LB','LB','CB','CB','S','K','P'];
+const REGIONS = ['Southeast','Texas','California','Midwest','Northeast','Florida','Mid-Atlantic','Mountain West'];
+const HS_SCHEMES = ['Air Raid','Spread RPO','Pro Style','Power Run','Triple Option','West Coast'];
+const SERVICES = ['GridironNow','ProspectHub','EliteGrid'];
+const EXTRA_SPORTS = ['Basketball','Baseball','Track','Wrestling','Soccer','None','None','None'];
+const TRAITS = [
+  {t:'High Motor',p:true},{t:'Explosive',p:true},{t:'Natural Leader',p:true},
+  {t:'Tech Savvy',p:true},{t:'Film Junkie',p:true},{t:'Dual Sport',p:true},
+  {t:'Injury History',p:false},{t:'Academic Risk',p:false},{t:'Slow Starter',p:false},{t:'Homesick',p:false}
+];
+const OFFSCHEMES = ['Spread RPO','Air Raid','Pro Style','Power Run','Triple Option','West Coast','Run-and-Shoot'];
+const FIRST_NAMES = ['Malik','Darius','Jordan','Marcus','Tyrese','Cameron','Isaiah','Elijah','Jaylen','Andre',
+  'Devin','Caleb','Trevor','Mason','Hunter','Bryce','Cole','Logan','Tyler','Nathan','Zach','Justin',
+  'Damien','Xavier','Kendall','Jalen','Quinton','Lamar','Terrell','DeAndre','Cody','Blake','Collin','Peyton'];
+const LAST_NAMES = ['Williams','Johnson','Davis','Brown','Wilson','Moore','Taylor','Thomas','Jackson','White',
+  'Harris','Martin','Thompson','Garcia','Martinez','Robinson','Clark','Rodriguez','Lewis','Lee',
+  'Walker','Hall','Allen','Young','King','Wright','Scott','Green','Baker','Adams','Nelson','Carter',
+  'Mitchell','Perez','Roberts','Turner','Phillips','Campbell','Parker','Evans'];
+const CITIES = {
+  Southeast:['Atlanta, GA','Birmingham, AL','Charlotte, NC','Nashville, TN','Columbia, SC'],
+  Texas:['Houston, TX','Dallas, TX','San Antonio, TX','Austin, TX','Beaumont, TX'],
+  California:['Los Angeles, CA','Fresno, CA','San Diego, CA','Oakland, CA','Riverside, CA'],
+  Midwest:['Columbus, OH','Indianapolis, IN','Detroit, MI','Chicago, IL','St. Louis, MO'],
+  Northeast:['Philadelphia, PA','Baltimore, MD','Boston, MA','Newark, NJ','Pittsburgh, PA'],
+  Florida:['Miami, FL','Tampa, FL','Orlando, FL','Jacksonville, FL','Fort Lauderdale, FL'],
+  'Mid-Atlantic':['Richmond, VA','Raleigh, NC','Norfolk, VA','Greensboro, NC','Washington, DC'],
+  'Mountain West':['Las Vegas, NV','Phoenix, AZ','Denver, CO','Salt Lake City, UT','Albuquerque, NM']
+};
+
+function rng(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 0xffffffff;
+  };
+}
+
+function pickR(arr, r) { return arr[Math.floor(r() * arr.length)]; }
+
+function heightStr(inches) {
+  return Math.floor(inches/12) + "'" + (inches%12) + '"';
+}
+
+function generateRecruits(count, classYear) {
+  const r = rng(classYear * 999 + 42);
+  const recruits = [];
+  const starDist = [0,0,0,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5];
+
+  for (let i = 0; i < count; i++) {
+    const fn = pickR(FIRST_NAMES, r);
+    const ln = pickR(LAST_NAMES, r);
+    const pos = pickR(POSITIONS, r);
+    const region = pickR(REGIONS, r);
+    const city = pickR(CITIES[region], r);
+    const hsScheme = pickR(HS_SCHEMES, r);
+    const stars = starDist[Math.floor(r() * starDist.length)];
+    const extraSport = pickR(EXTRA_SPORTS, r);
+
+    const baseHeight = {QB:74,RB:70,WR:72,TE:76,OL:77,DL:75,LB:73,CB:70,S:71,K:69,P:70}[pos] || 72;
+    const height = baseHeight + Math.round((r()-0.5)*4);
+    const baseWeight = {QB:220,RB:210,WR:190,TE:245,OL:305,DL:285,LB:235,CB:185,S:200,K:185,P:195}[pos] || 215;
+    const weight = baseWeight + Math.round((r()-0.5)*30);
+
+    const svc = SERVICES.map(s => {
+      const base = stars + (r()-0.5)*1.5;
+      return { name: s, stars: Math.max(1, Math.min(5, Math.round(base))) };
+    });
+    const composite = (svc.reduce((a,b)=>a+b.stars,0)/svc.length);
+
+    const traitPool = [...TRAITS].sort(()=>r()-0.5).slice(0, Math.floor(r()*3)+1);
+
+    const parentAlma = r() > 0.85 ? pickR(['Alabama','Georgia','Ohio State','Texas','LSU','Oklahoma','Notre Dame','Michigan','Florida','Clemson'], r) : null;
+    const nilPriority = r() > 0.6;
+    const homePriority = r() > 0.7;
+    const interest = Math.round(r() * 100);
+
+    recruits.push({
+      id: i,
+      name: fn + ' ' + ln,
+      pos, region, city, hsScheme, stars,
+      height, weight, svc, composite,
+      traits: traitPool,
+      extraSport,
+      parentAlma,
+      nilPriority,
+      homePriority,
+      interest,
+      classYear,
+      onBigBoard: false
+    });
+  }
+  return recruits;
+}
+
+const SCHEME_FIT = {
+  'Spread RPO':  {QB:0.9,WR:0.9,RB:0.8,OL:0.6,TE:0.6,DL:0.5,LB:0.5,CB:0.5,S:0.5,K:0.5,P:0.5},
+  'Air Raid':    {QB:0.95,WR:0.95,TE:0.7,RB:0.5,OL:0.55,DL:0.5,LB:0.5,CB:0.5,S:0.5,K:0.5,P:0.5},
+  'Pro Style':   {QB:0.8,OL:0.85,RB:0.8,TE:0.85,WR:0.7,DL:0.7,LB:0.75,CB:0.65,S:0.65,K:0.6,P:0.6},
+  'Power Run':   {OL:0.95,RB:0.95,TE:0.8,QB:0.6,WR:0.55,DL:0.8,LB:0.85,CB:0.55,S:0.6,K:0.5,P:0.5},
+  'Triple Option':{QB:0.7,RB:0.95,OL:0.85,WR:0.4,TE:0.5,DL:0.6,LB:0.7,CB:0.5,S:0.55,K:0.5,P:0.5},
+  'West Coast':  {QB:0.85,WR:0.85,RB:0.75,TE:0.8,OL:0.75,DL:0.6,LB:0.65,CB:0.6,S:0.65,K:0.55,P:0.55},
+  'Run-and-Shoot':{QB:0.9,WR:0.95,RB:0.6,TE:0.5,OL:0.55,DL:0.5,LB:0.5,CB:0.5,S:0.5,K:0.5,P:0.5}
+};
+
+function getFit(pos, myScheme) {
+  const val = (SCHEME_FIT[myScheme] || {})[pos] || 0.5;
+  if (val >= 0.8) return {label:'High',cls:'fit-high'};
+  if (val >= 0.6) return {label:'Med',cls:'fit-med'};
+  return {label:'Low',cls:'fit-low'};
+}
+
+function interestColor(v) {
+  if (v >= 70) return '#5bc47a';
+  if (v >= 40) return '#c4b45b';
+  return '#c47a5b';
+}
+
+function starsHtml(n) {
+  return '<span class="stars">' + '★'.repeat(n) + '<span style="color:#333;">' + '★'.repeat(5-n) + '</span></span>';
+}
+
+let recruits2026 = generateRecruits(4500, 2026);
+let recruits2027 = generateRecruits(4500, 2027);
+let allRecruits = recruits2026;
+let filtered = [];
+let sortCol = 'stars';
+let sortDir = -1;
+let selectedId = null;
+let bigBoard = [];
+
+function getFiltered() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const starF = parseInt(document.querySelector('.star-btn.active').dataset.star);
+  const posF = document.getElementById('pos-filter').value;
+  const regionF = document.getElementById('region-filter').value;
+  const schemeF = document.getElementById('scheme-filter').value;
+  const yearF = document.getElementById('year-filter').value;
+
+  allRecruits = yearF === '2027' ? recruits2027 : recruits2026;
+
+  return allRecruits.filter(r => {
+    if (search && !r.name.toLowerCase().includes(search) && !r.city.toLowerCase().includes(search)) return false;
+    if (starF > 0 && r.stars !== starF) return false;
+    if (posF && r.pos !== posF) return false;
+    if (regionF && r.region !== regionF) return false;
+    if (schemeF && r.hsScheme !== schemeF) return false;
+    return true;
+  });
+}
+
+function sorted(arr) {
+  return [...arr].sort((a,b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (typeof av === 'string') return sortDir * av.localeCompare(bv);
+    return sortDir * (bv - av);
+  });
+}
+
+function renderTable() {
+  filtered = sorted(getFiltered());
+  const myScheme = document.getElementById('my-scheme').value;
+  const tbody = document.getElementById('recruit-tbody');
+  const MAX_ROWS = 200;
+  const shown = filtered.slice(0, MAX_ROWS);
+
+  document.getElementById('results-count').textContent =
+    `Showing ${Math.min(MAX_ROWS, filtered.length).toLocaleString()} of ${filtered.length.toLocaleString()} recruits`;
+
+  tbody.innerHTML = shown.map(r => {
+    const fit = getFit(r.pos, myScheme);
+    const onBB = bigBoard.some(b => b.id === r.id && b.classYear === r.classYear);
+    return `<tr data-id="${r.id}" class="${selectedId === r.id ? 'selected' : ''}">
+      <td>${starsHtml(r.stars)}</td>
+      <td style="color:#c9a84c;font-weight:600;">${r.composite.toFixed(2)}</td>
+      <td style="font-weight:500;">${r.name}</td>
+      <td><span class="pos-badge pos-${r.pos}">${r.pos}</span></td>
+      <td>${heightStr(r.height)}</td>
+      <td>${r.weight}</td>
+      <td style="color:#888;font-size:0.77rem;">${r.city}</td>
+      <td style="color:#888;font-size:0.77rem;">${r.hsScheme}</td>
+      <td><span class="fit-chip ${fit.cls}">${fit.label}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="interest-bar"><div class="interest-fill" style="width:${r.interest}%;background:${interestColor(r.interest)};"></div></div>
+          <span style="font-size:0.7rem;color:#666;">${r.interest}%</span>
+        </div>
+      </td>
+      <td>
+        <button class="add-btn ${onBB?'added':''}" data-id="${r.id}" onclick="toggleBigBoard(${r.id}, event)">
+          ${onBB ? '✓ Board' : '+ Board'}
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('tr').forEach(row => {
+    row.addEventListener('click', (e) => {
+      if (e.target.classList.contains('add-btn')) return;
+      const id = parseInt(row.dataset.id);
+      selectedId = id;
+      renderDetail(id);
+      renderTable();
+    });
+  });
+}
+
+function toggleBigBoard(id, e) {
+  e.stopPropagation();
+  const r = allRecruits.find(x => x.id === id);
+  if (!r) return;
+  const idx = bigBoard.findIndex(b => b.id === id && b.classYear === r.classYear);
+  if (idx > -1) {
+    bigBoard.splice(idx, 1);
+  } else {
+    if (bigBoard.length >= 30) { alert('Big board limited to 30 recruits.'); return; }
+    bigBoard.push(r);
+  }
+  renderBigBoard();
+  renderTable();
+}
+
+function renderBigBoard() {
+  const el = document.getElementById('bigboard-list');
+  document.getElementById('bb-count').textContent = bigBoard.length;
+  if (!bigBoard.length) { el.innerHTML = '<div class="empty-board">No recruits added yet</div>'; return; }
+  el.innerHTML = bigBoard.map((r,i) => `
+    <div class="bigboard-item">
+      <span class="bigboard-rank">${i+1}</span>
+      <span class="pos-badge pos-${r.pos}" style="font-size:0.62rem;padding:0.1rem 0.3rem;">${r.pos}</span>
+      <span class="bigboard-name">${r.name}</span>
+      <span class="stars" style="font-size:0.65rem;">${'★'.repeat(r.stars)}</span>
+      <button class="remove-btn" onclick="toggleBigBoard(${r.id}, event)">×</button>
+    </div>`).join('');
+}
+
+function renderDetail(id) {
+  const r = allRecruits.find(x => x.id === id);
+  if (!r) return;
+  const myScheme = document.getElementById('my-scheme').value;
+  const fit = getFit(r.pos, myScheme);
+  const el = document.getElementById('detail-panel');
+
+  el.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-name">${r.name}</div>
+      <div class="detail-sub">${starsHtml(r.stars)} · Class of ${r.classYear}</div>
+      <div class="composite-score">${r.composite.toFixed(2)} composite</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Physical Profile</div>
+      <div class="detail-row"><span class="detail-row-label">Position</span><span class="pos-badge pos-${r.pos}">${r.pos}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Height</span><span class="detail-row-val">${heightStr(r.height)}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Weight</span><span class="detail-row-val">${r.weight} lbs</span></div>
+      <div class="detail-row"><span class="detail-row-label">Hometown</span><span class="detail-row-val">${r.city}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Region</span><span class="detail-row-val">${r.region}</span></div>
+      ${r.extraSport !== 'None' ? `<div class="detail-row"><span class="detail-row-label">Also plays</span><span class="detail-row-val">${r.extraSport}</span></div>` : ''}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Recruiting Services</div>
+      ${r.svc.map(s => `
+        <div class="service-row">
+          <span class="service-name">${s.name}</span>
+          <span>${starsHtml(s.stars)}</span>
+        </div>`).join('')}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Background</div>
+      <div class="detail-row"><span class="detail-row-label">HS Scheme</span><span class="detail-row-val">${r.hsScheme}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Scheme fit</span><span class="fit-chip ${fit.cls}">${fit.label} fit</span></div>
+      ${r.parentAlma ? `<div class="detail-row"><span class="detail-row-label">Family ties</span><span class="detail-row-val" style="color:#c9a84c;">${r.parentAlma} alum</span></div>` : ''}
+      <div class="detail-row"><span class="detail-row-label">NIL priority</span><span class="detail-row-val">${r.nilPriority ? 'Yes' : 'No'}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Wants to stay close</span><span class="detail-row-val">${r.homePriority ? 'Yes' : 'No'}</span></div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Traits</div>
+      <div>${r.traits.map(t => `<span class="trait-tag ${t.p?'positive':'negative'}">${t.t}</span>`).join('')}</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Program Interest</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:0.25rem;">
+        <div class="interest-bar" style="width:120px;height:8px;">
+          <div class="interest-fill" style="width:${r.interest}%;background:${interestColor(r.interest)};"></div>
+        </div>
+        <span style="font-size:0.85rem;font-weight:600;color:${interestColor(r.interest)};">${r.interest}%</span>
+      </div>
+    </div>
+  `;
+}
+
+document.getElementById('star-filter').addEventListener('click', e => {
+  if (!e.target.classList.contains('star-btn')) return;
+  document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  renderTable();
+});
+
+['search-input','pos-filter','region-filter','scheme-filter','year-filter'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderTable);
+  document.getElementById(id).addEventListener('change', renderTable);
+});
+
+document.getElementById('my-scheme').addEventListener('change', () => {
+  renderTable();
+  if (selectedId !== null) renderDetail(selectedId);
+});
+
+document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.sort;
+    if (sortCol === col) { sortDir *= -1; } else { sortCol = col; sortDir = -1; }
+    renderTable();
+  });
+});
+
+renderTable();
+renderBigBoard();
+</script>
+</body>
+</html>
