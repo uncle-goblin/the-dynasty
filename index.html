@@ -5,817 +5,1320 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Dynasty – Recruiting Board</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e8e8e8; min-height: 100vh; }
+header { background: #1a1d27; border-bottom: 2px solid #c9a84c33; padding: 0.75rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.08em; color: #c9a84c; }
+header span { font-size: 0.78rem; color: #666; }
+.layout { display: grid; grid-template-columns: 240px 1fr 300px; height: calc(100vh - 49px); }
+.panel { background: #1a1d27; border-right: 1px solid #2a2d3a; overflow-y: auto; display: flex; flex-direction: column; }
+.panel-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #555; padding: 0.75rem 1rem 0.4rem; border-bottom: 1px solid #2a2d3a; flex-shrink: 0; }
+.filter-section { padding: 0.6rem 1rem; border-bottom: 1px solid #1e2130; flex-shrink: 0; }
+.filter-label { font-size: 0.68rem; color: #777; margin-bottom: 0.3rem; font-weight: 500; }
+select, input[type="text"] { width: 100%; background: #12151f; border: 1px solid #2a2d3a; border-radius: 5px; color: #e8e8e8; padding: 0.35rem 0.55rem; font-size: 0.8rem; outline: none; }
+select:focus, input[type="text"]:focus { border-color: #c9a84c; }
+.star-filter { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+.star-btn { background: #12151f; border: 1px solid #2a2d3a; border-radius: 4px; color: #666; padding: 0.25rem 0.45rem; font-size: 0.7rem; cursor: pointer; transition: all 0.12s; }
+.star-btn.active { background: #c9a84c18; border-color: #c9a84c; color: #c9a84c; }
+.main { overflow-y: auto; background: #0f1117; display: flex; flex-direction: column; }
+.recruit-table { width: 100%; border-collapse: collapse; font-size: 0.79rem; }
+.recruit-table thead th { background: #1a1d27; color: #555; font-size: 0.63rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.5rem 0.65rem; text-align: left; border-bottom: 1px solid #2a2d3a; position: sticky; top: 0; z-index: 2; cursor: pointer; user-select: none; white-space: nowrap; }
+.recruit-table thead th:hover { color: #c9a84c; }
+.recruit-table tbody tr { border-bottom: 1px solid #1a1d27; cursor: pointer; transition: background 0.08s; }
+.recruit-table tbody tr:hover { background: #1a1d2799; }
+.recruit-table tbody tr.selected { background: #c9a84c0d; border-left: 2px solid #c9a84c; }
+.recruit-table td { padding: 0.45rem 0.65rem; vertical-align: middle; }
+.stars { color: #c9a84c; font-size: 0.72rem; letter-spacing: -1px; }
+.pos-badge { display: inline-block; padding: 0.12rem 0.35rem; border-radius: 3px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.03em; }
+.pos-QB{background:#1e3a5f;color:#5ba3e0} .pos-RB{background:#1e3a2a;color:#5bc47a}
+.pos-WR{background:#3a1e3a;color:#c07ad4} .pos-TE{background:#2a2a1e;color:#c4b45b}
+.pos-IOL{background:#2a1e1e;color:#c47a5b} .pos-OT{background:#3a2010;color:#e09050}
+.pos-EDGE{background:#1e2a2a;color:#5bc4c4} .pos-DL{background:#102a2a;color:#40b0b0}
+.pos-LB{background:#2a1e2a;color:#c45b9a} .pos-CB{background:#1e2a1e;color:#7ac45b}
+.pos-S{background:#1e1e2a;color:#7a7ac4} .pos-ATH{background:#2a1a10;color:#e0a050}
+.pos-K{background:#222;color:#aaa} .pos-P{background:#222;color:#999}
+.interest-bar { width: 50px; height: 4px; background: #2a2d3a; border-radius: 2px; overflow: hidden; display: inline-block; vertical-align: middle; }
+.interest-fill { height: 100%; border-radius: 2px; }
+.fit-chip { font-size: 0.63rem; padding: 0.08rem 0.35rem; border-radius: 3px; font-weight: 600; }
+.fit-high{background:#1e3a2a;color:#5bc47a} .fit-med{background:#2a2a1e;color:#c4b45b} .fit-low{background:#2a1e1e;color:#c47a5b}
+.add-btn { background: none; border: 1px solid #2a2d3a; border-radius: 4px; color: #555; padding: 0.18rem 0.45rem; font-size: 0.68rem; cursor: pointer; transition: all 0.12s; white-space: nowrap; }
+.add-btn:hover { border-color: #c9a84c; color: #c9a84c; }
+.add-btn.added { border-color: #5bc47a; color: #5bc47a; }
+.commit-badge { font-size: 0.62rem; padding: 0.1rem 0.35rem; border-radius: 3px; font-weight: 600; }
+.commit-soft { background:#1a2a1a; color:#5bc47a; border:1px solid #2a4a2a; }
+.commit-none { color:#444; font-size:0.68rem; }
 
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #0f1117;
-    color: #e8e8e8;
-    min-height: 100vh;
-  }
+/* RIGHT PANEL */
+.right-panel { background: #1a1d27; border-left: 1px solid #2a2d3a; overflow: hidden; display: flex; flex-direction: column; }
+.rp-tabs { display: flex; border-bottom: 1px solid #2a2d3a; flex-shrink: 0; }
+.rp-tab { flex: 1; padding: 0.6rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #555; cursor: pointer; text-align: center; border-bottom: 2px solid transparent; transition: all 0.12s; }
+.rp-tab.active { color: #c9a84c; border-bottom-color: #c9a84c; }
+.rp-content { flex: 1; overflow-y: auto; }
+.detail-empty { padding: 2rem 1rem; color: #444; font-size: 0.8rem; text-align: center; }
+.detail-header { padding: 0.85rem 1rem; border-bottom: 1px solid #2a2d3a; }
+.detail-name { font-size: 0.95rem; font-weight: 700; color: #e8e8e8; margin-bottom: 0.2rem; }
+.detail-sub { font-size: 0.75rem; color: #888; }
+.detail-section { padding: 0.65rem 1rem; border-bottom: 1px solid #1e2130; }
+.detail-section-title { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #555; margin-bottom: 0.5rem; }
+.detail-row { display: flex; justify-content: space-between; align-items: center; padding: 0.2rem 0; font-size: 0.78rem; }
+.detail-row-label { color: #777; } .detail-row-val { color: #e8e8e8; font-weight: 500; }
+.service-row { display: flex; align-items: center; justify-content: space-between; padding: 0.22rem 0; font-size: 0.78rem; }
+.service-name { color: #777; font-size: 0.72rem; }
+.service-rank { color: #555; font-size: 0.7rem; }
+.rating-big { font-size: 1.6rem; font-weight: 700; color: #c9a84c; margin-top: 0.2rem; line-height: 1; }
+.motivation-tag { display: inline-block; border-radius: 3px; font-size: 0.65rem; padding: 0.12rem 0.4rem; margin: 0.1rem 0.1rem 0 0; background: #1a2030; border: 1px solid #2a3a50; color: #7a9ac4; }
+.motivation-tag.db { background: #2a1010; border-color: #5a2020; color: #c47a7a; }
+.hidden-note { font-size: 0.7rem; color: #444; font-style: italic; padding: 0.4rem 0; }
+.nat-rank { font-weight: 700; color: #c9a84c; }
 
-  header {
-    background: #1a1d27;
-    border-bottom: 1px solid #2a2d3a;
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+/* BIG BOARD */
+.bb-header { padding: 0.65rem 1rem; border-bottom: 1px solid #2a2d3a; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.bb-score-block { text-align: right; }
+.bb-score { font-size: 1.1rem; font-weight: 700; color: #c9a84c; line-height: 1; }
+.bb-rank { font-size: 0.68rem; color: #666; margin-top: 0.1rem; }
+.bb-label { font-size: 0.62rem; color: #555; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.bb-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+.bb-item { display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 1rem; border-bottom: 1px solid #1a1d27; font-size: 0.75rem; cursor: pointer; transition: background 0.08s; }
+.bb-item:hover { background: #1e2130; }
+.bb-num { color: #444; font-size: 0.65rem; width: 14px; text-align: right; flex-shrink: 0; }
+.bb-name { color: #e8e8e8; flex: 1; }
+.bb-rating { color: #c9a84c; font-size: 0.7rem; font-weight: 600; }
+.remove-btn { background: none; border: none; color: #333; cursor: pointer; font-size: 0.85rem; padding: 0 0.15rem; transition: color 0.1s; }
+.remove-btn:hover { color: #c45b5b; }
+.empty-board { padding: 1.5rem 1rem; font-size: 0.78rem; color: #444; text-align: center; }
 
-  header h1 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: #c9a84c;
-  }
+/* CLASS RANKINGS */
+.cr-tabs { display: flex; border-bottom: 1px solid #2a2d3a; flex-shrink: 0; }
+.cr-tab { flex: 1; padding: 0.5rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #555; cursor: pointer; text-align: center; border-bottom: 2px solid transparent; }
+.cr-tab.active { color: #c9a84c; border-bottom-color: #c9a84c; }
+.cr-filters { padding: 0.5rem 1rem; border-bottom: 1px solid #2a2d3a; display: flex; gap: 0.5rem; flex-shrink: 0; }
+.cr-filters select { font-size: 0.72rem; padding: 0.25rem 0.4rem; }
+.cr-list { overflow-y: auto; flex: 1; }
+.cr-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 1rem; border-bottom: 1px solid #1a1d27; font-size: 0.75rem; }
+.cr-row:hover { background: #1e2130; }
+.cr-row.my-school { background: #c9a84c08; border-left: 2px solid #c9a84c; }
+.cr-rank { color: #555; font-size: 0.68rem; width: 24px; text-align: right; flex-shrink: 0; }
+.cr-school { color: #e8e8e8; flex: 1; font-size: 0.78rem; }
+.cr-conf { color: #555; font-size: 0.65rem; }
+.cr-score { color: #c9a84c; font-weight: 700; font-size: 0.8rem; }
+.cr-count { color: #555; font-size: 0.65rem; }
 
-  header span {
-    font-size: 0.8rem;
-    color: #888;
-  }
+.results-bar { padding: 0.4rem 0.65rem; font-size: 0.68rem; color: #555; border-bottom: 1px solid #1a1d27; background: #0f1117; flex-shrink: 0; }
 
-  .layout {
-    display: grid;
-    grid-template-columns: 260px 1fr 280px;
-    gap: 0;
-    height: calc(100vh - 57px);
-  }
-
-  .panel {
-    background: #1a1d27;
-    border-right: 1px solid #2a2d3a;
-    overflow-y: auto;
-  }
-
-  .panel-title {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #666;
-    padding: 1rem 1rem 0.5rem;
-    border-bottom: 1px solid #2a2d3a;
-  }
-
-  .filter-section {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #2a2d3a;
-  }
-
-  .filter-label {
-    font-size: 0.72rem;
-    color: #888;
-    margin-bottom: 0.4rem;
-    font-weight: 500;
-  }
-
-  select, input[type="text"] {
-    width: 100%;
-    background: #0f1117;
-    border: 1px solid #2a2d3a;
-    border-radius: 6px;
-    color: #e8e8e8;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.82rem;
-    outline: none;
-  }
-
-  select:focus, input[type="text"]:focus {
-    border-color: #c9a84c;
-  }
-
-  .star-filter {
-    display: flex;
-    gap: 0.3rem;
-    flex-wrap: wrap;
-  }
-
-  .star-btn {
-    background: #0f1117;
-    border: 1px solid #2a2d3a;
-    border-radius: 4px;
-    color: #888;
-    padding: 0.3rem 0.5rem;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .star-btn.active {
-    background: #c9a84c22;
-    border-color: #c9a84c;
-    color: #c9a84c;
-  }
-
-  .main {
-    overflow-y: auto;
-    background: #0f1117;
-  }
-
-  .recruit-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
-  }
-
-  .recruit-table thead th {
-    background: #1a1d27;
-    color: #666;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.6rem 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid #2a2d3a;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-  }
-
-  .recruit-table thead th:hover { color: #c9a84c; }
-
-  .recruit-table tbody tr {
-    border-bottom: 1px solid #1e2130;
-    cursor: pointer;
-    transition: background 0.1s;
-  }
-
-  .recruit-table tbody tr:hover { background: #1a1d2788; }
-  .recruit-table tbody tr.selected { background: #c9a84c11; }
-
-  .recruit-table td {
-    padding: 0.55rem 0.75rem;
-    vertical-align: middle;
-  }
-
-  .stars {
-    color: #c9a84c;
-    font-size: 0.75rem;
-    letter-spacing: -1px;
-  }
-
-  .pos-badge {
-    display: inline-block;
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-  }
-
-  .pos-QB { background: #1e3a5f; color: #5ba3e0; }
-  .pos-RB { background: #1e3a2a; color: #5bc47a; }
-  .pos-WR { background: #3a1e3a; color: #c07ad4; }
-  .pos-TE { background: #2a2a1e; color: #c4b45b; }
-  .pos-OL { background: #2a1e1e; color: #c47a5b; }
-  .pos-DL { background: #1e2a2a; color: #5bc4c4; }
-  .pos-LB { background: #2a1e2a; color: #c45b9a; }
-  .pos-CB { background: #1e2a1e; color: #7ac45b; }
-  .pos-S  { background: #1e1e2a; color: #7a7ac4; }
-  .pos-K  { background: #2a2a2a; color: #aaa; }
-  .pos-P  { background: #2a2a2a; color: #aaa; }
-
-  .interest-bar {
-    width: 60px;
-    height: 5px;
-    background: #2a2d3a;
-    border-radius: 3px;
-    overflow: hidden;
-    display: inline-block;
-    vertical-align: middle;
-  }
-
-  .interest-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.3s;
-  }
-
-  .fit-chip {
-    font-size: 0.68rem;
-    padding: 0.1rem 0.4rem;
-    border-radius: 3px;
-    font-weight: 600;
-  }
-
-  .fit-high { background: #1e3a2a; color: #5bc47a; }
-  .fit-med  { background: #2a2a1e; color: #c4b45b; }
-  .fit-low  { background: #2a1e1e; color: #c47a5b; }
-
-  .add-btn {
-    background: none;
-    border: 1px solid #2a2d3a;
-    border-radius: 4px;
-    color: #666;
-    padding: 0.2rem 0.5rem;
-    font-size: 0.72rem;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .add-btn:hover { border-color: #c9a84c; color: #c9a84c; }
-  .add-btn.added { border-color: #5bc47a; color: #5bc47a; }
-
-  .right-panel {
-    background: #1a1d27;
-    border-left: 1px solid #2a2d3a;
-    overflow-y: auto;
-  }
-
-  .detail-empty {
-    padding: 2rem 1rem;
-    color: #444;
-    font-size: 0.82rem;
-    text-align: center;
-  }
-
-  .detail-header {
-    padding: 1rem;
-    border-bottom: 1px solid #2a2d3a;
-  }
-
-  .detail-name {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #e8e8e8;
-    margin-bottom: 0.25rem;
-  }
-
-  .detail-sub {
-    font-size: 0.78rem;
-    color: #888;
-  }
-
-  .detail-section {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #2a2d3a;
-  }
-
-  .detail-section-title {
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #555;
-    margin-bottom: 0.6rem;
-  }
-
-  .detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.25rem 0;
-    font-size: 0.8rem;
-  }
-
-  .detail-row-label { color: #888; }
-  .detail-row-val { color: #e8e8e8; font-weight: 500; }
-
-  .service-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.3rem 0;
-    font-size: 0.8rem;
-  }
-
-  .service-name { color: #888; font-size: 0.75rem; }
-
-  .composite-score {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #c9a84c;
-    margin-top: 0.25rem;
-  }
-
-  .bigboard-section {
-    padding: 0.75rem 1rem;
-  }
-
-  .bigboard-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0;
-    border-bottom: 1px solid #1e2130;
-    font-size: 0.78rem;
-  }
-
-  .bigboard-rank {
-    color: #555;
-    font-size: 0.7rem;
-    width: 16px;
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  .bigboard-name { color: #e8e8e8; flex: 1; }
-
-  .remove-btn {
-    background: none;
-    border: none;
-    color: #444;
-    cursor: pointer;
-    font-size: 0.9rem;
-    line-height: 1;
-    padding: 0 0.2rem;
-    transition: color 0.1s;
-  }
-
-  .remove-btn:hover { color: #c45b5b; }
-
-  .results-count {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.72rem;
-    color: #555;
-    border-bottom: 1px solid #1e2130;
-    background: #0f1117;
-    position: sticky;
-    top: 41px;
-    z-index: 1;
-  }
-
-  .scheme-display {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #2a2d3a;
-  }
-
-  .scheme-select-label {
-    font-size: 0.68rem;
-    color: #666;
-    margin-bottom: 0.3rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .trait-tag {
-    display: inline-block;
-    background: #0f1117;
-    border: 1px solid #2a2d3a;
-    border-radius: 3px;
-    font-size: 0.68rem;
-    padding: 0.15rem 0.4rem;
-    color: #888;
-    margin: 0.15rem 0.15rem 0 0;
-  }
-
-  .trait-tag.positive { border-color: #1e4a2a; color: #5bc47a; }
-  .trait-tag.negative { border-color: #4a1e1e; color: #c45b5b; }
-
-  .empty-board {
-    padding: 1rem;
-    font-size: 0.78rem;
-    color: #444;
-    text-align: center;
-  }
-
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 2px; }
+::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 2px; }
 </style>
 </head>
 <body>
-
 <header>
   <h1>THE DYNASTY</h1>
   <span id="header-info">Recruiting Board · Class of 2026</span>
 </header>
-
 <div class="layout">
 
-  <!-- LEFT PANEL: Filters -->
-  <div class="panel">
-    <div class="panel-title">Filters</div>
-
-    <div class="filter-section">
-      <div class="filter-label">Search recruit</div>
-      <input type="text" id="search-input" placeholder="Name or hometown…">
+<!-- LEFT: Filters -->
+<div class="panel">
+  <div class="panel-title">Filters</div>
+  <div class="filter-section">
+    <div class="filter-label">Search</div>
+    <input type="text" id="search-input" placeholder="Name, city, or state…">
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">Stars</div>
+    <div class="star-filter" id="star-filter">
+      <button class="star-btn active" data-star="0">All</button>
+      <button class="star-btn" data-star="5">★★★★★</button>
+      <button class="star-btn" data-star="4">★★★★</button>
+      <button class="star-btn" data-star="3">★★★</button>
+      <button class="star-btn" data-star="2">★★</button>
+      <button class="star-btn" data-star="1">★</button>
     </div>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">Position</div>
+    <select id="pos-filter">
+      <option value="">All positions</option>
+      <option>QB</option><option>RB</option><option>WR</option><option>TE</option>
+      <option>IOL</option><option>OT</option><option>EDGE</option><option>DL</option>
+      <option>LB</option><option>CB</option><option>S</option><option>ATH</option>
+      <option>K</option><option>P</option>
+    </select>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">Archetype</div>
+    <select id="arch-filter"><option value="">All archetypes</option></select>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">State</div>
+    <select id="state-filter"><option value="">All states</option></select>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">HS Scheme</div>
+    <select id="scheme-filter">
+      <option value="">Any scheme</option>
+      <option>Air Raid</option><option>Spread RPO</option><option>Pro Style</option>
+      <option>Power Run</option><option>Triple Option</option><option>West Coast</option>
+    </select>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">Class Year</div>
+    <select id="year-filter">
+      <option value="2026">2026 (Seniors)</option>
+      <option value="2027">2027 (Juniors)</option>
+    </select>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">Sort Rankings By</div>
+    <select id="rank-service">
+      <option value="rating">Composite Rating</option>
+      <option value="0">GridironNow</option>
+      <option value="1">ProspectHub</option>
+      <option value="2">EliteGrid</option>
+    </select>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">Commit Status</div>
+    <select id="commit-filter">
+      <option value="">All recruits</option>
+      <option value="open">Open</option>
+      <option value="soft">Soft Committed</option>
+      <option value="hard">Hard Committed</option>
+    </select>
+  </div>
+</div>
 
-    <div class="filter-section">
-      <div class="filter-label">Stars</div>
-      <div class="star-filter" id="star-filter">
-        <button class="star-btn active" data-star="0">All</button>
-        <button class="star-btn" data-star="5">★★★★★</button>
-        <button class="star-btn" data-star="4">★★★★</button>
-        <button class="star-btn" data-star="3">★★★</button>
-        <button class="star-btn" data-star="2">★★</button>
-        <button class="star-btn" data-star="1">★</button>
+<!-- MAIN: Recruit table -->
+<div class="main">
+  <div class="results-bar" id="results-count">Loading recruits…</div>
+  <table class="recruit-table">
+    <thead>
+      <tr>
+        <th data-sort="natRank">Rank</th>
+        <th data-sort="stars">★</th>
+        <th data-sort="rating">Rating</th>
+        <th data-sort="name">Name</th>
+        <th data-sort="pos">Pos</th>
+        <th data-sort="archetype">Archetype</th>
+        <th data-sort="height">Ht</th>
+        <th data-sort="weight">Wt</th>
+        <th data-sort="state">St</th>
+        <th data-sort="fit">Fit</th>
+        <th data-sort="interest">Int.</th>
+        <th data-sort="commitStatus">Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="recruit-tbody"></tbody>
+  </table>
+</div>
+
+<!-- RIGHT: Tabbed panel -->
+<div class="right-panel">
+  <div class="rp-tabs">
+    <div class="rp-tab active" data-tab="detail" onclick="switchTab('detail')">Recruit</div>
+    <div class="rp-tab" data-tab="bigboard" onclick="switchTab('bigboard')">Big Board</div>
+    <div class="rp-tab" data-tab="rankings" onclick="switchTab('rankings')">Class Rank</div>
+  </div>
+  <div class="rp-content" id="tab-detail">
+    <div class="detail-empty">Click a recruit to view details</div>
+  </div>
+  <div class="rp-content" id="tab-bigboard" style="display:none;flex-direction:column;height:100%;">
+    <div class="bb-header">
+      <div>
+        <div class="bb-label">My Big Board</div>
+        <div style="font-size:0.7rem;color:#555;margin-top:0.2rem;"><span id="bb-count">0</span> recruits · excl. K/P</div>
+      </div>
+      <div class="bb-score-block">
+        <div class="bb-score" id="bb-score">—</div>
+        <div class="bb-rank" id="bb-rank-display">No class score yet</div>
       </div>
     </div>
-
-    <div class="filter-section">
-      <div class="filter-label">Position</div>
-      <select id="pos-filter">
-        <option value="">All positions</option>
-        <option>QB</option><option>RB</option><option>WR</option>
-        <option>TE</option><option>OL</option><option>DL</option>
-        <option>LB</option><option>CB</option><option>S</option>
-        <option>K</option><option>P</option>
-      </select>
-    </div>
-
-    <div class="filter-section">
-      <div class="filter-label">Region</div>
-      <select id="region-filter">
-        <option value="">All regions</option>
-        <option>Southeast</option><option>Texas</option>
-        <option>California</option><option>Midwest</option>
-        <option>Northeast</option><option>Florida</option>
-        <option>Mid-Atlantic</option><option>Mountain West</option>
-      </select>
-    </div>
-
-    <div class="filter-section">
-      <div class="filter-label">HS Scheme</div>
-      <select id="scheme-filter">
-        <option value="">Any scheme</option>
-        <option>Air Raid</option><option>Spread RPO</option>
-        <option>Pro Style</option><option>Power Run</option>
-        <option>Triple Option</option><option>West Coast</option>
-      </select>
-    </div>
-
-    <div class="filter-section">
-      <div class="filter-label">Class year</div>
-      <select id="year-filter">
-        <option value="2026">2026 (Seniors)</option>
-        <option value="2027">2027 (Juniors)</option>
-      </select>
-    </div>
-
-    <div class="scheme-display">
-      <div class="scheme-select-label">Your scheme</div>
-      <select id="my-scheme">
-        <option>Spread RPO</option>
-        <option>Air Raid</option>
-        <option>Pro Style</option>
-        <option>Power Run</option>
-        <option>Triple Option</option>
-        <option>West Coast</option>
-        <option>Run-and-Shoot</option>
-      </select>
-    </div>
-
-    <div class="bigboard-section">
-      <div class="panel-title" style="padding: 0 0 0.5rem;">Big Board (<span id="bb-count">0</span>)</div>
-      <div id="bigboard-list"><div class="empty-board">No recruits added yet</div></div>
+    <div class="bb-list" id="bigboard-list">
+      <div class="empty-board">Add recruits to build your board</div>
     </div>
   </div>
-
-  <!-- MAIN: Recruit table -->
-  <div class="main">
-    <div class="results-count" id="results-count">Loading recruits…</div>
-    <table class="recruit-table">
-      <thead>
-        <tr>
-          <th data-sort="stars">Stars</th>
-          <th data-sort="composite">Comp.</th>
-          <th data-sort="name">Name</th>
-          <th data-sort="pos">Pos</th>
-          <th data-sort="height">Ht</th>
-          <th data-sort="weight">Wt</th>
-          <th data-sort="region">Region</th>
-          <th data-sort="hsScheme">HS Scheme</th>
-          <th data-sort="fit">Fit</th>
-          <th data-sort="interest">Interest</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="recruit-tbody"></tbody>
-    </table>
+  <div class="rp-content" id="tab-rankings" style="display:none;flex-direction:column;height:100%;">
+    <div class="cr-tabs">
+      <div class="cr-tab active" data-cr="hs" onclick="switchCrTab('hs')">HS Class</div>
+      <div class="cr-tab" data-cr="portal" onclick="switchCrTab('portal')">Transfer</div>
+    </div>
+    <div class="cr-filters">
+      <select id="cr-conf-filter" onchange="renderClassRankings()">
+        <option value="">All Conferences</option>
+        <option>SEC</option><option>Big Ten</option><option>Big 12</option>
+        <option>ACC</option><option>AAC</option><option>Sun Belt</option>
+        <option>C-USA</option><option>MAC</option><option>MWC</option><option>Ind</option>
+      </select>
+    </div>
+    <div class="cr-list" id="cr-list"></div>
   </div>
-
-  <!-- RIGHT PANEL: Detail + Big Board -->
-  <div class="right-panel">
-    <div class="panel-title">Recruit Detail</div>
-    <div id="detail-panel"><div class="detail-empty">Click a recruit to view details</div></div>
-  </div>
+</div>
 
 </div>
 
 <script>
-const POSITIONS = ['QB','RB','WR','WR','WR','TE','OL','OL','OL','DL','DL','LB','LB','CB','CB','S','K','P'];
-const REGIONS = ['Southeast','Texas','California','Midwest','Northeast','Florida','Mid-Atlantic','Mountain West'];
-const HS_SCHEMES = ['Air Raid','Spread RPO','Pro Style','Power Run','Triple Option','West Coast'];
+// ═══════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════
+
 const SERVICES = ['GridironNow','ProspectHub','EliteGrid'];
-const EXTRA_SPORTS = ['Basketball','Baseball','Track','Wrestling','Soccer','None','None','None'];
-const TRAITS = [
-  {t:'High Motor',p:true},{t:'Explosive',p:true},{t:'Natural Leader',p:true},
-  {t:'Tech Savvy',p:true},{t:'Film Junkie',p:true},{t:'Dual Sport',p:true},
-  {t:'Injury History',p:false},{t:'Academic Risk',p:false},{t:'Slow Starter',p:false},{t:'Homesick',p:false}
-];
-const OFFSCHEMES = ['Spread RPO','Air Raid','Pro Style','Power Run','Triple Option','West Coast','Run-and-Shoot'];
-const FIRST_NAMES = ['Malik','Darius','Jordan','Marcus','Tyrese','Cameron','Isaiah','Elijah','Jaylen','Andre',
-  'Devin','Caleb','Trevor','Mason','Hunter','Bryce','Cole','Logan','Tyler','Nathan','Zach','Justin',
-  'Damien','Xavier','Kendall','Jalen','Quinton','Lamar','Terrell','DeAndre','Cody','Blake','Collin','Peyton'];
-const LAST_NAMES = ['Williams','Johnson','Davis','Brown','Wilson','Moore','Taylor','Thomas','Jackson','White',
-  'Harris','Martin','Thompson','Garcia','Martinez','Robinson','Clark','Rodriguez','Lewis','Lee',
-  'Walker','Hall','Allen','Young','King','Wright','Scott','Green','Baker','Adams','Nelson','Carter',
-  'Mitchell','Perez','Roberts','Turner','Phillips','Campbell','Parker','Evans'];
-const CITIES = {
-  Southeast:['Atlanta, GA','Birmingham, AL','Charlotte, NC','Nashville, TN','Columbia, SC'],
-  Texas:['Houston, TX','Dallas, TX','San Antonio, TX','Austin, TX','Beaumont, TX'],
-  California:['Los Angeles, CA','Fresno, CA','San Diego, CA','Oakland, CA','Riverside, CA'],
-  Midwest:['Columbus, OH','Indianapolis, IN','Detroit, MI','Chicago, IL','St. Louis, MO'],
-  Northeast:['Philadelphia, PA','Baltimore, MD','Boston, MA','Newark, NJ','Pittsburgh, PA'],
-  Florida:['Miami, FL','Tampa, FL','Orlando, FL','Jacksonville, FL','Fort Lauderdale, FL'],
-  'Mid-Atlantic':['Richmond, VA','Raleigh, NC','Norfolk, VA','Greensboro, NC','Washington, DC'],
-  'Mountain West':['Las Vegas, NV','Phoenix, AZ','Denver, CO','Salt Lake City, UT','Albuquerque, NM']
+
+const SVC_BIAS = {
+  GridironNow: {QB:0.92,RB:0.85,WR:0.88,TE:0.82,IOL:0.78,OT:0.80,EDGE:0.85,DL:0.75,LB:0.83,CB:0.87,S:0.84,ATH:0.70,K:0.90,P:0.90},
+  ProspectHub: {QB:0.80,RB:0.88,WR:0.82,TE:0.85,IOL:0.92,OT:0.90,EDGE:0.88,DL:0.92,LB:0.80,CB:0.78,S:0.80,ATH:0.75,K:0.85,P:0.85},
+  EliteGrid:   {QB:0.88,RB:0.80,WR:0.90,TE:0.78,IOL:0.82,OT:0.84,EDGE:0.80,DL:0.82,LB:0.88,CB:0.92,S:0.90,ATH:0.80,K:0.80,P:0.80}
 };
 
-function rng(seed) {
-  let s = seed;
-  return function() {
-    s = (s * 1664525 + 1013904223) & 0xffffffff;
-    return (s >>> 0) / 0xffffffff;
+const POS_STAR_CAP = {QB:5,RB:5,WR:5,TE:5,IOL:5,OT:5,EDGE:5,DL:5,LB:5,CB:5,S:5,ATH:5,K:3,P:3};
+
+const POS_ARCHETYPES = {
+  QB:   [['Pocket Passer',35],['Dual Threat',30],['Backfield Creator',25],['Pure Runner',10]],
+  RB:   [['Backfield Threat',25],['Elusive Bruiser',25],['East/West Playmaker',20],['Contact Seeker',15],['North/South Receiver',10],['North/South Blocker',5]],
+  WR:   [['Route Artist',22],['Speedster',20],['Physical Route Runner',18],['Elusive Route Runner',18],['Contested Specialist',12],['Gritty Possession',7],['Gadget',3]],
+  TE:   [['Vertical Threat',30],['Physical Route Runner',28],['Pure Possession',22],['Gritty Possession',13],['Pure Blocker',7]],
+  IOL:  [['Pass Protector',30],['Well Rounded',28],['Raw Strength',25],['Agile',17]],
+  OT:   [['Pass Protector',35],['Well Rounded',30],['Raw Strength',20],['Agile',15]],
+  EDGE: [['Speed Rusher',32],['Power Rusher',28],['Edge Setter',25],['Pure Power',15]],
+  DL:   [['Power Rusher',30],['Gap Specialist',30],['Pure Power',25],['Speed Rusher',15]],
+  LB:   [['Signal Caller',38],['Thumper',35],['Lurker',27]],
+  CB:   [['Bump and Run',30],['Field',28],['Zone',22],['Boundary',20]],
+  S:    [['Coverage Specialist',38],['Hybrid',35],['Box Specialist',27]],
+  ATH:  [],
+  K:    [['Accurate',55],['Power',45]],
+  P:    [['Accurate',55],['Power',45]],
+};
+
+const POS_POOL_BASE = [
+  ...Array(14).fill('WR'), ...Array(12).fill('CB'), ...Array(11).fill('OT'),
+  ...Array(10).fill('IOL'), ...Array(10).fill('EDGE'), ...Array(10).fill('DL'),
+  ...Array(9).fill('LB'), ...Array(8).fill('S'), ...Array(7).fill('RB'),
+  ...Array(8).fill('QB'),  // boosted from 5 — QBs appear more in top rankings historically
+  ...Array(5).fill('TE'),  // slight bump
+  ...Array(8).fill('ATH'),
+  ...Array(3).fill('K'), ...Array(3).fill('P'),
+];
+
+const PHYS = {
+  QB:   {minH:71,maxH:79,minW:195,maxW:240,sHB:0.6,sWB:3},
+  RB:   {minH:67,maxH:74,minW:185,maxW:225,sHB:0.2,sWB:2},
+  WR:   {minH:68,maxH:76,minW:165,maxW:205,sHB:0.4,sWB:1},
+  TE:   {minH:74,maxH:80,minW:230,maxW:260,sHB:0.5,sWB:3},
+  IOL:  {minH:72,maxH:77,minW:285,maxW:330,sHB:0.2,sWB:4},
+  OT:   {minH:75,maxH:82,minW:280,maxW:335,sHB:0.6,sWB:4},
+  EDGE: {minH:73,maxH:79,minW:235,maxW:270,sHB:0.5,sWB:2},
+  DL:   {minH:72,maxH:77,minW:280,maxW:330,sHB:0.2,sWB:4},
+  LB:   {minH:71,maxH:76,minW:220,maxW:250,sHB:0.3,sWB:2},
+  CB:   {minH:68,maxH:74,minW:170,maxW:195,sHB:0.3,sWB:1},
+  S:    {minH:69,maxH:75,minW:190,maxW:215,sHB:0.3,sWB:2},
+  ATH:  {minH:70,maxH:77,minW:185,maxW:220,sHB:0.4,sWB:2},
+  K:    {minH:68,maxH:74,minW:175,maxW:205,sHB:0.1,sWB:1},
+  P:    {minH:69,maxH:75,minW:180,maxW:210,sHB:0.1,sWB:1},
+};
+
+const STATE_WEIGHTS = {
+  FL:120,TX:115,GA:90,CA:85,AL:70,OH:65,LA:60,SC:55,NC:55,TN:50,MS:48,
+  VA:45,MD:42,PA:40,NJ:38,MI:35,MO:32,AR:30,OK:30,KY:28,IN:27,IL:26,
+  AZ:25,NV:22,CO:20,WA:18,OR:16,UT:15,MN:14,WI:13,CT:12,MA:11,NY:10,
+  IA:10,KS:9,NE:8,WV:8,DE:7,NH:6,ME:5,ID:5,MT:4,WY:3,ND:3,SD:3,VT:2,
+  AK:2,HI:2,RI:2,NM:8,DC:6
+};
+
+const STATE_CITIES = {
+  FL:['Miami','Tampa','Orlando','Jacksonville','Fort Lauderdale','Gainesville','Tallahassee','St. Petersburg','Bradenton'],
+  TX:['Houston','Dallas','San Antonio','Austin','Fort Worth','Beaumont','Waco','Tyler','Lubbock'],
+  GA:['Atlanta','Savannah','Augusta','Columbus','Macon','Warner Robins','Valdosta','Athens'],
+  CA:['Los Angeles','Fresno','San Diego','Oakland','Riverside','Long Beach','Sacramento','Bakersfield'],
+  AL:['Birmingham','Huntsville','Montgomery','Mobile','Tuscaloosa','Auburn','Dothan','Hoover'],
+  OH:['Columbus','Cleveland','Cincinnati','Akron','Toledo','Dayton','Canton','Youngstown'],
+  LA:['New Orleans','Baton Rouge','Shreveport','Lafayette','Lake Charles','Monroe'],
+  SC:['Columbia','Charleston','Greenville','Rock Hill','Spartanburg','Florence'],
+  NC:['Charlotte','Raleigh','Greensboro','Durham','Winston-Salem','Fayetteville'],
+  TN:['Nashville','Memphis','Knoxville','Chattanooga','Clarksville','Murfreesboro'],
+  MS:['Jackson','Gulfport','Hattiesburg','Biloxi','Meridian','Tupelo'],
+  VA:['Virginia Beach','Norfolk','Richmond','Chesapeake','Newport News','Alexandria'],
+  MD:['Baltimore','Columbia','Germantown','Silver Spring','Waldorf','Rockville'],
+  PA:['Philadelphia','Pittsburgh','Allentown','Erie','Reading','Scranton'],
+  NJ:['Newark','Jersey City','Paterson','Elizabeth','Edison','Toms River'],
+  MI:['Detroit','Grand Rapids','Warren','Sterling Heights','Lansing','Ann Arbor'],
+  MO:['Kansas City','St. Louis','Springfield','Columbia','Independence'],
+  AR:['Little Rock','Fort Smith','Fayetteville','Springdale','Jonesboro'],
+  OK:['Oklahoma City','Tulsa','Norman','Broken Arrow','Lawton','Edmond'],
+  KY:['Louisville','Lexington','Bowling Green','Owensboro','Covington'],
+  IN:['Indianapolis','Fort Wayne','Evansville','South Bend','Carmel'],
+  IL:['Chicago','Aurora','Joliet','Naperville','Rockford','Springfield'],
+  AZ:['Phoenix','Tucson','Mesa','Chandler','Scottsdale','Glendale'],
+  NV:['Las Vegas','Henderson','Reno','North Las Vegas','Sparks'],
+  CO:['Denver','Colorado Springs','Aurora','Fort Collins','Lakewood'],
+  WA:['Seattle','Spokane','Tacoma','Vancouver','Bellevue'],
+  OR:['Portland','Salem','Eugene','Gresham','Hillsboro'],
+  UT:['Salt Lake City','West Valley City','Provo','West Jordan','Orem'],
+};
+const DEF_CITIES = ['Springfield','Riverside','Franklin','Clinton','Georgetown','Madison'];
+
+const HS_SCHEMES = ['Air Raid','Spread RPO','Pro Style','Power Run','Triple Option','West Coast'];
+
+const ATH_PREF = [
+  {prim:'QB',sec:'S',loyalty:0.8},{prim:'QB',sec:'CB',loyalty:0.7},
+  {prim:'RB',sec:'LB',loyalty:0.3},{prim:'WR',sec:'CB',loyalty:0.4},
+  {prim:'WR',sec:'S',loyalty:0.3},{prim:'TE',sec:'LB',loyalty:0.2},
+  {prim:'LB',sec:'TE',loyalty:0.2},{prim:'S',sec:'LB',loyalty:0.2},
+  {prim:'CB',sec:'WR',loyalty:0.3},{prim:'EDGE',sec:'LB',loyalty:0.2},
+];
+
+const POS_TRAITS = {
+  QB:   ['Strong Arm','Accurate Passer','Mobile','Pocket Presence','Film Junkie','Clutch','Turnover Prone','Happy Feet','Leader','Academic Risk'],
+  RB:   ['Explosive','Breakaway Speed','Power Runner','Pass Catcher','Fumble Prone','Elusive','Injury Prone','Injury Resistant','High Motor'],
+  WR:   ['Contested Catch','Route Runner','Burner','Big Play Threat','Drops','RAC Ability','Blocker','Injury Prone','Injury Resistant','Film Junkie'],
+  TE:   ['Receiving TE','Blocking TE','Red Zone Threat','Route Runner','Pass Blocker','High Motor','Injury Prone','Injury Resistant'],
+  IOL:  ['Technician','Power Blocker','Pass Pro Specialist','Puller','Low Motor','High Motor','Injury Prone','Injury Resistant'],
+  OT:   ['Pass Pro Specialist','Run Blocker','Long Arms','Technician','Footwork Issues','High Motor','Injury Prone','Injury Resistant'],
+  EDGE: ['Pass Rush Specialist','Power Rusher','Speed Rusher','Run Stopper','High Motor','Injury Prone','Injury Resistant','Film Junkie'],
+  DL:   ['Run Stopper','Pass Rush Specialist','High Motor','Penetrator','Injury Prone','Injury Resistant','Two-Gap Specialist'],
+  LB:   ['Run Stopper','Pass Coverage','Blitzer','High Motor','Leader','Injury Prone','Injury Resistant','Film Junkie','Instincts'],
+  CB:   ['Ball Hawk','Man Coverage','Zone Coverage','Press Corner','Injury Prone','Injury Resistant','Burner','Film Junkie'],
+  S:    ['Ball Hawk','Run Support','Pass Coverage','Leader','High Motor','Injury Prone','Injury Resistant','Film Junkie'],
+  ATH:  ['Explosive','Versatile','Natural Athlete','High Motor','Film Junkie','Leader','Injury Prone','Injury Resistant'],
+  K:    ['Strong Leg','Accurate','Clutch','Injury Prone'],
+  P:    ['High Hang Time','Strong Leg','Directional','Injury Prone'],
+};
+
+const EXCLUSIVE_PAIRS = [
+  ['Injury Prone','Injury Resistant'],['High Motor','Low Motor'],
+  ['Pass Pro Specialist','Footwork Issues'],['Man Coverage','Zone Coverage'],
+  ['Receiving TE','Blocking TE'],
+];
+
+const ALL_MOTIVATIONS = [
+  'Academic Prestige','Athletic Facilities','Brand Exposure','Campus Lifestyle',
+  'Championship Contender','Coach Stability','Coach Prestige','Conference Prestige',
+  'NIL Opportunity','Playing Style','Pro Potential','Proximity to Home',
+  'Program Tradition','Stadium Atmosphere','Position Promise','Playing Time',
+  'Family Legacy','Pipeline Loyalty'
+];
+
+const DB_DIST = {
+  5:[0.10,0.25,0.50,0.15], 4:[0.20,0.45,0.25,0.10],
+  3:[0.35,0.50,0.15,0.00], 2:[0.60,0.40,0.00,0.00], 1:[0.85,0.15,0.00,0.00]
+};
+
+const SCHOOLS_LIST = ['Alabama','Georgia','Ohio State','Texas','LSU','Oklahoma',
+  'Notre Dame','Michigan','Florida','Clemson','Penn State','Tennessee','Auburn',
+  'Miami','Oregon','USC','Nebraska','Oklahoma State','Wisconsin','Iowa'];
+
+const EXTRA_SPORTS_BY_POS = {
+  QB:['Basketball','Baseball','Track','None','None'],
+  RB:['Basketball','Track','Baseball','Soccer','None'],
+  WR:['Basketball','Track','Soccer','Baseball','None','None'],
+  TE:['Basketball','Baseball','None','None'],
+  IOL:['Wrestling','None','None','None'],
+  OT:['Wrestling','Basketball','None','None'],
+  EDGE:['Basketball','Wrestling','Track','None','None'],
+  DL:['Wrestling','None','None','None','None'],
+  LB:['Wrestling','Basketball','Baseball','None','None'],
+  CB:['Basketball','Track','Soccer','Baseball','None','None'],
+  S:['Basketball','Track','Soccer','Baseball','None','None'],
+  ATH:['Basketball','Track','Baseball','Soccer','None'],
+  K:['Soccer','None','None'],
+  P:['Soccer','Baseball','None','None'],
+};
+
+const FIRST_NAMES = [
+  'Malik','Darius','Jordan','Marcus','Tyrese','Cameron','Isaiah','Elijah','Jaylen','Andre',
+  'Devin','Caleb','Trevor','Mason','Hunter','Bryce','Cole','Logan','Tyler','Nathan',
+  'Zach','Justin','Damien','Xavier','Kendall','Jalen','Quinton','Lamar','Terrell','DeAndre',
+  'Cody','Blake','Collin','Peyton','Javon','Marquez','Trevion','Keondre','Zion','Micah',
+  'Seth','Evan','Dylan','Brady','Cooper','Chase','Landon','Preston','Jackson','Weston',
+  'Nico','Emory','Quentin','Roderick','Antwan','Keon','Deon','Jamari','Tristen','Savion',
+  'Devontae','Trayvon','Kendric','Deshawn','Marquise','Tavion','Kameron','Elias','Nasir',
+  'Tobias','Rashad','Dominic','Kyler','Tanner','Griffin','Garrett','Nolan','Owen','Miles',
+  'Jayden','Aiden','Caden','Brayden','Hayden','Cayden','Zander','Xander','River','Ryder',
+  'Easton','Weston','Colton','Dalton','Ashton','Clayton','Braxton','Paxton','Daxton','Jaxton',
+  'Trevon','Kevon','Devon','Jevon','Levon','Damon','Ramon','Darion','Marion','Fabian',
+  'Sebastian','Christian','Cristian','Adrian','Adriel','Ezekiel','Ezra','Elias','Eli','Emmanuel',
+  'Emanuel','Emilio','Ernesto','Eduardo','Esteban','Felipe','Francisco','Fernando','Freddie','Felix',
+  'Germaine','Gerald','Gerardo','Gilberto','Giovanni','Glenn','Gordon','Graham','Grant','Gregory',
+  'Hakeem','Harold','Harrison','Harvey','Hassan','Hector','Henry','Herbert','Herman','Holden',
+  'Ibrahim','Ignacio','Isiah','Israel','Ivan','Ivory','Jabari','Jaboree','Jacari','Jadarius',
+  'Jahmari','Jahmir','Jaivion','Jakari','Jakobe','Jaleel','Jalen','Jamaal','Jamal','Jamarcus',
+  'Jameel','Jameel','Jamir','Jamison','Jamius','Jamon','Jamond','Jamoni','Jareed','Jarvis',
+  'Jashon','Jasiah','Jasper','Javaris','Javell','Javen','Javeon','Javian','Javien','Javieon',
+  'Kentavious','Kentrell','Kenyatta','Kerby','Kerryon','Kesean','Keshawn','Kevin','Keyshawn',
+  'Khalid','Khalil','Khyree','Kiedron','Kieran','Kobe','Koby','Kofi','Kolby','Kolton',
+  'Lawrence','Leland','Lennon','Leo','Leon','Leonard','Levi','Lewis','Liam','Lincoln',
+  'Memphis','Micaiah','Michael','Mikhail','Milan','Miles','Myles','Montavious','Monte','Montez',
+  'Nehemiah','Neil','Niko','Nolan','Norman','Norris','Nyheim','Omari','Oren','Orlando',
+  'Patrick','Paul','Percy','Perry','Pete','Pharoh','Phillip','Pierce','Porter','Princeton',
+  'Raequan','Raheem','Rahsaan','Rakim','Ramik','Ramon','Randall','Rashaan','Rashaud','Rasheed',
+  'Samuel','Samson','Saquon','Semaj','Senquez','Shadrach','Shamar','Shamari','Shane','Shannon',
+  'Tarique','Tariq','Taulia','Tavian','Tavien','Tavion','Tay','Taysom','Tayshaun','Tedarrell',
+  'Ulysses','Vance','Vanderbilt','Vidal','Vincent','Virgil','Wade','Wallace','Walter','Warren',
+  'Wendell','Wesley','Wilbur','Wiley','Wilkins','Will','William','Willie','Winston','Woodrow',
+];
+
+const LAST_NAMES = [
+  'Williams','Johnson','Davis','Brown','Wilson','Moore','Taylor','Thomas','Jackson','White',
+  'Harris','Martin','Thompson','Garcia','Martinez','Robinson','Clark','Rodriguez','Lewis','Lee',
+  'Walker','Hall','Allen','Young','King','Wright','Scott','Green','Baker','Adams',
+  'Nelson','Carter','Mitchell','Perez','Roberts','Turner','Phillips','Campbell','Parker','Evans',
+  'Edwards','Collins','Stewart','Sanchez','Morris','Rogers','Reed','Cook','Morgan','Bell',
+  'Murphy','Bailey','Rivera','Cooper','Richardson','Cox','Howard','Ward','Torres','Peterson',
+  'Gray','Ramirez','James','Watson','Brooks','Kelly','Sanders','Price','Bennett','Wood',
+  'Barnes','Ross','Henderson','Coleman','Jenkins','Perry','Powell','Long','Patterson','Hughes',
+  'Flores','Washington','Butler','Simmons','Foster','Gonzales','Bryant','Alexander','Russell','Griffin',
+  'Diaz','Hayes','Myers','Ford','Hamilton','Graham','Sullivan','Wallace','Woods','Cole',
+  'West','Jordan','Owens','Reynolds','Fisher','Ellis','Harrison','Gibson','Mcdonald','Cruz',
+  'Marshall','Ortega','Gomez','Murray','Freeman','Wells','Webb','Simpson','Stevens','Tucker',
+  'Porter','Hunter','Hicks','Crawford','Henry','Boyd','Mason','Morales','Kennedy','Warren',
+  'Dixon','Ramos','Reyes','Burns','Gordon','Shaw','Holmes','Rice','Robertson','Hunt',
+  'Black','Daniels','Palmer','Mills','Nichols','Grant','Knight','Ferguson','Rose','Stone',
+  'Hawkins','Dunn','Perkins','Hudson','Spencer','Gardner','Stephens','Payne','Pierce','Berry',
+  'Matthews','Arnold','Wagner','Willis','Ray','Watkins','Olson','Carroll','Duncan','Snyder',
+  'Hart','Cunningham','Bradley','Lane','Andrews','Ruiz','Harper','Fox','Riley','Armstrong',
+  'Carpenter','Weaver','Greene','Lawrence','Elliott','Chavez','Sims','Austin','Peters','Kelley',
+  'Franklin','Lawson','Fields','Gutierrez','Ryan','Schmidt','Carr','Vasquez','Castillo','Wheeler',
+  'Chapman','Oliver','Montgomery','Richards','Williamson','Johnston','Banks','Meyer','Bishop','Mccoy',
+  'Howell','Alvarez','Morrison','Hansen','Fernandez','Garza','Harvey','Little','Burton','Stanley',
+  'Nguyen','George','Jacobs','Reid','Kim','Fuller','Lynch','Dean','Gilbert','Garrett',
+  'Romero','Welch','Larson','Frazier','Burke','Hanson','Day','Mendoza','Moreno','Bowman',
+  'Medina','Fowler','Brewer','Hoffman','Carlson','Silva','Pearson','Holland','Douglas','Fleming',
+  'Jensen','Vargas','Byrd','Davidson','Hopkins','May','Terry','Herrera','Wade','Soto',
+  'Walters','Curtis','Neal','Caldwell','Lowe','Jennings','Barnett','Graves','Jimenez','Horton',
+  'Shelton','Barrett','Obrien','Castro','Sutton','Gregory','Mckinney','Lucas','Miles','Craig',
+  'Rodgers','Chambers','Holt','Lambert','Fletcher','Watts','Bates','Hale','Rhodes','Pena',
+  'Beck','Newman','Haynes','Mcdaniel','Mendez','Bush','Vaughn','Parks','Dawson','Santiago',
+];
+
+
+// 135 FBS Schools
+const FBS_SCHOOLS = [
+  {name:'Alabama',conf:'SEC',tier:5},{name:'Georgia',conf:'SEC',tier:5},{name:'Ohio State',conf:'Big Ten',tier:5},
+  {name:'Texas',conf:'SEC',tier:5},{name:'Michigan',conf:'Big Ten',tier:5},{name:'LSU',conf:'SEC',tier:5},
+  {name:'Notre Dame',conf:'Ind',tier:5},{name:'Clemson',conf:'ACC',tier:5},{name:'Oklahoma',conf:'SEC',tier:5},
+  {name:'Penn State',conf:'Big Ten',tier:5},{name:'Florida',conf:'SEC',tier:4},{name:'Tennessee',conf:'SEC',tier:4},
+  {name:'Auburn',conf:'SEC',tier:4},{name:'Oregon',conf:'Big Ten',tier:4},{name:'USC',conf:'Big Ten',tier:4},
+  {name:'Miami',conf:'ACC',tier:4},{name:'Texas A&M',conf:'SEC',tier:4},{name:'Oklahoma State',conf:'Big 12',tier:4},
+  {name:'Wisconsin',conf:'Big Ten',tier:4},{name:'Iowa',conf:'Big Ten',tier:4},{name:'Utah',conf:'Big 12',tier:4},
+  {name:'Washington',conf:'Big Ten',tier:4},{name:'Mississippi',conf:'SEC',tier:4},{name:'Arkansas',conf:'SEC',tier:4},
+  {name:'Missouri',conf:'SEC',tier:4},{name:'TCU',conf:'Big 12',tier:4},{name:'Baylor',conf:'Big 12',tier:4},
+  {name:'Kansas State',conf:'Big 12',tier:4},{name:'Iowa State',conf:'Big 12',tier:3},{name:'Florida State',conf:'ACC',tier:4},
+  {name:'Virginia Tech',conf:'ACC',tier:3},{name:'Pittsburgh',conf:'ACC',tier:3},{name:'NC State',conf:'ACC',tier:3},
+  {name:'Wake Forest',conf:'ACC',tier:3},{name:'Duke',conf:'ACC',tier:3},{name:'Louisville',conf:'ACC',tier:3},
+  {name:'Syracuse',conf:'ACC',tier:3},{name:'Boston College',conf:'ACC',tier:3},{name:'Georgia Tech',conf:'ACC',tier:3},
+  {name:'North Carolina',conf:'ACC',tier:3},{name:'Virginia',conf:'ACC',tier:3},{name:'Stanford',conf:'ACC',tier:3},
+  {name:'California',conf:'ACC',tier:3},{name:'SMU',conf:'ACC',tier:3},{name:'Nebraska',conf:'Big Ten',tier:4},
+  {name:'Minnesota',conf:'Big Ten',tier:3},{name:'Michigan State',conf:'Big Ten',tier:3},{name:'Purdue',conf:'Big Ten',tier:3},
+  {name:'Indiana',conf:'Big Ten',tier:3},{name:'Northwestern',conf:'Big Ten',tier:3},{name:'Illinois',conf:'Big Ten',tier:3},
+  {name:'Rutgers',conf:'Big Ten',tier:3},{name:'Maryland',conf:'Big Ten',tier:3},{name:'UCLA',conf:'Big Ten',tier:3},
+  {name:'Texas Tech',conf:'Big 12',tier:3},{name:'West Virginia',conf:'Big 12',tier:3},{name:'Kansas',conf:'Big 12',tier:3},
+  {name:'Houston',conf:'Big 12',tier:3},{name:'Cincinnati',conf:'Big 12',tier:3},{name:'UCF',conf:'Big 12',tier:3},
+  {name:'BYU',conf:'Big 12',tier:3},{name:'Colorado',conf:'Big 12',tier:3},{name:'Arizona State',conf:'Big 12',tier:3},
+  {name:'Arizona',conf:'Big 12',tier:3},{name:'Mississippi State',conf:'SEC',tier:3},{name:'Vanderbilt',conf:'SEC',tier:2},
+  {name:'Kentucky',conf:'SEC',tier:3},{name:'South Carolina',conf:'SEC',tier:3},{name:'Tulane',conf:'AAC',tier:3},
+  {name:'Memphis',conf:'AAC',tier:3},{name:'Navy',conf:'AAC',tier:2},{name:'SMU',conf:'AAC',tier:3},
+  {name:'Temple',conf:'AAC',tier:2},{name:'East Carolina',conf:'AAC',tier:2},{name:'South Florida',conf:'AAC',tier:2},
+  {name:'Tulsa',conf:'AAC',tier:2},{name:'UTSA',conf:'AAC',tier:2},{name:'Rice',conf:'AAC',tier:2},
+  {name:'App State',conf:'Sun Belt',tier:2},{name:'Louisiana',conf:'Sun Belt',tier:2},{name:'Troy',conf:'Sun Belt',tier:2},
+  {name:'South Alabama',conf:'Sun Belt',tier:2},{name:'Arkansas State',conf:'Sun Belt',tier:2},
+  {name:'Georgia Southern',conf:'Sun Belt',tier:2},{name:'Georgia State',conf:'Sun Belt',tier:2},
+  {name:'Marshall',conf:'Sun Belt',tier:2},{name:'Southern Miss',conf:'Sun Belt',tier:2},
+  {name:'Old Dominion',conf:'Sun Belt',tier:2},{name:'Texas State',conf:'Sun Belt',tier:2},
+  {name:'James Madison',conf:'Sun Belt',tier:2},{name:'Louisiana Monroe',conf:'Sun Belt',tier:1},
+  {name:'UTEP',conf:'C-USA',tier:2},{name:'Western Kentucky',conf:'C-USA',tier:2},
+  {name:'Florida Atlantic',conf:'C-USA',tier:2},{name:'Florida International',conf:'C-USA',tier:2},
+  {name:'Charlotte',conf:'C-USA',tier:2},{name:'Middle Tennessee',conf:'C-USA',tier:2},
+  {name:'UAB',conf:'C-USA',tier:2},{name:'North Texas',conf:'C-USA',tier:2},
+  {name:'Liberty',conf:'C-USA',tier:2},{name:'Jacksonville State',conf:'C-USA',tier:1},
+  {name:'Sam Houston',conf:'C-USA',tier:1},{name:'Miami (OH)',conf:'MAC',tier:2},
+  {name:'Ohio',conf:'MAC',tier:2},{name:'Toledo',conf:'MAC',tier:2},{name:'Ball State',conf:'MAC',tier:1},
+  {name:'Central Michigan',conf:'MAC',tier:2},{name:'Eastern Michigan',conf:'MAC',tier:1},
+  {name:'Western Michigan',conf:'MAC',tier:2},{name:'Buffalo',conf:'MAC',tier:1},
+  {name:'Akron',conf:'MAC',tier:1},{name:'Kent State',conf:'MAC',tier:1},
+  {name:'Northern Illinois',conf:'MAC',tier:2},{name:'Bowling Green',conf:'MAC',tier:1},
+  {name:'Boise State',conf:'MWC',tier:3},{name:'Fresno State',conf:'MWC',tier:2},
+  {name:'San Diego State',conf:'MWC',tier:2},{name:'UNLV',conf:'MWC',tier:2},
+  {name:'Nevada',conf:'MWC',tier:2},{name:'Hawaii',conf:'MWC',tier:1},
+  {name:'Colorado State',conf:'MWC',tier:2},{name:'Wyoming',conf:'MWC',tier:2},
+  {name:'Air Force',conf:'MWC',tier:2},{name:'New Mexico',conf:'MWC',tier:1},
+  {name:'Utah State',conf:'MWC',tier:2},{name:'San Jose State',conf:'MWC',tier:1},
+  {name:'Army',conf:'Ind',tier:2},{name:'Kennesaw State',conf:'C-USA',tier:1},
+  {name:'Western Kentucky',conf:'C-USA',tier:2},{name:'New Mexico State',conf:'Ind',tier:1},
+];
+
+// ═══════════════════════════════════════════════════════════════
+// RNG
+// ═══════════════════════════════════════════════════════════════
+function makeRng(seed) {
+  let s = seed >>> 0;
+  return () => { s = Math.imul(1664525,s)+1013904223>>>0; return s/4294967296; };
+}
+function pickW(arr,r) { return arr[Math.floor(r()*arr.length)]; }
+function weightedPick(items, weights, r) {
+  const total = weights.reduce((a,b)=>a+b,0);
+  let rnd = r()*total;
+  for (let i=0;i<items.length;i++) { rnd-=weights[i]; if(rnd<=0) return items[i]; }
+  return items[items.length-1];
+}
+function weightedState(r) {
+  const states=Object.keys(STATE_WEIGHTS), weights=Object.values(STATE_WEIGHTS);
+  const total=weights.reduce((a,b)=>a+b,0);
+  let rnd=r()*total;
+  for (let i=0;i<states.length;i++) { rnd-=weights[i]; if(rnd<=0) return states[i]; }
+  return states[states.length-1];
+}
+function heightStr(in_) { return Math.floor(in_/12)+"'"+(in_%12)+'"'; }
+
+// ═══════════════════════════════════════════════════════════════
+// STAR POOL
+// ═══════════════════════════════════════════════════════════════
+function buildStarPool(count) {
+  const pool=[];
+  const counts={5:32,4:350,3:1400};
+  const twoCount=Math.floor(count*0.40);
+  const oneCount=Math.max(0,count-32-350-1400-twoCount);
+  [5,5,5,4,4,4,3,3,2,1].forEach(()=>{});
+  for(let i=0;i<32;i++) pool.push(5);
+  for(let i=0;i<350;i++) pool.push(4);
+  for(let i=0;i<1400;i++) pool.push(3);
+  for(let i=0;i<twoCount;i++) pool.push(2);
+  for(let i=0;i<oneCount;i++) pool.push(1);
+  return pool;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PHYSICAL
+// ═══════════════════════════════════════════════════════════════
+function genPhysical(pos,stars,r) {
+  const p=PHYS[pos]||PHYS.ATH;
+  const sf=(stars-1)/4;
+  const hRaw=p.minH+Math.round((sf*0.4+r()*0.6)*(p.maxH-p.minH)+stars*p.sHB);
+  const wRaw=p.minW+Math.round((sf*0.4+r()*0.6)*(p.maxW-p.minW)+stars*p.sWB);
+  return {
+    height:Math.min(p.maxH+1,Math.max(p.minH,hRaw)),
+    weight:Math.min(p.maxW+10,Math.max(p.minW-10,wRaw))
   };
 }
 
-function pickR(arr, r) { return arr[Math.floor(r() * arr.length)]; }
-
-function heightStr(inches) {
-  return Math.floor(inches/12) + "'" + (inches%12) + '"';
+// ═══════════════════════════════════════════════════════════════
+// ARCHETYPE
+// ═══════════════════════════════════════════════════════════════
+function pickArchetype(pos,stars,r) {
+  const pool=POS_ARCHETYPES[pos];
+  if(!pool||pool.length===0) return 'Athlete';
+  const sf=(stars-1)/4;
+  const adj=pool.map(([name,w],idx)=>{
+    const bonus=idx===0?sf*20:idx===1?sf*10:0;
+    const penalty=idx>=pool.length-1?sf*15:0;
+    return [name,Math.max(1,w+bonus-penalty)];
+  });
+  return weightedPick(adj.map(a=>a[0]),adj.map(a=>a[1]),r);
 }
 
-function generateRecruits(count, classYear) {
-  const r = rng(classYear * 999 + 42);
-  const recruits = [];
-  const starDist = [0,0,0,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5];
+// ═══════════════════════════════════════════════════════════════
+// TRAITS
+// ═══════════════════════════════════════════════════════════════
+function genTraits(pos,r) {
+  const pool=[...(POS_TRAITS[pos]||POS_TRAITS.ATH)];
+  const count=Math.floor(r()*3)+1;
+  const chosen=[];
+  pool.sort(()=>r()-0.5);
+  for(const c of pool) {
+    if(chosen.length>=count) break;
+    let conflict=false;
+    for(const pair of EXCLUSIVE_PAIRS) {
+      if(pair.includes(c)&&chosen.some(x=>pair.includes(x)&&x!==c)){conflict=true;break;}
+    }
+    if(!conflict) chosen.push(c);
+  }
+  return chosen;
+}
 
-  for (let i = 0; i < count; i++) {
-    const fn = pickR(FIRST_NAMES, r);
-    const ln = pickR(LAST_NAMES, r);
-    const pos = pickR(POSITIONS, r);
-    const region = pickR(REGIONS, r);
-    const city = pickR(CITIES[region], r);
-    const hsScheme = pickR(HS_SCHEMES, r);
-    const stars = starDist[Math.floor(r() * starDist.length)];
-    const extraSport = pickR(EXTRA_SPORTS, r);
+// ═══════════════════════════════════════════════════════════════
+// MOTIVATIONS
+// ═══════════════════════════════════════════════════════════════
+function genMotivations(stars,r) {
+  const shuffled=[...ALL_MOTIVATIONS].sort(()=>r()-0.5).slice(0,3);
+  const dist=DB_DIST[stars]||DB_DIST[1];
+  const rnd=r();
+  let dbCount=0,cum=0;
+  for(let i=0;i<dist.length;i++){cum+=dist[i];if(rnd<cum){dbCount=i;break;}}
+  return shuffled.map((m,i)=>({name:m,isDealbreaker:i<dbCount}));
+}
 
-    const baseHeight = {QB:74,RB:70,WR:72,TE:76,OL:77,DL:75,LB:73,CB:70,S:71,K:69,P:70}[pos] || 72;
-    const height = baseHeight + Math.round((r()-0.5)*4);
-    const baseWeight = {QB:220,RB:210,WR:190,TE:245,OL:305,DL:285,LB:235,CB:185,S:200,K:185,P:195}[pos] || 215;
-    const weight = baseWeight + Math.round((r()-0.5)*30);
+// ═══════════════════════════════════════════════════════════════
+// OVR & GEM/BUST SYSTEM
+// Arrival OVR: what the player is on day 1 of campus
+// Dev ceiling: max OVR achievable with ideal coaching/development
+// Gem/bust: hidden modifier revealed on official visit only
+// Rankings are based on true OVR BEFORE gem/bust — services see
+// the player's talent, not his hidden ceiling modifier
+// ═══════════════════════════════════════════════════════════════
 
-    const svc = SERVICES.map(s => {
-      const base = stars + (r()-0.5)*1.5;
-      return { name: s, stars: Math.max(1, Math.min(5, Math.round(base))) };
+// Base OVR ranges by star [min, max]
+const OVR_BASE = {
+  5:[77,81], 4:[71,77], 3:[65,73], 2:[58,65], 1:[50,59]
+};
+
+// Dev ceiling ranges by star [min, max]
+const OVR_CEIL = {
+  5:[88,96], 4:[80,89], 3:[72,82], 2:[65,74], 1:[58,68]
+};
+
+// Gem modifiers [arrivalBoost_min, arrivalBoost_max, ceilBoost_min, ceilBoost_max]
+// Heavier at lower star levels — finding hidden talent
+const GEM_MOD = {
+  5:[2,4,5,8],  4:[3,5,6,10],  3:[4,7,8,12],  2:[5,9,10,14],  1:[6,10,12,16]
+};
+
+// Bust modifiers [arrivalDrop_min, arrivalDrop_max, ceilDrop_min, ceilDrop_max]
+// Dramatic at all levels — especially 5-star
+const BUST_MOD = {
+  5:[6,10,12,18],  4:[5,8,10,15],  3:[4,7,8,12],  2:[3,5,6,9],  1:[2,4,4,7]
+};
+
+// Gem/bust rates by star
+const GB_RATES = {
+  5:{bust:0.08,gem:0.00}, // 5-stars rarely gems (already elite), bust 8%
+  4:{bust:0.10,gem:0.08},
+  3:{bust:0.14,gem:0.15},
+  2:{bust:0.18,gem:0.20},
+  1:{bust:0.12,gem:0.25},
+};
+
+function randRange(lo,hi,r){ return lo+Math.floor(r()*(hi-lo+1)); }
+
+function genOVR(stars,r) {
+  const rates=GB_RATES[stars]||GB_RATES[1];
+  const rnd=r();
+
+  // Determine gem/bust status
+  let type='none';
+  if(rnd<rates.bust) type='bust';
+  else if(rnd>1-rates.gem) type='gem';
+
+  // Base arrival OVR
+  const [aLo,aHi]=OVR_BASE[stars]||[50,59];
+  const baseArrival=randRange(aLo,aHi,r);
+
+  // Base dev ceiling
+  const [cLo,cHi]=OVR_CEIL[stars]||[58,68];
+  const baseCeiling=randRange(cLo,cHi,r);
+
+  let arrivalOVR=baseArrival;
+  let devCeiling=baseCeiling;
+
+  if(type==='gem'){
+    const [abLo,abHi,cbLo,cbHi]=GEM_MOD[stars]||GEM_MOD[1];
+    arrivalOVR=Math.min(99,baseArrival+randRange(abLo,abHi,r));
+    devCeiling=Math.min(99,baseCeiling+randRange(cbLo,cbHi,r));
+  } else if(type==='bust'){
+    const [adLo,adHi,cdLo,cdHi]=BUST_MOD[stars]||BUST_MOD[1];
+    arrivalOVR=Math.max(30,baseArrival-randRange(adLo,adHi,r));
+    devCeiling=Math.max(40,baseCeiling-randRange(cdLo,cdHi,r));
+  }
+
+  // Ensure ceiling is always above arrival
+  devCeiling=Math.max(devCeiling,arrivalOVR+3);
+
+  return { type, arrivalOVR, devCeiling };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RATING — Rivals-style 70-100 scale, 4 decimal precision
+// ═══════════════════════════════════════════════════════════════
+function calcRating(svc,stars) {
+  // Weighted average rawScore — service 0 weighted slightly more (like 247 composite)
+  const weights=[1.1,1.0,0.9];
+  const weightedSum=svc.reduce((a,s,i)=>a+s.rawScore*weights[i],0);
+  const weightTotal=weights.reduce((a,b)=>a+b,0);
+  const avgRaw=weightedSum/weightTotal;
+  const ranges={5:[98.0,100.0],4:[90.0,97.99],3:[80.0,89.99],2:[75.0,79.99],1:[70.0,74.99]};
+  const [lo,hi]=ranges[stars]||[70.0,74.99];
+  const normalized=(avgRaw-(stars-0.5))/1.0;
+  const rating=lo+Math.max(0,Math.min(1,normalized))*(hi-lo);
+  // Store to 4 decimal places internally — display rounds to 2
+  // This ensures Caleb Thomas (2,1,2) ranks above Jordan Thomas (1,5,3)
+  return Math.round(rating*10000)/10000;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RANKINGS
+// ═══════════════════════════════════════════════════════════════
+function assignRankings(recruits) {
+  // Sort by weighted composite rawScore — pure talent signal
+  // QB representation handled by pool size and star boost in generation
+  const bySignal=[...recruits].sort((a,b)=>{
+    const sigA=a.svc.reduce((s,sv,i)=>s+sv.rawScore*[1.1,1.0,0.9][i],0)/3;
+    const sigB=b.svc.reduce((s,sv,i)=>s+sv.rawScore*[1.1,1.0,0.9][i],0)/3;
+    return sigB-sigA;
+  });
+  const posCounts={},stateCounts={};
+  bySignal.forEach((r,idx)=>{
+    r.natRank=idx+1;
+    r.natRankDisplay=idx<1500?(idx+1):null;
+    posCounts[r.pos]=(posCounts[r.pos]||0)+1; r.posRank=posCounts[r.pos];
+    stateCounts[r.state]=(stateCounts[r.state]||0)+1; r.stateRank=stateCounts[r.state];
+  });
+
+  // Service rankings — each service sorts by their own rawScore independently
+  SERVICES.forEach((svc,si)=>{
+    const bySvc=[...recruits].sort((a,b)=>b.svc[si].rawScore-a.svc[si].rawScore);
+    bySvc.forEach((r,idx)=>{
+      r.svc[si].natRank=idx+1;
+      r.svc[si].natRankDisplay=idx<1500?(idx+1):null;
     });
-    const composite = (svc.reduce((a,b)=>a+b.stars,0)/svc.length);
+  });
+}
 
-    const traitPool = [...TRAITS].sort(()=>r()-0.5).slice(0, Math.floor(r()*3)+1);
+// ═══════════════════════════════════════════════════════════════
+// CLASS SCORE (Gaussian-weighted, excludes K/P, drops bottom 3)
+// ═══════════════════════════════════════════════════════════════
+function calcClassScore(recruitList) {
+  const eligible=recruitList
+    .filter(r=>r.pos!=='K'&&r.pos!=='P')
+    .sort((a,b)=>b.rating-a.rating);
+  if(eligible.length<=3) return 0;
+  const scored=eligible.slice(0,eligible.length-3);
+  let score=0,weight=1.0;
+  scored.forEach(r=>{ score+=r.rating*weight; weight*=0.97; });
+  return Math.round(score*100)/100;
+}
 
-    const parentAlma = r() > 0.85 ? pickR(['Alabama','Georgia','Ohio State','Texas','LSU','Oklahoma','Notre Dame','Michigan','Florida','Clemson'], r) : null;
-    const nilPriority = r() > 0.6;
-    const homePriority = r() > 0.7;
-    const interest = Math.round(r() * 100);
+// ═══════════════════════════════════════════════════════════════
+// MAIN RECRUIT GENERATION
+// ═══════════════════════════════════════════════════════════════
+function generateRecruits(count,classYear) {
+  const r=makeRng(classYear*7919+31337);
+  const starPool=buildStarPool(count);
+  for(let i=starPool.length-1;i>0;i--){
+    const j=Math.floor(r()*(i+1));
+    [starPool[i],starPool[j]]=[starPool[j],starPool[i]];
+  }
+  const recruits=[];
+  const usedNames=new Set();
+  for(let i=0;i<count;i++){
+    const pos=pickW(POS_POOL_BASE,r);
+    let stars=Math.min(starPool[i]||1,POS_STAR_CAP[pos]);
+
+    // QB and ATH skew higher in real rankings — services value them more
+    // Occasionally bump a 3-star QB to 4-star, or 4-star to 5-star
+    if(pos==='QB'&&stars===3&&r()<0.18) stars=4;
+    if(pos==='QB'&&stars===4&&r()<0.08) stars=5;
+    if(pos==='ATH'&&stars===3&&r()<0.12) stars=4;
+    stars=Math.min(stars,POS_STAR_CAP[pos]);
+    const state=weightedState(r);
+    const city=pickW(STATE_CITIES[state]||DEF_CITIES,r);
+    const phys=genPhysical(pos,stars,r);
+    const hsScheme=pickW(HS_SCHEMES,r);
+    const extraSport=pickW(EXTRA_SPORTS_BY_POS[pos]||['None'],r);
+
+    // Generate a shared consensus signal for this recruit
+    // High-star recruits have stronger consensus — services mostly agree on elite talent
+    // The consensus signal is the "true" quality, each service adds independent noise on top
+    const consensusSignal = stars + (r() - 0.5) * 0.08; // very tight shared base
+
+    const svc=SERVICES.map((svcName,si)=>{
+      const bias=SVC_BIAS[svcName][pos];
+      const accuracyNoise=(1-bias)*0.4;
+      // Independent noise per service — tuned to produce target rank spreads:
+      // 5-star: ±5 spots | high 4-star: ±10-15 | low 4-star: ±15-25
+      // high 3-star: ±30-60 | mid/low 3-star+: wide open
+      const starVariance = stars===5 ? 0.010 :
+                           stars===4 ? 0.025 :
+                           stars===3 ? 0.055 :
+                           stars===2 ? 0.55  : 0.70;
+      const indNoise = accuracyNoise + starVariance;
+      const indSignal = (r() - 0.5) * indNoise * 2;
+      // Consensus weight — 5-stars are 85% consensus, 4-stars 65%, 3-stars 40%, lower 10%
+      const consensusWeight = stars===5 ? 0.85 :
+                              stars===4 ? 0.65 :
+                              stars===3 ? 0.40 : 0.10;
+      const rawScore = consensusSignal * consensusWeight + (stars + indSignal) * (1 - consensusWeight);
+      const svcStars=Math.max(1,Math.min(POS_STAR_CAP[pos],Math.round(rawScore)));
+      return{name:svcName,stars:svcStars,rawScore:Math.max(0.5,Math.min(5.5,rawScore)),natRank:9999,natRankDisplay:null};
+    });
+
+    const rating=calcRating(svc,stars);
+
+    // OVR — generated AFTER service ratings so rankings reflect true talent
+    // Gem/bust modifies the player but NOT their recruit ranking
+    const ovrData=genOVR(stars,r);
+
+    let athPref=null,athLoyalty=0;
+    if(pos==='ATH'){const ap=pickW(ATH_PREF,r);athPref=ap;athLoyalty=ap.loyalty+(r()-0.5)*0.2;}
+
+    const archetypePos=pos==='ATH'&&athPref?athPref.prim:pos;
+    const archetype=pickArchetype(archetypePos,stars,r);
+    const hasParentAlma=r()>0.87;
+    const parentAlma=hasParentAlma?pickW(SCHOOLS_LIST,r):null;
+    const motivations=genMotivations(stars,r);
+    if(pos==='ATH'&&athLoyalty>0.6) motivations[0]={name:'Position Promise',isDealbreaker:stars>=4};
+    const traits=genTraits(pos,r);
+
+    // Generate unique name — retry until unused combination found
+    let fullName;
+    let attempts=0;
+    do {
+      const fn=pickW(FIRST_NAMES,r);
+      const ln=pickW(LAST_NAMES,r);
+      fullName=fn+' '+ln;
+      attempts++;
+    } while(usedNames.has(fullName)&&attempts<20);
+    usedNames.add(fullName);
 
     recruits.push({
-      id: i,
-      name: fn + ' ' + ln,
-      pos, region, city, hsScheme, stars,
-      height, weight, svc, composite,
-      traits: traitPool,
-      extraSport,
-      parentAlma,
-      nilPriority,
-      homePriority,
-      interest,
-      classYear,
-      onBigBoard: false
+      id:i,
+      name:fullName,
+      pos,state,city,hsScheme,stars,
+      height:phys.height,weight:phys.weight,
+      extraSport,archetype,svc,rating,
+      natRank:9999,natRankDisplay:null,posRank:0,stateRank:0,
+      // OVR — all hidden until official visit
+      ovrType:ovrData.type,         // 'none' | 'gem' | 'bust'
+      arrivalOVR:ovrData.arrivalOVR, // hidden
+      devCeiling:ovrData.devCeiling, // hidden
+      athPref,athLoyalty,parentAlma,motivations,traits,
+      interest:Math.round(20+r()*60),
+      classYear,scouted:false,
+      commitStatus:'open',
+      commitSchool:null,
     });
   }
+  assignRankings(recruits);
   return recruits;
 }
 
-const SCHEME_FIT = {
-  'Spread RPO':  {QB:0.9,WR:0.9,RB:0.8,OL:0.6,TE:0.6,DL:0.5,LB:0.5,CB:0.5,S:0.5,K:0.5,P:0.5},
-  'Air Raid':    {QB:0.95,WR:0.95,TE:0.7,RB:0.5,OL:0.55,DL:0.5,LB:0.5,CB:0.5,S:0.5,K:0.5,P:0.5},
-  'Pro Style':   {QB:0.8,OL:0.85,RB:0.8,TE:0.85,WR:0.7,DL:0.7,LB:0.75,CB:0.65,S:0.65,K:0.6,P:0.6},
-  'Power Run':   {OL:0.95,RB:0.95,TE:0.8,QB:0.6,WR:0.55,DL:0.8,LB:0.85,CB:0.55,S:0.6,K:0.5,P:0.5},
-  'Triple Option':{QB:0.7,RB:0.95,OL:0.85,WR:0.4,TE:0.5,DL:0.6,LB:0.7,CB:0.5,S:0.55,K:0.5,P:0.5},
-  'West Coast':  {QB:0.85,WR:0.85,RB:0.75,TE:0.8,OL:0.75,DL:0.6,LB:0.65,CB:0.6,S:0.65,K:0.55,P:0.55},
-  'Run-and-Shoot':{QB:0.9,WR:0.95,RB:0.6,TE:0.5,OL:0.55,DL:0.5,LB:0.5,CB:0.5,S:0.5,K:0.5,P:0.5}
+// ═══════════════════════════════════════════════════════════════
+// SCHOOL CLASS GENERATION (for class rankings)
+// Each school gets a simulated class based on their tier
+// ═══════════════════════════════════════════════════════════════
+function generateSchoolClasses(classYear) {
+  const classes={};
+  FBS_SCHOOLS.forEach((school,si)=>{
+    const r=makeRng(classYear*1337+si*97+42);
+    const classSize=18+Math.floor(r()*10); // 18-27 players
+    const recruits=[];
+    // Tier determines rating range
+    const tierRanges={5:[88,100],4:[82,96],3:[78,90],2:[74,85],1:[70,80]};
+    const [lo,hi]=tierRanges[school.tier]||[70,80];
+    for(let i=0;i<classSize;i++){
+      const pos=pickW(POS_POOL_BASE,r);
+      if(pos==='K'||pos==='P') continue; // exclude from score
+      const baseRating=lo+(r()*(hi-lo));
+      // Add some variance
+      const rating=Math.max(70,Math.min(100,baseRating+(r()-0.5)*8));
+      const stars=rating>=98?5:rating>=90?4:rating>=80?3:rating>=75?2:1;
+      recruits.push({pos,rating:Math.round(rating*100)/100,stars});
+    }
+    classes[school.name]={school,recruits,score:calcClassScore(recruits)};
+  });
+  return classes;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCHEME FIT
+// ═══════════════════════════════════════════════════════════════
+const SCHEME_FIT={
+  'Spread RPO':{QB:0.9,RB:0.8,WR:0.9,TE:0.6,IOL:0.6,OT:0.6,EDGE:0.5,DL:0.5,LB:0.5,CB:0.5,S:0.5,ATH:0.7,K:0.5,P:0.5},
+  'Air Raid':{QB:0.95,RB:0.5,WR:0.95,TE:0.7,IOL:0.55,OT:0.55,EDGE:0.5,DL:0.5,LB:0.5,CB:0.5,S:0.5,ATH:0.65,K:0.5,P:0.5},
+  'Pro Style':{QB:0.8,RB:0.8,WR:0.7,TE:0.85,IOL:0.85,OT:0.85,EDGE:0.7,DL:0.75,LB:0.75,CB:0.65,S:0.65,ATH:0.6,K:0.6,P:0.6},
+  'Power Run':{QB:0.6,RB:0.95,WR:0.55,TE:0.8,IOL:0.95,OT:0.95,EDGE:0.7,DL:0.85,LB:0.85,CB:0.55,S:0.6,ATH:0.55,K:0.5,P:0.5},
+  'Triple Option':{QB:0.7,RB:0.95,WR:0.4,TE:0.5,IOL:0.85,OT:0.85,EDGE:0.6,DL:0.65,LB:0.7,CB:0.5,S:0.55,ATH:0.75,K:0.5,P:0.5},
+  'West Coast':{QB:0.85,RB:0.75,WR:0.85,TE:0.8,IOL:0.75,OT:0.75,EDGE:0.6,DL:0.65,LB:0.65,CB:0.6,S:0.65,ATH:0.65,K:0.55,P:0.55},
+  'Run-and-Shoot':{QB:0.9,RB:0.6,WR:0.95,TE:0.5,IOL:0.55,OT:0.55,EDGE:0.5,DL:0.5,LB:0.5,CB:0.5,S:0.5,ATH:0.7,K:0.5,P:0.5},
 };
+function getFit(pos,scheme){
+  const v=(SCHEME_FIT[scheme]||{})[pos]||0.5;
+  if(v>=0.8) return{label:'High',cls:'fit-high'};
+  if(v>=0.6) return{label:'Med',cls:'fit-med'};
+  return{label:'Low',cls:'fit-low'};
+}
+function interestColor(v){if(v>=70)return'#5bc47a';if(v>=40)return'#c4b45b';return'#c47a5b';}
+function starsHtml(n){return'<span class="stars">'+'★'.repeat(n)+'<span style="color:#2a2d3a;">'+'★'.repeat(5-n)+'</span></span>';}
 
-function getFit(pos, myScheme) {
-  const val = (SCHEME_FIT[myScheme] || {})[pos] || 0.5;
-  if (val >= 0.8) return {label:'High',cls:'fit-high'};
-  if (val >= 0.6) return {label:'Med',cls:'fit-med'};
-  return {label:'Low',cls:'fit-low'};
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+let recruits2026=generateRecruits(4500,2026);
+let recruits2027=generateRecruits(4500,2027);
+let allRecruits=recruits2026;
+let schoolClasses2026=generateSchoolClasses(2026);
+let schoolClasses2027=generateSchoolClasses(2027);
+let filtered=[];
+let sortCol='natRank',sortDir=1;
+let selectedId=null;
+let bigBoard=[];
+let activeTab='detail';
+let activeCrTab='hs';
+
+// Populate state filter
+(function(){
+  const states=[...new Set([...recruits2026,...recruits2027].map(r=>r.state))].sort();
+  const sel=document.getElementById('state-filter');
+  states.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
+})();
+
+// Populate archetype filter
+(function(){
+  const all=Object.values(POS_ARCHETYPES).flat().map(a=>Array.isArray(a)?a[0]:a);
+  const unique=[...new Set(all)].sort();
+  const sel=document.getElementById('arch-filter');
+  unique.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;sel.appendChild(o);});
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  activeTab=tab;
+  document.querySelectorAll('.rp-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.getElementById('tab-detail').style.display=tab==='detail'?'block':'none';
+  document.getElementById('tab-bigboard').style.display=tab==='bigboard'?'flex':'none';
+  document.getElementById('tab-rankings').style.display=tab==='rankings'?'flex':'none';
+  if(tab==='rankings') renderClassRankings();
+  if(tab==='bigboard') renderBigBoard();
 }
 
-function interestColor(v) {
-  if (v >= 70) return '#5bc47a';
-  if (v >= 40) return '#c4b45b';
-  return '#c47a5b';
+function switchCrTab(tab) {
+  activeCrTab=tab;
+  document.querySelectorAll('.cr-tab').forEach(t=>t.classList.toggle('active',t.dataset.cr===tab));
+  renderClassRankings();
 }
 
-function starsHtml(n) {
-  return '<span class="stars">' + '★'.repeat(n) + '<span style="color:#333;">' + '★'.repeat(5-n) + '</span></span>';
-}
-
-let recruits2026 = generateRecruits(4500, 2026);
-let recruits2027 = generateRecruits(4500, 2027);
-let allRecruits = recruits2026;
-let filtered = [];
-let sortCol = 'stars';
-let sortDir = -1;
-let selectedId = null;
-let bigBoard = [];
-
+// ═══════════════════════════════════════════════════════════════
+// FILTERING & SORTING
+// ═══════════════════════════════════════════════════════════════
 function getFiltered() {
-  const search = document.getElementById('search-input').value.toLowerCase();
-  const starF = parseInt(document.querySelector('.star-btn.active').dataset.star);
-  const posF = document.getElementById('pos-filter').value;
-  const regionF = document.getElementById('region-filter').value;
-  const schemeF = document.getElementById('scheme-filter').value;
-  const yearF = document.getElementById('year-filter').value;
-
-  allRecruits = yearF === '2027' ? recruits2027 : recruits2026;
-
-  return allRecruits.filter(r => {
-    if (search && !r.name.toLowerCase().includes(search) && !r.city.toLowerCase().includes(search)) return false;
-    if (starF > 0 && r.stars !== starF) return false;
-    if (posF && r.pos !== posF) return false;
-    if (regionF && r.region !== regionF) return false;
-    if (schemeF && r.hsScheme !== schemeF) return false;
+  const search=document.getElementById('search-input').value.toLowerCase();
+  const starF=parseInt(document.querySelector('.star-btn.active').dataset.star);
+  const posF=document.getElementById('pos-filter').value;
+  const stateF=document.getElementById('state-filter').value;
+  const schemeF=document.getElementById('scheme-filter').value;
+  const yearF=document.getElementById('year-filter').value;
+  const archF=document.getElementById('arch-filter').value;
+  const commitF=document.getElementById('commit-filter').value;
+  allRecruits=yearF==='2027'?recruits2027:recruits2026;
+  return allRecruits.filter(r=>{
+    if(search&&!r.name.toLowerCase().includes(search)&&!r.city.toLowerCase().includes(search)&&!r.state.toLowerCase().includes(search)) return false;
+    if(starF>0&&r.stars!==starF) return false;
+    if(posF&&r.pos!==posF) return false;
+    if(stateF&&r.state!==stateF) return false;
+    if(schemeF&&r.hsScheme!==schemeF) return false;
+    if(archF&&r.archetype!==archF) return false;
+    if(commitF&&r.commitStatus!==commitF) return false;
     return true;
   });
 }
 
 function sorted(arr) {
-  return [...arr].sort((a,b) => {
-    let av = a[sortCol], bv = b[sortCol];
-    if (typeof av === 'string') return sortDir * av.localeCompare(bv);
-    return sortDir * (bv - av);
+  return [...arr].sort((a,b)=>{
+    if(sortCol==='natRank') {
+      // Check which service is selected and sort by that service's rank
+      const svcSel=document.getElementById('rank-service').value;
+      if(svcSel==='rating') return sortDir*(a.natRank-b.natRank);
+      const si=parseInt(svcSel);
+      return sortDir*(a.svc[si].natRank-b.svc[si].natRank);
+    }
+    if(sortCol==='rating') return sortDir*(b.rating-a.rating);
+    if(sortCol==='commitStatus') return sortDir*a.commitStatus.localeCompare(b.commitStatus);
+    let av=a[sortCol],bv=b[sortCol];
+    if(av==null) av=9999; if(bv==null) bv=9999;
+    if(typeof av==='string') return sortDir*av.localeCompare(bv);
+    return sortDir*(bv-av);
   });
 }
 
+// ═══════════════════════════════════════════════════════════════
+// RENDER TABLE
+// ═══════════════════════════════════════════════════════════════
 function renderTable() {
-  filtered = sorted(getFiltered());
-  const myScheme = document.getElementById('my-scheme').value;
-  const tbody = document.getElementById('recruit-tbody');
-  const MAX_ROWS = 200;
-  const shown = filtered.slice(0, MAX_ROWS);
+  filtered=sorted(getFiltered());
+  const myScheme='Spread RPO'; // placeholder until school selection screen sets this
+  const tbody=document.getElementById('recruit-tbody');
+  const MAX=200;
+  const shown=filtered.slice(0,MAX);
+  document.getElementById('results-count').textContent=
+    `Showing ${Math.min(MAX,filtered.length).toLocaleString()} of ${filtered.length.toLocaleString()} recruits`;
 
-  document.getElementById('results-count').textContent =
-    `Showing ${Math.min(MAX_ROWS, filtered.length).toLocaleString()} of ${filtered.length.toLocaleString()} recruits`;
-
-  tbody.innerHTML = shown.map(r => {
-    const fit = getFit(r.pos, myScheme);
-    const onBB = bigBoard.some(b => b.id === r.id && b.classYear === r.classYear);
-    return `<tr data-id="${r.id}" class="${selectedId === r.id ? 'selected' : ''}">
+  tbody.innerHTML=shown.map(r=>{
+    const fit=getFit(r.pos,myScheme);
+    const onBB=bigBoard.some(b=>b.id===r.id&&b.classYear===r.classYear);
+    const rankD=r.natRankDisplay?`<span class="nat-rank">#${r.natRankDisplay}</span>`:'<span style="color:#333;">NR</span>';
+    const commitD=r.commitStatus==='soft'?'<span class="commit-badge commit-soft">Soft</span>':
+                  r.commitStatus==='hard'?'<span class="commit-badge commit-soft" style="background:#1a3a2a;color:#5bc47a;border-color:#2a5a3a;">Hard</span>':
+                  '<span class="commit-none">Open</span>';
+    return`<tr data-id="${r.id}" class="${selectedId===r.id?'selected':''}">
+      <td>${rankD}</td>
       <td>${starsHtml(r.stars)}</td>
-      <td style="color:#c9a84c;font-weight:600;">${r.composite.toFixed(2)}</td>
+      <td style="color:#c9a84c;font-weight:700;">${r.rating.toFixed(2)}</td>
       <td style="font-weight:500;">${r.name}</td>
       <td><span class="pos-badge pos-${r.pos}">${r.pos}</span></td>
-      <td>${heightStr(r.height)}</td>
-      <td>${r.weight}</td>
-      <td style="color:#888;font-size:0.77rem;">${r.city}</td>
-      <td style="color:#888;font-size:0.77rem;">${r.hsScheme}</td>
+      <td style="color:#777;font-size:0.72rem;">${r.archetype}</td>
+      <td style="white-space:nowrap;color:#888;">${heightStr(r.height)}</td>
+      <td style="color:#888;">${r.weight}</td>
+      <td style="color:#666;font-size:0.72rem;">${r.state}</td>
       <td><span class="fit-chip ${fit.cls}">${fit.label}</span></td>
       <td>
-        <div style="display:flex;align-items:center;gap:6px;">
+        <div style="display:flex;align-items:center;gap:5px;">
           <div class="interest-bar"><div class="interest-fill" style="width:${r.interest}%;background:${interestColor(r.interest)};"></div></div>
-          <span style="font-size:0.7rem;color:#666;">${r.interest}%</span>
+          <span style="font-size:0.65rem;color:#555;">${r.interest}%</span>
         </div>
       </td>
+      <td>${commitD}</td>
       <td>
-        <button class="add-btn ${onBB?'added':''}" data-id="${r.id}" onclick="toggleBigBoard(${r.id}, event)">
-          ${onBB ? '✓ Board' : '+ Board'}
+        <button class="add-btn ${onBB?'added':''}" onclick="toggleBigBoard(${r.id},event)">
+          ${onBB?'✓':'+ Board'}
         </button>
       </td>
     </tr>`;
   }).join('');
 
-  tbody.querySelectorAll('tr').forEach(row => {
-    row.addEventListener('click', (e) => {
-      if (e.target.classList.contains('add-btn')) return;
-      const id = parseInt(row.dataset.id);
-      selectedId = id;
-      renderDetail(id);
-      renderTable();
+  tbody.querySelectorAll('tr').forEach(row=>{
+    row.addEventListener('click',e=>{
+      if(e.target.classList.contains('add-btn')) return;
+      selectedId=parseInt(row.dataset.id);
+      renderDetail(selectedId);
+      switchTab('detail');
     });
   });
 }
 
-function toggleBigBoard(id, e) {
+// ═══════════════════════════════════════════════════════════════
+// BIG BOARD
+// ═══════════════════════════════════════════════════════════════
+function toggleBigBoard(id,e) {
   e.stopPropagation();
-  const r = allRecruits.find(x => x.id === id);
-  if (!r) return;
-  const idx = bigBoard.findIndex(b => b.id === id && b.classYear === r.classYear);
-  if (idx > -1) {
-    bigBoard.splice(idx, 1);
-  } else {
-    if (bigBoard.length >= 30) { alert('Big board limited to 30 recruits.'); return; }
-    bigBoard.push(r);
-  }
+  const r=allRecruits.find(x=>x.id===id);
+  if(!r) return;
+  const idx=bigBoard.findIndex(b=>b.id===id&&b.classYear===r.classYear);
+  if(idx>-1){bigBoard.splice(idx,1);}
+  else{if(bigBoard.length>=35){alert('Big board limited to 35 recruits.');return;}bigBoard.push(r);}
   renderBigBoard();
   renderTable();
+  if(activeTab==='rankings') renderClassRankings();
 }
 
 function renderBigBoard() {
-  const el = document.getElementById('bigboard-list');
-  document.getElementById('bb-count').textContent = bigBoard.length;
-  if (!bigBoard.length) { el.innerHTML = '<div class="empty-board">No recruits added yet</div>'; return; }
-  el.innerHTML = bigBoard.map((r,i) => `
-    <div class="bigboard-item">
-      <span class="bigboard-rank">${i+1}</span>
-      <span class="pos-badge pos-${r.pos}" style="font-size:0.62rem;padding:0.1rem 0.3rem;">${r.pos}</span>
-      <span class="bigboard-name">${r.name}</span>
-      <span class="stars" style="font-size:0.65rem;">${'★'.repeat(r.stars)}</span>
-      <button class="remove-btn" onclick="toggleBigBoard(${r.id}, event)">×</button>
+  const el=document.getElementById('bigboard-list');
+  document.getElementById('bb-count').textContent=bigBoard.length;
+  const myScore=calcClassScore(bigBoard);
+  const scoreEl=document.getElementById('bb-score');
+  const rankEl=document.getElementById('bb-rank-display');
+
+  if(bigBoard.length===0){
+    el.innerHTML='<div class="empty-board">Add recruits to build your board</div>';
+    scoreEl.textContent='—';rankEl.textContent='No class score yet';
+    return;
+  }
+
+  scoreEl.textContent=myScore.toFixed(2);
+
+  // Find my rank among all schools
+  const yearF=document.getElementById('year-filter').value;
+  const classes=yearF==='2027'?schoolClasses2027:schoolClasses2026;
+  const scores=Object.values(classes).map(c=>c.score).concat([myScore]).sort((a,b)=>b-a);
+  const myRank=scores.indexOf(myScore)+1;
+  rankEl.textContent=`#${myRank} nationally`;
+
+  el.innerHTML=bigBoard
+    .sort((a,b)=>b.rating-a.rating)
+    .map((r,i)=>`
+    <div class="bb-item" onclick="renderDetail(${r.id});switchTab('detail');">
+      <span class="bb-num">${i+1}</span>
+      <span class="pos-badge pos-${r.pos}" style="font-size:0.6rem;padding:0.08rem 0.3rem;">${r.pos}</span>
+      <span class="bb-name">${r.name}</span>
+      <span class="bb-rating">${r.rating.toFixed(2)}</span>
+      <span class="stars" style="font-size:0.62rem;">${'★'.repeat(r.stars)}</span>
+      <button class="remove-btn" onclick="event.stopPropagation();toggleBigBoard(${r.id},event)">×</button>
     </div>`).join('');
 }
 
-function renderDetail(id) {
-  const r = allRecruits.find(x => x.id === id);
-  if (!r) return;
-  const myScheme = document.getElementById('my-scheme').value;
-  const fit = getFit(r.pos, myScheme);
-  const el = document.getElementById('detail-panel');
+// ═══════════════════════════════════════════════════════════════
+// CLASS RANKINGS
+// ═══════════════════════════════════════════════════════════════
+function renderClassRankings() {
+  const el=document.getElementById('cr-list');
+  const confF=document.getElementById('cr-conf-filter').value;
+  const yearF=document.getElementById('year-filter').value;
+  const classes=yearF==='2027'?schoolClasses2027:schoolClasses2026;
 
-  el.innerHTML = `
+  // Build my score
+  const myScore=calcClassScore(bigBoard);
+
+  // Build ranked list
+  let rows=Object.values(classes).map(c=>({
+    name:c.school.name,
+    conf:c.school.conf,
+    tier:c.school.tier,
+    score:c.score,
+    count:c.recruits.length,
+    isMe:false,
+  }));
+
+  // Insert player's class as "My Class"
+  rows.push({name:'My Class',conf:'—',tier:0,score:myScore,count:bigBoard.filter(r=>r.pos!=='K'&&r.pos!=='P').length,isMe:true});
+
+  // Filter by conf
+  if(confF) rows=rows.filter(r=>r.conf===confF||r.isMe);
+
+  // Sort by score
+  rows.sort((a,b)=>b.score-a.score);
+
+  el.innerHTML=rows.map((row,i)=>`
+    <div class="cr-row ${row.isMe?'my-school':''}">
+      <span class="cr-rank">${i+1}</span>
+      <div style="flex:1;">
+        <div class="cr-school">${row.name}${row.isMe?' ⭐':''}</div>
+        <div class="cr-conf">${row.conf}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cr-score">${row.score>0?row.score.toFixed(2):'—'}</div>
+        <div class="cr-count">${row.count} recruits</div>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════════════════════════════
+function renderDetail(id) {
+  const r=allRecruits.find(x=>x.id===id);
+  if(!r) return;
+  const myScheme='Spread RPO'; // placeholder until school selection screen sets this
+  const fit=getFit(r.pos,myScheme);
+  const el=document.getElementById('tab-detail');
+
+  const rankLine=r.natRankDisplay
+    ?`#${r.natRankDisplay} National · #${r.posRank} ${r.pos} · #${r.stateRank} in ${r.state}`
+    :`NR National · #${r.posRank} ${r.pos} · #${r.stateRank} in ${r.state}`;
+
+  const svcHtml=r.svc.map(s=>`
+    <div class="service-row">
+      <span class="service-name">${s.name}</span>
+      <span>${starsHtml(s.stars)}</span>
+      <span class="service-rank">${s.natRankDisplay?'#'+s.natRankDisplay:'NR'}</span>
+    </div>`).join('');
+
+  const athHtml=r.pos==='ATH'?`
+    <div class="detail-row"><span class="detail-row-label">Prefers to play</span><span class="detail-row-val" style="color:#e0a050;">${r.athPref?r.athPref.prim:'—'}</span></div>
+    <div class="detail-row"><span class="detail-row-label">Could also play</span><span class="detail-row-val">${r.athPref?r.athPref.sec:'—'}</span></div>
+    <div class="detail-row"><span class="detail-row-label">Position loyalty</span><span class="detail-row-val">${r.athLoyalty>0.6?'High':r.athLoyalty>0.35?'Medium':'Low'}</span></div>`:'';
+
+  const commitColors={open:'#555',soft:'#5bc47a',hard:'#c9a84c'};
+  const commitLabel={open:'Open',soft:'Soft Committed',hard:'Hard Committed'};
+
+  el.innerHTML=`
     <div class="detail-header">
       <div class="detail-name">${r.name}</div>
-      <div class="detail-sub">${starsHtml(r.stars)} · Class of ${r.classYear}</div>
-      <div class="composite-score">${r.composite.toFixed(2)} composite</div>
+      <div class="detail-sub">${starsHtml(r.stars)} · ${r.archetype} · Class of ${r.classYear}</div>
+      <div class="rating-big">${r.rating.toFixed(2)}</div>
+      <div style="font-size:0.68rem;color:#555;margin-top:0.2rem;">${rankLine}</div>
     </div>
-
     <div class="detail-section">
       <div class="detail-section-title">Physical Profile</div>
       <div class="detail-row"><span class="detail-row-label">Position</span><span class="pos-badge pos-${r.pos}">${r.pos}</span></div>
       <div class="detail-row"><span class="detail-row-label">Height</span><span class="detail-row-val">${heightStr(r.height)}</span></div>
       <div class="detail-row"><span class="detail-row-label">Weight</span><span class="detail-row-val">${r.weight} lbs</span></div>
-      <div class="detail-row"><span class="detail-row-label">Hometown</span><span class="detail-row-val">${r.city}</span></div>
-      <div class="detail-row"><span class="detail-row-label">Region</span><span class="detail-row-val">${r.region}</span></div>
-      ${r.extraSport !== 'None' ? `<div class="detail-row"><span class="detail-row-label">Also plays</span><span class="detail-row-val">${r.extraSport}</span></div>` : ''}
-    </div>
-
-    <div class="detail-section">
-      <div class="detail-section-title">Recruiting Services</div>
-      ${r.svc.map(s => `
-        <div class="service-row">
-          <span class="service-name">${s.name}</span>
-          <span>${starsHtml(s.stars)}</span>
-        </div>`).join('')}
-    </div>
-
-    <div class="detail-section">
-      <div class="detail-section-title">Background</div>
+      <div class="detail-row"><span class="detail-row-label">Hometown</span><span class="detail-row-val">${r.city}, ${r.state}</span></div>
       <div class="detail-row"><span class="detail-row-label">HS Scheme</span><span class="detail-row-val">${r.hsScheme}</span></div>
-      <div class="detail-row"><span class="detail-row-label">Scheme fit</span><span class="fit-chip ${fit.cls}">${fit.label} fit</span></div>
-      ${r.parentAlma ? `<div class="detail-row"><span class="detail-row-label">Family ties</span><span class="detail-row-val" style="color:#c9a84c;">${r.parentAlma} alum</span></div>` : ''}
-      <div class="detail-row"><span class="detail-row-label">NIL priority</span><span class="detail-row-val">${r.nilPriority ? 'Yes' : 'No'}</span></div>
-      <div class="detail-row"><span class="detail-row-label">Wants to stay close</span><span class="detail-row-val">${r.homePriority ? 'Yes' : 'No'}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Scheme Fit</span><span class="fit-chip ${fit.cls}">${fit.label}</span></div>
+      ${r.extraSport!=='None'?`<div class="detail-row"><span class="detail-row-label">Also plays</span><span class="detail-row-val">${r.extraSport}</span></div>`:''}
+      ${athHtml}
     </div>
-
     <div class="detail-section">
-      <div class="detail-section-title">Traits</div>
-      <div>${r.traits.map(t => `<span class="trait-tag ${t.p?'positive':'negative'}">${t.t}</span>`).join('')}</div>
+      <div class="detail-section-title">Service Rankings</div>
+      ${svcHtml}
     </div>
-
     <div class="detail-section">
-      <div class="detail-section-title">Program Interest</div>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:0.25rem;">
-        <div class="interest-bar" style="width:120px;height:8px;">
-          <div class="interest-fill" style="width:${r.interest}%;background:${interestColor(r.interest)};"></div>
-        </div>
-        <span style="font-size:0.85rem;font-weight:600;color:${interestColor(r.interest)};">${r.interest}%</span>
+      <div class="detail-section-title">Recruit Status</div>
+      <div class="detail-row"><span class="detail-row-label">Status</span><span class="detail-row-val" style="color:${commitColors[r.commitStatus]};">${commitLabel[r.commitStatus]}</span></div>
+      ${r.commitSchool?`<div class="detail-row"><span class="detail-row-label">Committed to</span><span class="detail-row-val">${r.commitSchool}</span></div>`:''}
+      <div style="display:flex;gap:0.4rem;margin-top:0.5rem;flex-wrap:wrap;">
+        <button onclick="setCommit(${r.id},'soft')" style="background:${r.commitStatus==='soft'?'#1e3a2a':'#12151f'};border:1px solid #2a4a2a;color:#5bc47a;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.68rem;cursor:pointer;">Soft Commit</button>
+        <button onclick="setCommit(${r.id},'hard')" style="background:${r.commitStatus==='hard'?'#1e3a2a':'#12151f'};border:1px solid #3a5a2a;color:#7bc47a;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.68rem;cursor:pointer;">Hard Commit</button>
+        <button onclick="setCommit(${r.id},'open')" style="background:#12151f;border:1px solid #2a2d3a;color:#555;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.68rem;cursor:pointer;">Clear</button>
+        ${!r.scouted?`<button onclick="scoutRecruit(${r.id})" style="background:#12151f;border:1px solid #2a3a5a;color:#5ba3e0;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.68rem;cursor:pointer;">🔍 Official Visit</button>`:'<span style="font-size:0.65rem;color:#555;padding:0.2rem 0;">✓ Scouted</span>'}
       </div>
     </div>
-  `;
+    <div class="detail-section">
+      <div class="detail-section-title">Known Background</div>
+      ${r.parentAlma?`<div class="detail-row"><span class="detail-row-label">Family ties</span><span class="detail-row-val" style="color:#c9a84c;">${r.parentAlma} alum</span></div>`:'<div style="font-size:0.72rem;color:#444;padding:0.2rem 0;">No known family ties</div>'}
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Motivations <span style="color:#444;font-size:0.58rem;font-weight:400;"> · ⚠ = dealbreaker</span></div>
+      <div>${r.motivations.map(m=>`<span class="motivation-tag ${m.isDealbreaker?'db':''}">${m.name}${m.isDealbreaker?' ⚠':''}</span>`).join('')}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Traits & Potential</div>
+      ${r.scouted ? `
+        <div class="detail-row">
+          <span class="detail-row-label">Arrival OVR</span>
+          <span class="detail-row-val" style="color:#c9a84c;font-weight:700;">${r.arrivalOVR}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row-label">Dev Ceiling</span>
+          <span class="detail-row-val" style="color:${r.devCeiling>=90?'#5bc47a':r.devCeiling>=80?'#c9a84c':'#c47a5b'};font-weight:700;">${r.devCeiling}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row-label">Projection</span>
+          <span class="detail-row-val" style="color:${r.ovrType==='gem'?'#5bc47a':r.ovrType==='bust'?'#c45b5b':'#888'};">
+            ${r.ovrType==='gem'?'💎 Hidden Gem':r.ovrType==='bust'?'⚠️ Bust Risk':'Normal Development'}
+          </span>
+        </div>
+        <div style="margin-top:0.5rem;">${r.traits.map(t=>`<span style="display:inline-block;background:#12151f;border:1px solid #2a2d3a;border-radius:3px;font-size:0.65rem;padding:0.12rem 0.4rem;color:#888;margin:0.1rem 0.1rem 0 0;">${t}</span>`).join('')}</div>
+      ` : `<div class="hidden-note">🔒 Schedule an official visit to reveal OVR, ceiling, projection, and traits</div>`}
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Program Interest</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:0.2rem;">
+        <div class="interest-bar" style="width:110px;height:7px;"><div class="interest-fill" style="width:${r.interest}%;background:${interestColor(r.interest)};"></div></div>
+        <span style="font-size:0.82rem;font-weight:700;color:${interestColor(r.interest)};">${r.interest}%</span>
+      </div>
+      <div style="font-size:0.65rem;color:#444;margin-top:0.3rem;">Base interest · will update with school matching</div>
+    </div>`;
 }
 
-document.getElementById('star-filter').addEventListener('click', e => {
-  if (!e.target.classList.contains('star-btn')) return;
-  document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
+function scoutRecruit(id) {
+  const r=allRecruits.find(x=>x.id===id);
+  if(!r) return;
+  r.scouted=true;
+  renderDetail(id);
+  renderTable();
+}
+
+function setCommit(id,status) {
+  const r=allRecruits.find(x=>x.id===id);
+  if(!r) return;
+  r.commitStatus=status;
+  r.commitSchool=status!=='open'?'My School':null;
+  renderDetail(id);
+  renderTable();
+  if(activeTab==='bigboard') renderBigBoard();
+  if(activeTab==='rankings') renderClassRankings();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EVENT LISTENERS
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('star-filter').addEventListener('click',e=>{
+  if(!e.target.classList.contains('star-btn')) return;
+  document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('active'));
   e.target.classList.add('active');
   renderTable();
 });
 
-['search-input','pos-filter','region-filter','scheme-filter','year-filter'].forEach(id => {
-  document.getElementById(id).addEventListener('input', renderTable);
-  document.getElementById(id).addEventListener('change', renderTable);
+['search-input','pos-filter','state-filter','scheme-filter','year-filter','arch-filter','commit-filter'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',renderTable);
+  document.getElementById(id).addEventListener('change',renderTable);
 });
 
-document.getElementById('my-scheme').addEventListener('change', () => {
+document.getElementById('rank-service').addEventListener('change',()=>{
+  sortCol='natRank'; sortDir=1;
   renderTable();
-  if (selectedId !== null) renderDetail(selectedId);
 });
 
-document.querySelectorAll('th[data-sort]').forEach(th => {
-  th.addEventListener('click', () => {
-    const col = th.dataset.sort;
-    if (sortCol === col) { sortDir *= -1; } else { sortCol = col; sortDir = -1; }
+document.querySelectorAll('th[data-sort]').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const col=th.dataset.sort;
+    if(sortCol===col){sortDir*=-1;}else{sortCol=col;sortDir=col==='natRank'?1:-1;}
     renderTable();
   });
 });
