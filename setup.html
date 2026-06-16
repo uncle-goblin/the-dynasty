@@ -630,14 +630,14 @@ function renderDetail() {
 // START
 // ═══════════════════════════════════════════════════════════════
 function startCareer() {
-  if(!validate(3)) return;
   if(!state.school){ alert('Please select a program.'); return; }
-  sessionStorage.setItem('dynastyCareer', JSON.stringify({
+  const career = {
     coachName:state.coachName, almaMater:state.almaMater,
     offScheme:state.offScheme, defScheme:state.defScheme,
     role:state.role, startTree:state.startTree,
     school:state.school, year:2026, season:1,
-  }));
+  };
+  sessionStorage.setItem('dynastyCareer', JSON.stringify(career));
   window.location.href='recruiting.html';
 }
 
