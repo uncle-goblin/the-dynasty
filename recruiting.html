@@ -3,789 +3,1343 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Dynasty – New Career</title>
+<title>The Dynasty – Recruiting Board</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e8e8e8; min-height: 100vh; }
-
-/* HEADER */
-header { background: #1a1d27; border-bottom: 2px solid #c9a84c33; padding: 0.85rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+header { background: #1a1d27; border-bottom: 2px solid #c9a84c33; padding: 0.75rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
 header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.08em; color: #c9a84c; }
-.step-indicator { display: flex; gap: 0.5rem; align-items: center; }
-.step-dot { width: 8px; height: 8px; border-radius: 50%; background: #2a2d3a; transition: all 0.2s; }
-.step-dot.active { background: #c9a84c; }
-.step-dot.done { background: #5bc47a; }
+header span { font-size: 0.78rem; color: #666; }
+.layout { display: grid; grid-template-columns: 240px 1fr 300px; height: calc(100vh - 49px); }
+.panel { background: #1a1d27; border-right: 1px solid #2a2d3a; overflow-y: auto; display: flex; flex-direction: column; }
+.panel-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #555; padding: 0.75rem 1rem 0.4rem; border-bottom: 1px solid #2a2d3a; flex-shrink: 0; }
+.filter-section { padding: 0.6rem 1rem; border-bottom: 1px solid #1e2130; flex-shrink: 0; }
+.filter-label { font-size: 0.68rem; color: #777; margin-bottom: 0.3rem; font-weight: 500; }
+select, input[type="text"] { width: 100%; background: #12151f; border: 1px solid #2a2d3a; border-radius: 5px; color: #e8e8e8; padding: 0.35rem 0.55rem; font-size: 0.8rem; outline: none; }
+select:focus, input[type="text"]:focus { border-color: #c9a84c; }
+.star-filter { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+.star-btn { background: #12151f; border: 1px solid #2a2d3a; border-radius: 4px; color: #666; padding: 0.25rem 0.45rem; font-size: 0.7rem; cursor: pointer; transition: all 0.12s; }
+.star-btn.active { background: #c9a84c18; border-color: #c9a84c; color: #c9a84c; }
+.main { overflow-y: auto; background: #0f1117; display: flex; flex-direction: column; }
+.recruit-table { width: 100%; border-collapse: collapse; font-size: 0.79rem; }
+.recruit-table thead th { background: #1a1d27; color: #555; font-size: 0.63rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.5rem 0.65rem; text-align: left; border-bottom: 1px solid #2a2d3a; position: sticky; top: 0; z-index: 2; cursor: pointer; user-select: none; white-space: nowrap; }
+.recruit-table thead th:hover { color: #c9a84c; }
+.recruit-table tbody tr { border-bottom: 1px solid #1a1d27; cursor: pointer; transition: background 0.08s; }
+.recruit-table tbody tr:hover { background: #1a1d2799; }
+.recruit-table tbody tr.selected { background: #c9a84c0d; border-left: 2px solid #c9a84c; }
+.recruit-table td { padding: 0.45rem 0.65rem; vertical-align: middle; }
+.stars { color: #c9a84c; font-size: 0.72rem; letter-spacing: -1px; }
+.pos-badge { display: inline-block; padding: 0.12rem 0.35rem; border-radius: 3px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.03em; }
+.pos-QB{background:#1e3a5f;color:#5ba3e0} .pos-RB{background:#1e3a2a;color:#5bc47a}
+.pos-WR{background:#3a1e3a;color:#c07ad4} .pos-TE{background:#2a2a1e;color:#c4b45b}
+.pos-IOL{background:#2a1e1e;color:#c47a5b} .pos-OT{background:#3a2010;color:#e09050}
+.pos-EDGE{background:#1e2a2a;color:#5bc4c4} .pos-DL{background:#102a2a;color:#40b0b0}
+.pos-LB{background:#2a1e2a;color:#c45b9a} .pos-CB{background:#1e2a1e;color:#7ac45b}
+.pos-S{background:#1e1e2a;color:#7a7ac4} .pos-ATH{background:#2a1a10;color:#e0a050}
+.pos-K{background:#222;color:#aaa} .pos-P{background:#222;color:#999}
+.interest-bar { width: 50px; height: 4px; background: #2a2d3a; border-radius: 2px; overflow: hidden; display: inline-block; vertical-align: middle; }
+.interest-fill { height: 100%; border-radius: 2px; }
+.fit-chip { font-size: 0.63rem; padding: 0.08rem 0.35rem; border-radius: 3px; font-weight: 600; }
+.fit-high{background:#1e3a2a;color:#5bc47a} .fit-med{background:#2a2a1e;color:#c4b45b} .fit-low{background:#2a1e1e;color:#c47a5b}
+.add-btn { background: none; border: 1px solid #2a2d3a; border-radius: 4px; color: #555; padding: 0.18rem 0.45rem; font-size: 0.68rem; cursor: pointer; transition: all 0.12s; white-space: nowrap; }
+.add-btn:hover { border-color: #c9a84c; color: #c9a84c; }
+.add-btn.added { border-color: #5bc47a; color: #5bc47a; }
+.commit-badge { font-size: 0.62rem; padding: 0.1rem 0.35rem; border-radius: 3px; font-weight: 600; }
+.commit-soft { background:#1a2a1a; color:#5bc47a; border:1px solid #2a4a2a; }
+.commit-none { color:#444; font-size:0.68rem; }
 
-/* LAYOUT */
-.page { display: none; max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
-.page.active { display: block; }
-.page-title { font-size: 1.4rem; font-weight: 700; color: #e8e8e8; margin-bottom: 0.3rem; }
-.page-sub { font-size: 0.85rem; color: #666; margin-bottom: 2rem; }
+/* RIGHT PANEL */
+.right-panel { background: #1a1d27; border-left: 1px solid #2a2d3a; overflow: hidden; display: flex; flex-direction: column; }
+.rp-tabs { display: flex; border-bottom: 1px solid #2a2d3a; flex-shrink: 0; }
+.rp-tab { flex: 1; padding: 0.6rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #555; cursor: pointer; text-align: center; border-bottom: 2px solid transparent; transition: all 0.12s; }
+.rp-tab.active { color: #c9a84c; border-bottom-color: #c9a84c; }
+.rp-content { flex: 1; overflow-y: auto; }
+.detail-empty { padding: 2rem 1rem; color: #444; font-size: 0.8rem; text-align: center; }
+.detail-header { padding: 0.85rem 1rem; border-bottom: 1px solid #2a2d3a; }
+.detail-name { font-size: 0.95rem; font-weight: 700; color: #e8e8e8; margin-bottom: 0.2rem; }
+.detail-sub { font-size: 0.75rem; color: #888; }
+.detail-section { padding: 0.65rem 1rem; border-bottom: 1px solid #1e2130; }
+.detail-section-title { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #555; margin-bottom: 0.5rem; }
+.detail-row { display: flex; justify-content: space-between; align-items: center; padding: 0.2rem 0; font-size: 0.78rem; }
+.detail-row-label { color: #777; } .detail-row-val { color: #e8e8e8; font-weight: 500; }
+.service-row { display: flex; align-items: center; justify-content: space-between; padding: 0.22rem 0; font-size: 0.78rem; }
+.service-name { color: #777; font-size: 0.72rem; }
+.service-rank { color: #555; font-size: 0.7rem; }
+.rating-big { font-size: 1.6rem; font-weight: 700; color: #c9a84c; margin-top: 0.2rem; line-height: 1; }
+.motivation-tag { display: inline-block; border-radius: 3px; font-size: 0.65rem; padding: 0.12rem 0.4rem; margin: 0.1rem 0.1rem 0 0; background: #1a2030; border: 1px solid #2a3a50; color: #7a9ac4; }
+.motivation-tag.db { background: #2a1010; border-color: #5a2020; color: #c47a7a; }
+.hidden-note { font-size: 0.7rem; color: #444; font-style: italic; padding: 0.4rem 0; }
+.nat-rank { font-weight: 700; color: #c9a84c; }
 
-/* CARDS */
-.card-grid { display: grid; gap: 1rem; }
-.card-grid-2 { grid-template-columns: 1fr 1fr; }
-.card-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-.card { background: #1a1d27; border: 2px solid #2a2d3a; border-radius: 10px; padding: 1.25rem; cursor: pointer; transition: all 0.15s; }
-.card:hover { border-color: #c9a84c55; background: #1e2130; }
-.card.selected { border-color: #c9a84c; background: #1e2130; }
-.card-title { font-size: 0.95rem; font-weight: 700; color: #e8e8e8; margin-bottom: 0.3rem; }
-.card-sub { font-size: 0.78rem; color: #666; line-height: 1.5; }
-.card-icon { font-size: 1.8rem; margin-bottom: 0.6rem; }
-.card-tag { display: inline-block; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 3px; margin-bottom: 0.5rem; }
-.tag-gold { background: #c9a84c22; color: #c9a84c; border: 1px solid #c9a84c44; }
-.tag-green { background: #1e3a2a; color: #5bc47a; border: 1px solid #2a5a3a; }
-.tag-locked { background: #2a1e1e; color: #c47a5b; border: 1px solid #4a2e2e; }
-.tag-blue { background: #1e2a3a; color: #5ba3e0; border: 1px solid #2a3a5a; }
+/* BIG BOARD */
+.bb-header { padding: 0.65rem 1rem; border-bottom: 1px solid #2a2d3a; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.bb-score-block { text-align: right; }
+.bb-score { font-size: 1.1rem; font-weight: 700; color: #c9a84c; line-height: 1; }
+.bb-rank { font-size: 0.68rem; color: #666; margin-top: 0.1rem; }
+.bb-label { font-size: 0.62rem; color: #555; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.bb-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+.bb-item { display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 1rem; border-bottom: 1px solid #1a1d27; font-size: 0.75rem; cursor: pointer; transition: background 0.08s; }
+.bb-item:hover { background: #1e2130; }
+.bb-num { color: #444; font-size: 0.65rem; width: 14px; text-align: right; flex-shrink: 0; }
+.bb-name { color: #e8e8e8; flex: 1; }
+.bb-rating { color: #c9a84c; font-size: 0.7rem; font-weight: 600; }
+.remove-btn { background: none; border: none; color: #333; cursor: pointer; font-size: 0.85rem; padding: 0 0.15rem; transition: color 0.1s; }
+.remove-btn:hover { color: #c45b5b; }
+.empty-board { padding: 1.5rem 1rem; font-size: 0.78rem; color: #444; text-align: center; }
 
-/* FORM FIELDS */
-.field { margin-bottom: 1.25rem; }
-.field label { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #666; margin-bottom: 0.4rem; }
-.field input, .field select { width: 100%; background: #12151f; border: 1px solid #2a2d3a; border-radius: 6px; color: #e8e8e8; padding: 0.6rem 0.8rem; font-size: 0.9rem; outline: none; }
-.field input:focus, .field select:focus { border-color: #c9a84c; }
-.field-note { font-size: 0.72rem; color: #555; margin-top: 0.3rem; }
+/* CLASS RANKINGS */
+.cr-tabs { display: flex; border-bottom: 1px solid #2a2d3a; flex-shrink: 0; }
+.cr-tab { flex: 1; padding: 0.5rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #555; cursor: pointer; text-align: center; border-bottom: 2px solid transparent; }
+.cr-tab.active { color: #c9a84c; border-bottom-color: #c9a84c; }
+.cr-filters { padding: 0.5rem 1rem; border-bottom: 1px solid #2a2d3a; display: flex; gap: 0.5rem; flex-shrink: 0; }
+.cr-filters select { font-size: 0.72rem; padding: 0.25rem 0.4rem; }
+.cr-list { overflow-y: auto; flex: 1; }
+.cr-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 1rem; border-bottom: 1px solid #1a1d27; font-size: 0.75rem; }
+.cr-row:hover { background: #1e2130; }
+.cr-row.my-school { background: #c9a84c08; border-left: 2px solid #c9a84c; }
+.cr-rank { color: #555; font-size: 0.68rem; width: 24px; text-align: right; flex-shrink: 0; }
+.cr-school { color: #e8e8e8; flex: 1; font-size: 0.78rem; }
+.cr-conf { color: #555; font-size: 0.65rem; }
+.cr-score { color: #c9a84c; font-weight: 700; font-size: 0.8rem; }
+.cr-count { color: #555; font-size: 0.65rem; }
 
-/* SCHEME GRID */
-.scheme-section { margin-bottom: 1.5rem; }
-.scheme-section-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #666; margin-bottom: 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid #2a2d3a; }
-.scheme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.6rem; }
-.scheme-card { background: #12151f; border: 1px solid #2a2d3a; border-radius: 7px; padding: 0.75rem; cursor: pointer; transition: all 0.12s; }
-.scheme-card:hover { border-color: #c9a84c55; }
-.scheme-card.selected { border-color: #c9a84c; background: #1a1d27; }
-.scheme-card.selected-def { border-color: #5ba3e0; background: #1a1d27; }
-.scheme-name { font-size: 0.82rem; font-weight: 700; color: #e8e8e8; }
-.scheme-desc { font-size: 0.68rem; color: #666; margin-top: 0.2rem; line-height: 1.4; }
+.results-bar { padding: 0.4rem 0.65rem; font-size: 0.68rem; color: #555; border-bottom: 1px solid #1a1d27; background: #0f1117; flex-shrink: 0; }
 
-/* TREE CARDS */
-.tree-card { background: #1a1d27; border: 2px solid #2a2d3a; border-radius: 10px; padding: 1.25rem; cursor: pointer; transition: all 0.15s; position: relative; }
-.tree-card:hover { border-color: #c9a84c55; }
-.tree-card.selected { border-color: #c9a84c; }
-.tree-card.locked { opacity: 0.5; cursor: not-allowed; }
-.tree-nodes { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.75rem; }
-.tree-node { font-size: 0.62rem; background: #0f1117; border: 1px solid #2a2d3a; border-radius: 3px; padding: 0.1rem 0.35rem; color: #666; }
-.tree-node.available { color: #5bc47a; border-color: #2a4a2a; }
-
-/* SCHOOL SELECTION */
-.school-filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
-.school-filters select { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 6px; color: #e8e8e8; padding: 0.4rem 0.7rem; font-size: 0.8rem; outline: none; flex: 1; min-width: 140px; }
-.school-filters select:focus { border-color: #c9a84c; }
-.school-list { display: grid; gap: 0.5rem; max-height: 480px; overflow-y: auto; padding-right: 0.25rem; }
-.school-card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 0.85rem 1rem; cursor: pointer; transition: all 0.12s; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1rem; }
-.school-card:hover { border-color: #c9a84c44; background: #1e2130; }
-.school-card.selected { border-color: #c9a84c; background: #1e2130; }
-.school-name { font-size: 0.95rem; font-weight: 700; color: #e8e8e8; }
-.school-meta { font-size: 0.72rem; color: #666; margin-top: 0.15rem; }
-.school-grades { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem; }
-.grade-chip { font-size: 0.62rem; padding: 0.12rem 0.4rem; border-radius: 3px; font-weight: 600; }
-.grade-A { background: #1e3a2a; color: #5bc47a; }
-.grade-B { background: #1e2a3a; color: #5ba3e0; }
-.grade-C { background: #2a2a1e; color: #c4b45b; }
-.grade-D { background: #2a1e1e; color: #c47a5b; }
-.school-tier-stars { color: #c9a84c; font-size: 0.9rem; letter-spacing: -1px; }
-
-/* SCHOOL DETAIL PANEL */
-.school-detail { background: #1a1d27; border: 1px solid #c9a84c44; border-radius: 10px; padding: 1.25rem; margin-top: 1rem; display: none; }
-.school-detail.visible { display: block; }
-.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem; }
-.detail-grade-row { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; border-bottom: 1px solid #1e2130; font-size: 0.8rem; }
-.detail-grade-label { color: #888; }
-.grade-bar { width: 80px; height: 5px; background: #2a2d3a; border-radius: 3px; overflow: hidden; }
-.grade-bar-fill { height: 100%; border-radius: 3px; }
-
-/* NAVIGATION */
-.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #2a2d3a; }
-.btn { padding: 0.65rem 1.5rem; border-radius: 7px; font-size: 0.85rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; letter-spacing: 0.03em; }
-.btn-primary { background: #c9a84c; color: #0f1117; }
-.btn-primary:hover { background: #d4b45c; }
-.btn-primary:disabled { background: #2a2d3a; color: #555; cursor: not-allowed; }
-.btn-secondary { background: #1a1d27; color: #888; border: 1px solid #2a2d3a; }
-.btn-secondary:hover { border-color: #888; color: #e8e8e8; }
-.summary-bar { background: #12151f; border: 1px solid #2a2d3a; border-radius: 7px; padding: 0.6rem 1rem; font-size: 0.78rem; color: #666; display: flex; gap: 1.5rem; flex-wrap: wrap; }
-.summary-item { display: flex; flex-direction: column; gap: 0.1rem; }
-.summary-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: #444; }
-.summary-val { color: #c9a84c; font-weight: 600; }
-
-::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 2px; }
+::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 2px; }
 </style>
 </head>
 <body>
 <header>
   <h1>THE DYNASTY</h1>
-  <div class="step-indicator">
-    <div class="step-dot active" id="dot-1"></div>
-    <div class="step-dot" id="dot-2"></div>
-    <div class="step-dot" id="dot-3"></div>
-    <div class="step-dot" id="dot-4"></div>
-    <div class="step-dot" id="dot-5"></div>
-  </div>
+  <span id="header-info">Recruiting Board · Class of 2026</span>
+  <a href="setup.html" style="font-size:0.72rem;color:#555;text-decoration:none;border:1px solid #2a2d3a;padding:0.3rem 0.7rem;border-radius:4px;">← New Career</a>
 </header>
+<div class="layout">
 
-<!-- STEP 1: COACH CREATION -->
-<div class="page active" id="step-1">
-  <div class="page-title">Create Your Coach</div>
-  <div class="page-sub">You'll carry this identity through your entire career.</div>
-
-  <div class="field">
-    <label>Coach Name</label>
-    <input type="text" id="coach-name" placeholder="Enter your name…" maxlength="40">
+<!-- LEFT: Filters -->
+<div class="panel">
+  <div class="panel-title">Filters</div>
+  <div class="filter-section">
+    <div class="filter-label">Search</div>
+    <input type="text" id="search-input" placeholder="Name, city, or state…">
   </div>
-
-  <div class="field">
-    <label>Alma Mater <span style="color:#444;font-weight:400;">(optional)</span></label>
-    <select id="alma-mater">
-      <option value="">None — I'll build my own legacy</option>
+  <div class="filter-section">
+    <div class="filter-label">Stars</div>
+    <div class="star-filter" id="star-filter">
+      <button class="star-btn active" data-star="0">All</button>
+      <button class="star-btn" data-star="5">★★★★★</button>
+      <button class="star-btn" data-star="4">★★★★</button>
+      <button class="star-btn" data-star="3">★★★</button>
+      <button class="star-btn" data-star="2">★★</button>
+      <button class="star-btn" data-star="1">★</button>
+    </div>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">Position</div>
+    <select id="pos-filter">
+      <option value="">All positions</option>
+      <option>QB</option><option>RB</option><option>WR</option><option>TE</option>
+      <option>IOL</option><option>OT</option><option>EDGE</option><option>DL</option>
+      <option>LB</option><option>CB</option><option>S</option><option>ATH</option>
+      <option>K</option><option>P</option>
     </select>
-    <div class="field-note">Gives a small recruiting interest boost at your alma mater. Purely flavor — not required.</div>
   </div>
+  <div class="filter-section">
+    <div class="filter-label">Archetype</div>
+    <select id="arch-filter"><option value="">All archetypes</option></select>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">State</div>
+    <select id="state-filter"><option value="">All states</option></select>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">HS Scheme</div>
+    <select id="scheme-filter">
+      <option value="">Any scheme</option>
+      <option>Air Raid</option><option>Spread RPO</option><option>Pro Style</option>
+      <option>Power Run</option><option>Triple Option</option><option>West Coast</option>
+    </select>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">Class Year</div>
+    <select id="year-filter">
+      <option value="2026">2026 (Seniors)</option>
+      <option value="2027">2027 (Juniors)</option>
+    </select>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">Sort Rankings By</div>
+    <select id="rank-service">
+      <option value="rating">Composite Rating</option>
+      <option value="0">GridironNow</option>
+      <option value="1">ProspectHub</option>
+      <option value="2">EliteGrid</option>
+    </select>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">Commit Status</div>
+    <select id="commit-filter">
+      <option value="">All recruits</option>
+      <option value="open">Open</option>
+      <option value="soft">Soft Committed</option>
+      <option value="hard">Hard Committed</option>
+    </select>
+  </div>
+</div>
 
-  <div class="field">
-    <label>Play Calling Preference</label>
-    <div class="card-grid card-grid-3" style="margin-top:0.5rem;">
-      <div class="card" data-pcp="Offense" onclick="selectPCP(this)">
-        <div class="card-icon">⚔️</div>
-        <div class="card-title">Offense</div>
-        <div class="card-sub">You call plays on offense. As OC you control the offense. As HC you can call either side or delegate.</div>
+<!-- MAIN: Recruit table -->
+<div class="main">
+  <div class="results-bar" id="results-count">Loading recruits…</div>
+  <table class="recruit-table">
+    <thead>
+      <tr>
+        <th data-sort="natRank">Rank</th>
+        <th data-sort="stars">★</th>
+        <th data-sort="rating">Rating</th>
+        <th data-sort="name">Name</th>
+        <th data-sort="pos">Pos</th>
+        <th data-sort="archetype">Archetype</th>
+        <th data-sort="height">Ht</th>
+        <th data-sort="weight">Wt</th>
+        <th data-sort="state">St</th>
+        <th data-sort="fit">Fit</th>
+        <th data-sort="interest">Int.</th>
+        <th data-sort="commitStatus">Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="recruit-tbody"></tbody>
+  </table>
+</div>
+
+<!-- RIGHT: Tabbed panel -->
+<div class="right-panel">
+  <div class="rp-tabs">
+    <div class="rp-tab active" data-tab="detail" onclick="switchTab('detail')">Recruit</div>
+    <div class="rp-tab" data-tab="bigboard" onclick="switchTab('bigboard')">Big Board</div>
+    <div class="rp-tab" data-tab="rankings" onclick="switchTab('rankings')">Class Rank</div>
+  </div>
+  <div class="rp-content" id="tab-detail">
+    <div class="detail-empty">Click a recruit to view details</div>
+  </div>
+  <div class="rp-content" id="tab-bigboard" style="display:none;flex-direction:column;height:100%;">
+    <div class="bb-header">
+      <div>
+        <div class="bb-label">My Big Board</div>
+        <div style="font-size:0.7rem;color:#555;margin-top:0.2rem;"><span id="bb-count">0</span> recruits · excl. K/P</div>
       </div>
-      <div class="card" data-pcp="Defense" onclick="selectPCP(this)">
-        <div class="card-icon">🛡️</div>
-        <div class="card-title">Defense</div>
-        <div class="card-sub">You call plays on defense. As DC you control the defense. As HC you can call either side or delegate.</div>
-      </div>
-      <div class="card" data-pcp="Neither" onclick="selectPCP(this)">
-        <div class="card-icon">📋</div>
-        <div class="card-title">Neither</div>
-        <div class="card-sub">You delegate play calling entirely to your coordinators. Focus on program building, recruiting, and management.</div>
+      <div class="bb-score-block">
+        <div class="bb-score" id="bb-score">—</div>
+        <div class="bb-rank" id="bb-rank-display">No class score yet</div>
       </div>
     </div>
-  </div>
-
-  <div class="nav-row">
-    <div></div>
-    <button class="btn btn-primary" onclick="goStep(2)" id="btn-step1">Next →</button>
-  </div>
-</div>
-
-<!-- STEP 2: ROLE SELECTION -->
-<div class="page" id="step-2">
-  <div class="page-title">Starting Role</div>
-  <div class="page-sub">Where do you begin your career? You'll eventually become a Head Coach regardless of where you start.</div>
-
-  <div class="card-grid card-grid-3">
-    <div class="card" data-role="HC" onclick="selectRole(this)">
-      <div class="card-tag tag-gold">Head Coach</div>
-      <div class="card-title">Head Coach</div>
-      <div class="card-sub">Full program control from day one. You manage everything — recruiting, staff, NIL, game planning. Higher expectations, more pressure, but the full experience immediately.</div>
-    </div>
-    <div class="card" data-role="OC" onclick="selectRole(this)">
-      <div class="card-tag tag-blue">Coordinator</div>
-      <div class="card-title">Offensive Coordinator</div>
-      <div class="card-sub">Build your coaching reputation on offense first. Lower pressure, develop your play calling identity. The OC decision tree leads toward HC. You will call offense regardless of play calling preference.</div>
-    </div>
-    <div class="card" data-role="DC" onclick="selectRole(this)">
-      <div class="card-tag tag-blue">Coordinator</div>
-      <div class="card-title">Defensive Coordinator</div>
-      <div class="card-sub">Build your reputation on defense. The DC decision tree leads toward HC. You will call defense regardless of play calling preference.</div>
+    <div class="bb-list" id="bigboard-list">
+      <div class="empty-board">Add recruits to build your board</div>
     </div>
   </div>
-
-  <div class="nav-row">
-    <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
-    <button class="btn btn-primary" onclick="goStep(3)" id="btn-step2">Next →</button>
+  <div class="rp-content" id="tab-rankings" style="display:none;flex-direction:column;height:100%;">
+    <div class="cr-tabs">
+      <div class="cr-tab active" data-cr="hs" onclick="switchCrTab('hs')">HS Class</div>
+      <div class="cr-tab" data-cr="portal" onclick="switchCrTab('portal')">Transfer</div>
+    </div>
+    <div class="cr-filters">
+      <select id="cr-conf-filter" onchange="renderClassRankings()">
+        <option value="">All Conferences</option>
+        <option>SEC</option><option>Big Ten</option><option>Big 12</option>
+        <option>ACC</option><option>AAC</option><option>Sun Belt</option>
+        <option>C-USA</option><option>MAC</option><option>MWC</option><option>Ind</option>
+      </select>
+    </div>
+    <div class="cr-list" id="cr-list"></div>
   </div>
 </div>
 
-<!-- STEP 3: SCHEME SELECTION -->
-<div class="page" id="step-3">
-  <div class="page-title">Your Schemes</div>
-  <div class="page-sub">Select your offensive and defensive identities. Both are stored now and activate fully when you become Head Coach.</div>
-
-  <div class="scheme-section">
-    <div class="scheme-section-title">⚔️ Offensive Scheme</div>
-    <div class="scheme-grid" id="off-scheme-grid"></div>
-  </div>
-
-  <div class="scheme-section">
-    <div class="scheme-section-title">🛡️ Defensive Scheme</div>
-    <div class="scheme-grid" id="def-scheme-grid"></div>
-  </div>
-
-  <div class="nav-row">
-    <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
-    <button class="btn btn-primary" onclick="goStep(4)" id="btn-step3">Next →</button>
-  </div>
-</div>
-
-<!-- STEP 4: SKILL TREE -->
-<div class="page" id="step-4">
-  <div class="page-title">Starting Skill Tree</div>
-  <div class="page-sub">Choose one area to specialize in at the start of your career. You'll unlock all trees over time — this just gives you a head start.</div>
-
-  <div class="card-grid card-grid-3" id="tree-grid"></div>
-
-  <div style="margin-top:1rem;padding:0.75rem 1rem;background:#12151f;border-radius:7px;font-size:0.75rem;color:#555;">
-    <strong style="color:#666;">Championship Coach</strong> and <strong style="color:#666;">NIL & Collective</strong> trees unlock through achievements during your career and cannot be selected at start.
-  </div>
-
-  <div class="nav-row">
-    <button class="btn btn-secondary" onclick="goStep(3)">← Back</button>
-    <button class="btn btn-primary" onclick="goStep(5)" id="btn-step4">Next →</button>
-  </div>
-</div>
-
-<!-- STEP 5: SCHOOL SELECTION -->
-<div class="page" id="step-5">
-  <div class="page-title">Choose Your Program</div>
-  <div class="page-sub" id="school-sub">Select the program where your career begins.</div>
-
-  <div class="school-filters">
-    <select id="conf-filter" onchange="renderSchools()">
-      <option value="">All Conferences</option>
-      <option>SEC</option><option>Big Ten</option><option>Big 12</option>
-      <option>ACC</option><option>AAC</option><option>Sun Belt</option>
-      <option>C-USA</option><option>MAC</option><option>MWC</option><option>Ind</option>
-    </select>
-    <select id="tier-filter" onchange="renderSchools()">
-      <option value="">All Tiers</option>
-      <option value="5">★★★★★ Elite</option>
-      <option value="4">★★★★ Contender</option>
-      <option value="3">★★★ Established</option>
-      <option value="2">★★ Developing</option>
-      <option value="1">★ Rebuilding</option>
-    </select>
-    <select id="sort-schools" onchange="renderSchools()">
-      <option value="tier">Sort: Program Tier</option>
-      <option value="nil">Sort: NIL Budget</option>
-      <option value="tradition">Sort: Tradition</option>
-      <option value="name">Sort: Name A-Z</option>
-    </select>
-  </div>
-
-  <div class="school-list" id="school-list"></div>
-
-  <div class="school-detail" id="school-detail"></div>
-
-  <div class="nav-row">
-    <button class="btn btn-secondary" onclick="goStep(4)">← Back</button>
-    <button class="btn btn-primary" onclick="startCareer()" id="btn-start">Begin Career →</button>
-  </div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// DATA
+// CONSTANTS
 // ═══════════════════════════════════════════════════════════════
 
-const OFF_SCHEMES = [
-  {name:'Spread RPO', desc:'Read-option run-pass system. Mobile QB, spread formations, stress the defense horizontally.'},
-  {name:'Air Raid', desc:'Four-wide passing attack. Spacing, quick game, and volume passing. Minimal run game.'},
-  {name:'Pro Style', desc:'Multiple formations, balanced attack. Best versatility. NFL-style preparation.'},
-  {name:'Power Run', desc:'Physical, downhill running. Dominant OL and FB. Grind the clock, control field position.'},
-  {name:'Triple Option', desc:'Wishbone or flexbone. Rarely pass. The offense is a system — every player must fit.'},
-  {name:'West Coast', desc:'Short, precise passing as an extension of the run game. Route timing, receiver yards after catch.'},
-  {name:'Run-and-Shoot', desc:'Four-wide receivers, no huddle, route variations. Pass heavy, spread the field.'},
-  {name:'Pistol', desc:'QB depth between shotgun and under center. Hybrid run/pass. Flexible play action.'},
+const SERVICES = ['GridironNow','ProspectHub','EliteGrid'];
+
+const SVC_BIAS = {
+  GridironNow: {QB:0.92,RB:0.85,WR:0.88,TE:0.82,IOL:0.78,OT:0.80,EDGE:0.85,DL:0.75,LB:0.83,CB:0.87,S:0.84,ATH:0.70,K:0.90,P:0.90},
+  ProspectHub: {QB:0.80,RB:0.88,WR:0.82,TE:0.85,IOL:0.92,OT:0.90,EDGE:0.88,DL:0.92,LB:0.80,CB:0.78,S:0.80,ATH:0.75,K:0.85,P:0.85},
+  EliteGrid:   {QB:0.88,RB:0.80,WR:0.90,TE:0.78,IOL:0.82,OT:0.84,EDGE:0.80,DL:0.82,LB:0.88,CB:0.92,S:0.90,ATH:0.80,K:0.80,P:0.80}
+};
+
+const POS_STAR_CAP = {QB:5,RB:5,WR:5,TE:5,IOL:5,OT:5,EDGE:5,DL:5,LB:5,CB:5,S:5,ATH:5,K:3,P:3};
+
+const POS_ARCHETYPES = {
+  QB:   [['Pocket Passer',35],['Dual Threat',30],['Backfield Creator',25],['Pure Runner',10]],
+  RB:   [['Backfield Threat',25],['Elusive Bruiser',25],['East/West Playmaker',20],['Contact Seeker',15],['North/South Receiver',10],['North/South Blocker',5]],
+  WR:   [['Route Artist',22],['Speedster',20],['Physical Route Runner',18],['Elusive Route Runner',18],['Contested Specialist',12],['Gritty Possession',7],['Gadget',3]],
+  TE:   [['Vertical Threat',30],['Physical Route Runner',28],['Pure Possession',22],['Gritty Possession',13],['Pure Blocker',7]],
+  IOL:  [['Pass Protector',30],['Well Rounded',28],['Raw Strength',25],['Agile',17]],
+  OT:   [['Pass Protector',35],['Well Rounded',30],['Raw Strength',20],['Agile',15]],
+  EDGE: [['Speed Rusher',32],['Power Rusher',28],['Edge Setter',25],['Pure Power',15]],
+  DL:   [['Power Rusher',30],['Gap Specialist',30],['Pure Power',25],['Speed Rusher',15]],
+  LB:   [['Signal Caller',38],['Thumper',35],['Lurker',27]],
+  CB:   [['Bump and Run',30],['Field',28],['Zone',22],['Boundary',20]],
+  S:    [['Coverage Specialist',38],['Hybrid',35],['Box Specialist',27]],
+  ATH:  [],
+  K:    [['Accurate',55],['Power',45]],
+  P:    [['Accurate',55],['Power',45]],
+};
+
+const POS_POOL_BASE = [
+  ...Array(14).fill('WR'), ...Array(12).fill('CB'), ...Array(11).fill('OT'),
+  ...Array(10).fill('IOL'), ...Array(10).fill('EDGE'), ...Array(10).fill('DL'),
+  ...Array(9).fill('LB'), ...Array(8).fill('S'), ...Array(7).fill('RB'),
+  ...Array(8).fill('QB'),  // boosted from 5 — QBs appear more in top rankings historically
+  ...Array(5).fill('TE'),  // slight bump
+  ...Array(8).fill('ATH'),
+  ...Array(3).fill('K'), ...Array(3).fill('P'),
 ];
 
-const DEF_SCHEMES = [
-  {name:'4-3 Base', desc:'Four down linemen, three linebackers. Balanced against run and pass. Most common base.'},
-  {name:'3-4 Base', desc:'Three down linemen, four linebackers. Versatile fronts, unpredictable blitz packages.'},
-  {name:'Nickel Base', desc:'Five defensive backs as base. Modern pass defense. Sacrifices some run stopping.'},
-  {name:'Cover 2 Tampa', desc:'Two deep safeties, aggressive corners. Forces underneath routes. Weak against seams.'},
-  {name:'Cover 3 Zone', desc:'Three deep, four underneath. Great vs deep ball. Vulnerable to crossing routes.'},
-  {name:'Bear Front', desc:'Heavy box, eight in the run fit. Stops the run cold. Vulnerable to passing attacks.'},
-  {name:'3-3-5 Stack', desc:'Three linemen, three linebackers, five DBs. Modern spread stopper. Athletic LBs required.'},
-  {name:'46 Defense', desc:'Eight in the box, heavy pressure. Aggressive and attacking. High risk, high reward.'},
+const PHYS = {
+  QB:   {minH:71,maxH:79,minW:195,maxW:240,sHB:0.6,sWB:3},
+  RB:   {minH:67,maxH:74,minW:185,maxW:225,sHB:0.2,sWB:2},
+  WR:   {minH:68,maxH:76,minW:165,maxW:205,sHB:0.4,sWB:1},
+  TE:   {minH:74,maxH:80,minW:230,maxW:260,sHB:0.5,sWB:3},
+  IOL:  {minH:72,maxH:77,minW:285,maxW:330,sHB:0.2,sWB:4},
+  OT:   {minH:75,maxH:82,minW:280,maxW:335,sHB:0.6,sWB:4},
+  EDGE: {minH:73,maxH:79,minW:235,maxW:270,sHB:0.5,sWB:2},
+  DL:   {minH:72,maxH:77,minW:280,maxW:330,sHB:0.2,sWB:4},
+  LB:   {minH:71,maxH:76,minW:220,maxW:250,sHB:0.3,sWB:2},
+  CB:   {minH:68,maxH:74,minW:170,maxW:195,sHB:0.3,sWB:1},
+  S:    {minH:69,maxH:75,minW:190,maxW:215,sHB:0.3,sWB:2},
+  ATH:  {minH:70,maxH:77,minW:185,maxW:220,sHB:0.4,sWB:2},
+  K:    {minH:68,maxH:74,minW:175,maxW:205,sHB:0.1,sWB:1},
+  P:    {minH:69,maxH:75,minW:180,maxW:210,sHB:0.1,sWB:1},
+};
+
+const STATE_WEIGHTS = {
+  FL:120,TX:115,GA:90,CA:85,AL:70,OH:65,LA:60,SC:55,NC:55,TN:50,MS:48,
+  VA:45,MD:42,PA:40,NJ:38,MI:35,MO:32,AR:30,OK:30,KY:28,IN:27,IL:26,
+  AZ:25,NV:22,CO:20,WA:18,OR:16,UT:15,MN:14,WI:13,CT:12,MA:11,NY:10,
+  IA:10,KS:9,NE:8,WV:8,DE:7,NH:6,ME:5,ID:5,MT:4,WY:3,ND:3,SD:3,VT:2,
+  AK:2,HI:2,RI:2,NM:8,DC:6
+};
+
+const STATE_CITIES = {
+  FL:['Miami','Tampa','Orlando','Jacksonville','Fort Lauderdale','Gainesville','Tallahassee','St. Petersburg','Bradenton'],
+  TX:['Houston','Dallas','San Antonio','Austin','Fort Worth','Beaumont','Waco','Tyler','Lubbock'],
+  GA:['Atlanta','Savannah','Augusta','Columbus','Macon','Warner Robins','Valdosta','Athens'],
+  CA:['Los Angeles','Fresno','San Diego','Oakland','Riverside','Long Beach','Sacramento','Bakersfield'],
+  AL:['Birmingham','Huntsville','Montgomery','Mobile','Tuscaloosa','Auburn','Dothan','Hoover'],
+  OH:['Columbus','Cleveland','Cincinnati','Akron','Toledo','Dayton','Canton','Youngstown'],
+  LA:['New Orleans','Baton Rouge','Shreveport','Lafayette','Lake Charles','Monroe'],
+  SC:['Columbia','Charleston','Greenville','Rock Hill','Spartanburg','Florence'],
+  NC:['Charlotte','Raleigh','Greensboro','Durham','Winston-Salem','Fayetteville'],
+  TN:['Nashville','Memphis','Knoxville','Chattanooga','Clarksville','Murfreesboro'],
+  MS:['Jackson','Gulfport','Hattiesburg','Biloxi','Meridian','Tupelo'],
+  VA:['Virginia Beach','Norfolk','Richmond','Chesapeake','Newport News','Alexandria'],
+  MD:['Baltimore','Columbia','Germantown','Silver Spring','Waldorf','Rockville'],
+  PA:['Philadelphia','Pittsburgh','Allentown','Erie','Reading','Scranton'],
+  NJ:['Newark','Jersey City','Paterson','Elizabeth','Edison','Toms River'],
+  MI:['Detroit','Grand Rapids','Warren','Sterling Heights','Lansing','Ann Arbor'],
+  MO:['Kansas City','St. Louis','Springfield','Columbia','Independence'],
+  AR:['Little Rock','Fort Smith','Fayetteville','Springdale','Jonesboro'],
+  OK:['Oklahoma City','Tulsa','Norman','Broken Arrow','Lawton','Edmond'],
+  KY:['Louisville','Lexington','Bowling Green','Owensboro','Covington'],
+  IN:['Indianapolis','Fort Wayne','Evansville','South Bend','Carmel'],
+  IL:['Chicago','Aurora','Joliet','Naperville','Rockford','Springfield'],
+  AZ:['Phoenix','Tucson','Mesa','Chandler','Scottsdale','Glendale'],
+  NV:['Las Vegas','Henderson','Reno','North Las Vegas','Sparks'],
+  CO:['Denver','Colorado Springs','Aurora','Fort Collins','Lakewood'],
+  WA:['Seattle','Spokane','Tacoma','Vancouver','Bellevue'],
+  OR:['Portland','Salem','Eugene','Gresham','Hillsboro'],
+  UT:['Salt Lake City','West Valley City','Provo','West Jordan','Orem'],
+};
+const DEF_CITIES = ['Springfield','Riverside','Franklin','Clinton','Georgetown','Madison'];
+
+const HS_SCHEMES = ['Air Raid','Spread RPO','Pro Style','Power Run','Triple Option','West Coast'];
+
+const ATH_PREF = [
+  {prim:'QB',sec:'S',loyalty:0.8},{prim:'QB',sec:'CB',loyalty:0.7},
+  {prim:'RB',sec:'LB',loyalty:0.3},{prim:'WR',sec:'CB',loyalty:0.4},
+  {prim:'WR',sec:'S',loyalty:0.3},{prim:'TE',sec:'LB',loyalty:0.2},
+  {prim:'LB',sec:'TE',loyalty:0.2},{prim:'S',sec:'LB',loyalty:0.2},
+  {prim:'CB',sec:'WR',loyalty:0.3},{prim:'EDGE',sec:'LB',loyalty:0.2},
 ];
 
-const SKILL_TREES = [
-  {
-    id:'playcaller',
-    name:'Play Caller',
-    icon:'📡',
-    desc:'Master the art of in-game decision making. Unlock playbook bonuses, situational calling advantages, and gameday player boosts.',
-    nodes:['Scheme Installer','3rd Down Specialist','Red Zone Master','2-Minute Drill','Tendency Disguise'],
-    available: true,
-  },
-  {
-    id:'developer',
-    name:'Developer',
-    icon:'📈',
-    desc:'Accelerate player growth toward their ceiling. Unlock faster OVR progression, position conversion efficiency, and player retention bonuses.',
-    nodes:['Fast Riser','Ceiling Pusher','Position Converter','Culture Builder','Walk-On Whisperer'],
-    available: true,
-  },
-  {
-    id:'recruiter',
-    name:'Recruiter',
-    icon:'🎯',
-    desc:'Maximize recruiting efficiency. More staff hours, faster scouting, better zone pipelines, and higher initial interest from recruits.',
-    nodes:['Extra Hours','Zone Pioneer','Speed Scout','NIL Negotiator','Pipeline Builder'],
-    available: true,
-  },
-  {
-    id:'champion',
-    name:'Championship Coach',
-    icon:'🏆',
-    desc:'Unlocked after winning your first conference championship. Builds dynasty prestige, collective influence, and winning culture bonuses.',
-    nodes:['Prestige Boost','Dynasty Builder','Benefactor Magnet','Culture of Winning','Legacy Recruiter'],
-    available: false,
-  },
-  {
-    id:'nil',
-    name:'NIL & Collective',
-    icon:'💰',
-    desc:'Unlocked after reaching Strong collective relationship. Budget efficiency, donor management, NIL retention, and Benefactor attraction.',
-    nodes:['Budget Stretcher','Donor Whisperer','NIL Retention','Booster Network','Benefactor Ready'],
-    available: false,
-  },
+const POS_TRAITS = {
+  QB:   ['Strong Arm','Accurate Passer','Mobile','Pocket Presence','Film Junkie','Clutch','Turnover Prone','Happy Feet','Leader','Academic Risk'],
+  RB:   ['Explosive','Breakaway Speed','Power Runner','Pass Catcher','Fumble Prone','Elusive','Injury Prone','Injury Resistant','High Motor'],
+  WR:   ['Contested Catch','Route Runner','Burner','Big Play Threat','Drops','RAC Ability','Blocker','Injury Prone','Injury Resistant','Film Junkie'],
+  TE:   ['Receiving TE','Blocking TE','Red Zone Threat','Route Runner','Pass Blocker','High Motor','Injury Prone','Injury Resistant'],
+  IOL:  ['Technician','Power Blocker','Pass Pro Specialist','Puller','Low Motor','High Motor','Injury Prone','Injury Resistant'],
+  OT:   ['Pass Pro Specialist','Run Blocker','Long Arms','Technician','Footwork Issues','High Motor','Injury Prone','Injury Resistant'],
+  EDGE: ['Pass Rush Specialist','Power Rusher','Speed Rusher','Run Stopper','High Motor','Injury Prone','Injury Resistant','Film Junkie'],
+  DL:   ['Run Stopper','Pass Rush Specialist','High Motor','Penetrator','Injury Prone','Injury Resistant','Two-Gap Specialist'],
+  LB:   ['Run Stopper','Pass Coverage','Blitzer','High Motor','Leader','Injury Prone','Injury Resistant','Film Junkie','Instincts'],
+  CB:   ['Ball Hawk','Man Coverage','Zone Coverage','Press Corner','Injury Prone','Injury Resistant','Burner','Film Junkie'],
+  S:    ['Ball Hawk','Run Support','Pass Coverage','Leader','High Motor','Injury Prone','Injury Resistant','Film Junkie'],
+  ATH:  ['Explosive','Versatile','Natural Athlete','High Motor','Film Junkie','Leader','Injury Prone','Injury Resistant'],
+  K:    ['Strong Leg','Accurate','Clutch','Injury Prone'],
+  P:    ['High Hang Time','Strong Leg','Directional','Injury Prone'],
+};
+
+const EXCLUSIVE_PAIRS = [
+  ['Injury Prone','Injury Resistant'],['High Motor','Low Motor'],
+  ['Pass Pro Specialist','Footwork Issues'],['Man Coverage','Zone Coverage'],
+  ['Receiving TE','Blocking TE'],
 ];
 
+const ALL_MOTIVATIONS = [
+  'Academic Prestige','Athletic Facilities','Brand Exposure','Campus Lifestyle',
+  'Championship Contender','Coach Stability','Coach Prestige','Conference Prestige',
+  'NIL Opportunity','Playing Style','Pro Potential','Proximity to Home',
+  'Program Tradition','Stadium Atmosphere','Position Promise','Playing Time',
+  'Family Legacy','Pipeline Loyalty'
+];
+
+const DB_DIST = {
+  5:[0.10,0.25,0.50,0.15], 4:[0.20,0.45,0.25,0.10],
+  3:[0.35,0.50,0.15,0.00], 2:[0.60,0.40,0.00,0.00], 1:[0.85,0.15,0.00,0.00]
+};
+
+const SCHOOLS_LIST = ['Alabama','Georgia','Ohio State','Texas','LSU','Oklahoma',
+  'Notre Dame','Michigan','Florida','Clemson','Penn State','Tennessee','Auburn',
+  'Miami','Oregon','USC','Nebraska','Oklahoma State','Wisconsin','Iowa'];
+
+const EXTRA_SPORTS_BY_POS = {
+  QB:['Basketball','Baseball','Track','None','None'],
+  RB:['Basketball','Track','Baseball','Soccer','None'],
+  WR:['Basketball','Track','Soccer','Baseball','None','None'],
+  TE:['Basketball','Baseball','None','None'],
+  IOL:['Wrestling','None','None','None'],
+  OT:['Wrestling','Basketball','None','None'],
+  EDGE:['Basketball','Wrestling','Track','None','None'],
+  DL:['Wrestling','None','None','None','None'],
+  LB:['Wrestling','Basketball','Baseball','None','None'],
+  CB:['Basketball','Track','Soccer','Baseball','None','None'],
+  S:['Basketball','Track','Soccer','Baseball','None','None'],
+  ATH:['Basketball','Track','Baseball','Soccer','None'],
+  K:['Soccer','None','None'],
+  P:['Soccer','Baseball','None','None'],
+};
+
+const FIRST_NAMES = [
+  'Malik','Darius','Jordan','Marcus','Tyrese','Cameron','Isaiah','Elijah','Jaylen','Andre',
+  'Devin','Caleb','Trevor','Mason','Hunter','Bryce','Cole','Logan','Tyler','Nathan',
+  'Zach','Justin','Damien','Xavier','Kendall','Jalen','Quinton','Lamar','Terrell','DeAndre',
+  'Cody','Blake','Collin','Peyton','Javon','Marquez','Trevion','Keondre','Zion','Micah',
+  'Seth','Evan','Dylan','Brady','Cooper','Chase','Landon','Preston','Jackson','Weston',
+  'Nico','Emory','Quentin','Roderick','Antwan','Keon','Deon','Jamari','Tristen','Savion',
+  'Devontae','Trayvon','Kendric','Deshawn','Marquise','Tavion','Kameron','Elias','Nasir',
+  'Tobias','Rashad','Dominic','Kyler','Tanner','Griffin','Garrett','Nolan','Owen','Miles',
+  'Jayden','Aiden','Caden','Brayden','Hayden','Cayden','Zander','Xander','River','Ryder',
+  'Easton','Weston','Colton','Dalton','Ashton','Clayton','Braxton','Paxton','Daxton','Jaxton',
+  'Trevon','Kevon','Devon','Jevon','Levon','Damon','Ramon','Darion','Marion','Fabian',
+  'Sebastian','Christian','Cristian','Adrian','Adriel','Ezekiel','Ezra','Elias','Eli','Emmanuel',
+  'Emanuel','Emilio','Ernesto','Eduardo','Esteban','Felipe','Francisco','Fernando','Freddie','Felix',
+  'Germaine','Gerald','Gerardo','Gilberto','Giovanni','Glenn','Gordon','Graham','Grant','Gregory',
+  'Hakeem','Harold','Harrison','Harvey','Hassan','Hector','Henry','Herbert','Herman','Holden',
+  'Ibrahim','Ignacio','Isiah','Israel','Ivan','Ivory','Jabari','Jaboree','Jacari','Jadarius',
+  'Jahmari','Jahmir','Jaivion','Jakari','Jakobe','Jaleel','Jalen','Jamaal','Jamal','Jamarcus',
+  'Jameel','Jameel','Jamir','Jamison','Jamius','Jamon','Jamond','Jamoni','Jareed','Jarvis',
+  'Jashon','Jasiah','Jasper','Javaris','Javell','Javen','Javeon','Javian','Javien','Javieon',
+  'Kentavious','Kentrell','Kenyatta','Kerby','Kerryon','Kesean','Keshawn','Kevin','Keyshawn',
+  'Khalid','Khalil','Khyree','Kiedron','Kieran','Kobe','Koby','Kofi','Kolby','Kolton',
+  'Lawrence','Leland','Lennon','Leo','Leon','Leonard','Levi','Lewis','Liam','Lincoln',
+  'Memphis','Micaiah','Michael','Mikhail','Milan','Miles','Myles','Montavious','Monte','Montez',
+  'Nehemiah','Neil','Niko','Nolan','Norman','Norris','Nyheim','Omari','Oren','Orlando',
+  'Patrick','Paul','Percy','Perry','Pete','Pharoh','Phillip','Pierce','Porter','Princeton',
+  'Raequan','Raheem','Rahsaan','Rakim','Ramik','Ramon','Randall','Rashaan','Rashaud','Rasheed',
+  'Samuel','Samson','Saquon','Semaj','Senquez','Shadrach','Shamar','Shamari','Shane','Shannon',
+  'Tarique','Tariq','Taulia','Tavian','Tavien','Tavion','Tay','Taysom','Tayshaun','Tedarrell',
+  'Ulysses','Vance','Vanderbilt','Vidal','Vincent','Virgil','Wade','Wallace','Walter','Warren',
+  'Wendell','Wesley','Wilbur','Wiley','Wilkins','Will','William','Willie','Winston','Woodrow',
+];
+
+const LAST_NAMES = [
+  'Williams','Johnson','Davis','Brown','Wilson','Moore','Taylor','Thomas','Jackson','White',
+  'Harris','Martin','Thompson','Garcia','Martinez','Robinson','Clark','Rodriguez','Lewis','Lee',
+  'Walker','Hall','Allen','Young','King','Wright','Scott','Green','Baker','Adams',
+  'Nelson','Carter','Mitchell','Perez','Roberts','Turner','Phillips','Campbell','Parker','Evans',
+  'Edwards','Collins','Stewart','Sanchez','Morris','Rogers','Reed','Cook','Morgan','Bell',
+  'Murphy','Bailey','Rivera','Cooper','Richardson','Cox','Howard','Ward','Torres','Peterson',
+  'Gray','Ramirez','James','Watson','Brooks','Kelly','Sanders','Price','Bennett','Wood',
+  'Barnes','Ross','Henderson','Coleman','Jenkins','Perry','Powell','Long','Patterson','Hughes',
+  'Flores','Washington','Butler','Simmons','Foster','Gonzales','Bryant','Alexander','Russell','Griffin',
+  'Diaz','Hayes','Myers','Ford','Hamilton','Graham','Sullivan','Wallace','Woods','Cole',
+  'West','Jordan','Owens','Reynolds','Fisher','Ellis','Harrison','Gibson','Mcdonald','Cruz',
+  'Marshall','Ortega','Gomez','Murray','Freeman','Wells','Webb','Simpson','Stevens','Tucker',
+  'Porter','Hunter','Hicks','Crawford','Henry','Boyd','Mason','Morales','Kennedy','Warren',
+  'Dixon','Ramos','Reyes','Burns','Gordon','Shaw','Holmes','Rice','Robertson','Hunt',
+  'Black','Daniels','Palmer','Mills','Nichols','Grant','Knight','Ferguson','Rose','Stone',
+  'Hawkins','Dunn','Perkins','Hudson','Spencer','Gardner','Stephens','Payne','Pierce','Berry',
+  'Matthews','Arnold','Wagner','Willis','Ray','Watkins','Olson','Carroll','Duncan','Snyder',
+  'Hart','Cunningham','Bradley','Lane','Andrews','Ruiz','Harper','Fox','Riley','Armstrong',
+  'Carpenter','Weaver','Greene','Lawrence','Elliott','Chavez','Sims','Austin','Peters','Kelley',
+  'Franklin','Lawson','Fields','Gutierrez','Ryan','Schmidt','Carr','Vasquez','Castillo','Wheeler',
+  'Chapman','Oliver','Montgomery','Richards','Williamson','Johnston','Banks','Meyer','Bishop','Mccoy',
+  'Howell','Alvarez','Morrison','Hansen','Fernandez','Garza','Harvey','Little','Burton','Stanley',
+  'Nguyen','George','Jacobs','Reid','Kim','Fuller','Lynch','Dean','Gilbert','Garrett',
+  'Romero','Welch','Larson','Frazier','Burke','Hanson','Day','Mendoza','Moreno','Bowman',
+  'Medina','Fowler','Brewer','Hoffman','Carlson','Silva','Pearson','Holland','Douglas','Fleming',
+  'Jensen','Vargas','Byrd','Davidson','Hopkins','May','Terry','Herrera','Wade','Soto',
+  'Walters','Curtis','Neal','Caldwell','Lowe','Jennings','Barnett','Graves','Jimenez','Horton',
+  'Shelton','Barrett','Obrien','Castro','Sutton','Gregory','Mckinney','Lucas','Miles','Craig',
+  'Rodgers','Chambers','Holt','Lambert','Fletcher','Watts','Bates','Hale','Rhodes','Pena',
+  'Beck','Newman','Haynes','Mcdaniel','Mendez','Bush','Vaughn','Parks','Dawson','Santiago',
+];
+
+
+// 135 FBS Schools
 const FBS_SCHOOLS = [
-  // SEC
-  {name:'Alabama',conf:'SEC',tradition:99,nilBudget:98,facilities:98,brand:99,atmosphere:99,proProspects:97,academic:72,campusLife:78,playingTime:40,champContender:99,coachPrestige:99,confPrestige:98},
-  {name:'Georgia',conf:'SEC',tradition:95,nilBudget:96,facilities:97,brand:96,atmosphere:97,proProspects:95,academic:78,campusLife:80,playingTime:42,champContender:97,coachPrestige:97,confPrestige:98},
-  {name:'LSU',conf:'SEC',tradition:92,nilBudget:94,facilities:95,brand:94,atmosphere:99,proProspects:93,academic:68,campusLife:90,playingTime:45,champContender:90,coachPrestige:92,confPrestige:98},
-  {name:'Texas',conf:'SEC',tradition:90,nilBudget:99,facilities:97,brand:97,atmosphere:95,proProspects:91,academic:80,campusLife:85,playingTime:44,champContender:88,coachPrestige:90,confPrestige:98},
-  {name:'Oklahoma',conf:'SEC',tradition:93,nilBudget:91,facilities:92,brand:93,atmosphere:94,proProspects:90,academic:72,campusLife:80,playingTime:45,champContender:87,coachPrestige:91,confPrestige:98},
-  {name:'Florida',conf:'SEC',tradition:91,nilBudget:88,facilities:91,brand:90,atmosphere:93,proProspects:91,academic:82,campusLife:88,playingTime:48,champContender:82,coachPrestige:85,confPrestige:98},
-  {name:'Tennessee',conf:'SEC',tradition:88,nilBudget:90,facilities:92,brand:89,atmosphere:96,proProspects:88,academic:74,campusLife:82,playingTime:50,champContender:82,coachPrestige:85,confPrestige:98},
-  {name:'Auburn',conf:'SEC',tradition:86,nilBudget:85,facilities:88,brand:85,atmosphere:93,proProspects:85,academic:74,campusLife:78,playingTime:52,champContender:78,coachPrestige:80,confPrestige:98},
-  {name:'Texas A&M',conf:'SEC',tradition:84,nilBudget:95,facilities:94,brand:88,atmosphere:94,proProspects:86,academic:78,campusLife:80,playingTime:50,champContender:80,coachPrestige:82,confPrestige:98},
-  {name:'Arkansas',conf:'SEC',tradition:80,nilBudget:78,facilities:82,brand:78,atmosphere:86,proProspects:78,academic:70,campusLife:72,playingTime:58,champContender:68,coachPrestige:72,confPrestige:98},
-  {name:'Mississippi',conf:'SEC',tradition:78,nilBudget:82,facilities:80,brand:76,atmosphere:84,proProspects:78,academic:68,campusLife:75,playingTime:60,champContender:70,coachPrestige:74,confPrestige:98},
-  {name:'Mississippi State',conf:'SEC',tradition:72,nilBudget:70,facilities:74,brand:68,atmosphere:78,proProspects:70,academic:68,campusLife:65,playingTime:62,champContender:60,coachPrestige:65,confPrestige:98},
-  {name:'Missouri',conf:'SEC',tradition:74,nilBudget:72,facilities:76,brand:70,atmosphere:78,proProspects:72,academic:74,campusLife:72,playingTime:60,champContender:62,coachPrestige:66,confPrestige:98},
-  {name:'South Carolina',conf:'SEC',tradition:72,nilBudget:70,facilities:74,brand:68,atmosphere:80,proProspects:70,academic:72,campusLife:78,playingTime:62,champContender:60,coachPrestige:64,confPrestige:98},
-  {name:'Kentucky',conf:'SEC',tradition:68,nilBudget:68,facilities:72,brand:64,atmosphere:74,proProspects:66,academic:76,campusLife:72,playingTime:64,champContender:55,coachPrestige:60,confPrestige:98},
-  {name:'Vanderbilt',conf:'SEC',tradition:55,nilBudget:62,facilities:70,brand:58,atmosphere:58,proProspects:60,academic:98,campusLife:70,playingTime:75,champContender:40,coachPrestige:48,confPrestige:98},
-  // Big Ten
-  {name:'Ohio State',conf:'Big Ten',tradition:97,nilBudget:96,facilities:98,brand:97,atmosphere:98,proProspects:96,academic:84,campusLife:82,playingTime:40,champContender:96,coachPrestige:97,confPrestige:96},
-  {name:'Michigan',conf:'Big Ten',tradition:95,nilBudget:92,facilities:95,brand:95,atmosphere:96,proProspects:92,academic:92,campusLife:80,playingTime:42,champContender:90,coachPrestige:93,confPrestige:96},
-  {name:'Penn State',conf:'Big Ten',tradition:90,nilBudget:88,facilities:90,brand:90,atmosphere:97,proProspects:88,academic:84,campusLife:78,playingTime:46,champContender:85,coachPrestige:88,confPrestige:96},
-  {name:'Oregon',conf:'Big Ten',tradition:82,nilBudget:90,facilities:95,brand:88,atmosphere:88,proProspects:85,academic:80,campusLife:82,playingTime:48,champContender:84,coachPrestige:85,confPrestige:96},
-  {name:'USC',conf:'Big Ten',tradition:88,nilBudget:88,facilities:90,brand:92,atmosphere:86,proProspects:88,academic:84,campusLife:90,playingTime:48,champContender:80,coachPrestige:84,confPrestige:96},
-  {name:'Nebraska',conf:'Big Ten',tradition:88,nilBudget:80,facilities:85,brand:85,atmosphere:97,proProspects:78,academic:76,campusLife:72,playingTime:52,champContender:68,coachPrestige:72,confPrestige:96},
-  {name:'Wisconsin',conf:'Big Ten',tradition:82,nilBudget:78,facilities:84,brand:80,atmosphere:84,proProspects:80,academic:84,campusLife:74,playingTime:52,champContender:72,coachPrestige:76,confPrestige:96},
-  {name:'Iowa',conf:'Big Ten',tradition:78,nilBudget:72,facilities:78,brand:74,atmosphere:82,proProspects:76,academic:82,campusLife:68,playingTime:54,champContender:65,coachPrestige:70,confPrestige:96},
-  {name:'Michigan State',conf:'Big Ten',tradition:78,nilBudget:70,facilities:76,brand:72,atmosphere:80,proProspects:74,academic:80,campusLife:68,playingTime:56,champContender:62,coachPrestige,confPrestige:96},
-  {name:'Minnesota',conf:'Big Ten',tradition:70,nilBudget:68,facilities:74,brand,atmosphere:76,proProspects:68,academic:86,campusLife:75,playingTime:60,champContender:55,coachPrestige:60,confPrestige:96},
-  {name:'Maryland',conf:'Big Ten',tradition:62,nilBudget:68,facilities:72,brand:66,atmosphere:64,proProspects:66,academic:82,campusLife:72,playingTime:65,champContender:50,coachPrestige:55,confPrestige:96},
-  {name:'Indiana',conf:'Big Ten',tradition:55,nilBudget:72,facilities:74,brand:60,atmosphere:62,proProspects:58,academic:84,campusLife:74,playingTime:68,champContender:48,coachPrestige:50,confPrestige:96},
-  {name:'Purdue',conf:'Big Ten',tradition:62,nilBudget:62,facilities:68,brand:60,atmosphere:66,proProspects:62,academic:88,campusLife:62,playingTime:66,champContender:48,coachPrestige:54,confPrestige:96},
-  {name:'Northwestern',conf:'Big Ten',tradition:60,nilBudget:65,facilities:70,brand:62,atmosphere:62,proProspects:60,academic:98,campusLife:70,playingTime:68,champContender:45,coachPrestige:52,confPrestige:96},
-  {name:'Illinois',conf:'Big Ten',tradition:60,nilBudget:60,facilities:66,brand:58,atmosphere:60,proProspects:58,academic:84,campusLife:65,playingTime:68,champContender:42,coachPrestige:50,confPrestige:96},
-  {name:'Rutgers',conf:'Big Ten',tradition:48,nilBudget:60,facilities:65,brand:55,atmosphere:55,proProspects:55,academic:78,campusLife:68,playingTime:70,champContender:38,coachPrestige:42,confPrestige:96},
-  {name:'UCLA',conf:'Big Ten',tradition:72,nilBudget:78,facilities:82,brand:80,atmosphere:70,proProspects:75,academic:92,campusLife:92,playingTime:58,champContender:62,coachPrestige:66,confPrestige:96},
-  {name:'Washington',conf:'Big Ten',tradition:72,nilBudget:74,facilities:80,brand:74,atmosphere:76,proProspects:72,academic:88,campusLife:82,playingTime:58,champContender:62,coachPrestige:66,confPrestige:96},
-  // Big 12
-  {name:'Clemson',conf:'ACC',tradition:85,nilBudget:80,facilities:88,brand:85,atmosphere:90,proProspects:84,academic:78,campusLife:72,playingTime:46,champContender:84,coachPrestige:86,confPrestige:88},
-  {name:'Miami',conf:'ACC',tradition:88,nilBudget:86,facilities:85,brand:90,atmosphere:85,proProspects:86,academic:82,campusLife:90,playingTime:48,champContender:76,coachPrestige:78,confPrestige:88},
-  {name:'Florida State',conf:'ACC',tradition:84,nilBudget:76,facilities:82,brand:82,atmosphere:84,proProspects:82,academic:76,campusLife:80,playingTime:50,champContender:72,coachPrestige:74,confPrestige:88},
-  {name:'North Carolina',conf:'ACC',tradition:68,nilBudget:70,facilities:74,brand:70,atmosphere:70,proProspects:68,academic:88,campusLife:80,playingTime:60,champContender:58,coachPrestige:62,confPrestige:88},
-  {name:'Virginia Tech',conf:'ACC',tradition:74,nilBudget:66,facilities:72,brand:70,atmosphere:78,proProspects:70,academic:78,campusLife:68,playingTime:58,champContender:58,coachPrestige:62,confPrestige:88},
-  {name:'Pittsburgh',conf:'ACC',tradition:68,nilBudget:62,facilities:68,brand:64,atmosphere:68,proProspects:66,academic:80,campusLife:75,playingTime:62,champContender:52,coachPrestige:56,confPrestige:88},
-  {name:'Georgia Tech',conf:'ACC',tradition:68,nilBudget:64,facilities:70,brand,atmosphere:68,proProspects:66,academic:94,campusLife:68,playingTime:62,champContender:50,coachPrestige:55,confPrestige:88},
-  {name:'Louisville',conf:'ACC',tradition:65,nilBudget:60,facilities:68,brand:62,atmosphere:70,proProspects:64,academic:72,campusLife:72,playingTime:64,champContender:50,coachPrestige:55,confPrestige:88},
-  {name:'NC State',conf:'ACC',tradition:64,nilBudget:60,facilities:66,brand:60,atmosphere:66,proProspects:62,academic:80,campusLife:68,playingTime:64,champContender:48,coachPrestige:54,confPrestige:88},
-  {name:'Syracuse',conf:'ACC',tradition:60,nilBudget:55,facilities:62,brand:58,atmosphere:62,proProspects:58,academic:78,campusLife:70,playingTime:66,champContender:42,coachPrestige:48,confPrestige:88},
-  {name:'Wake Forest',conf:'ACC',tradition:52,nilBudget:52,facilities,atmosphere:56,proProspects:54,academic:90,campusLife:68,playingTime:70,champContender:38,coachPrestige:44,confPrestige:88},
-  {name:'Duke',conf:'ACC',tradition:50,nilBudget:55,facilities:65,brand:58,atmosphere:54,proProspects:55,academic:98,campusLife:72,playingTime:72,champContender:38,coachPrestige:44,confPrestige:88},
-  {name:'Boston College',conf:'ACC',tradition:58,nilBudget:52,facilities:62,brand:55,atmosphere:58,proProspects:56,academic:90,campusLife:72,playingTime:68,champContender:40,coachPrestige:46,confPrestige:88},
-  {name:'Virginia',conf:'ACC',tradition:54,nilBudget:54,facilities:64,brand:54,atmosphere:56,proProspects:54,academic:92,campusLife:74,playingTime:70,champContender:38,coachPrestige:44,confPrestige:88},
-  {name:'Stanford',conf:'ACC',tradition:72,nilBudget:80,facilities:82,brand:80,atmosphere:70,proProspects:74,academic:99,campusLife:82,playingTime:58,champContender:60,coachPrestige:65,confPrestige:88},
-  {name:'California',conf:'ACC',tradition:60,nilBudget:68,facilities:70,brand:65,atmosphere:60,proProspects:62,academic:94,campusLife:88,playingTime:66,champContender:45,coachPrestige:50,confPrestige:88},
-  {name:'SMU',conf:'ACC',tradition:55,nilBudget:70,facilities:72,brand:60,atmosphere:60,proProspects:58,academic:82,campusLife:82,playingTime:68,champContender:48,coachPrestige:52,confPrestige:88},
-  // Big 12
-  {name:'TCU',conf:'Big 12',tradition:72,nilBudget:72,facilities:78,brand:70,atmosphere:76,proProspects:70,academic:80,campusLife:78,playingTime:58,champContender:65,coachPrestige:68,confPrestige:82},
-  {name:'Baylor',conf:'Big 12',tradition:68,nilBudget:70,facilities:76,brand:66,atmosphere:72,proProspects:66,academic:78,campusLife:72,playingTime:60,champContender:60,coachPrestige:64,confPrestige:82},
-  {name:'Oklahoma State',conf:'Big 12',tradition:72,nilBudget:74,facilities:78,brand:70,atmosphere:74,proProspects:68,academic:72,campusLife:70,playingTime:58,champContender:65,coachPrestige:68,confPrestige:82},
-  {name:'Kansas State',conf:'Big 12',tradition:68,nilBudget,facilities:72,brand:64,atmosphere:72,proProspects:64,academic:72,campusLife:65,playingTime:60,champContender:60,coachPrestige:64,confPrestige:82},
-  {name:'Iowa State',conf:'Big 12',tradition:62,nilBudget:62,facilities:68,brand:58,atmosphere:70,proProspects:60,academic:76,campusLife:65,playingTime:64,champContender:52,coachPrestige:56,confPrestige:82},
-  {name:'Texas Tech',conf:'Big 12',tradition:68,nilBudget:75,facilities:74,brand:66,atmosphere:74,proProspects:65,academic:70,campusLife:68,playingTime:60,champContender:58,coachPrestige:62,confPrestige:82},
-  {name:'West Virginia',conf:'Big 12',tradition:68,nilBudget:62,facilities:68,brand:62,atmosphere:76,proProspects:62,academic:70,campusLife:65,playingTime:62,champContender:52,coachPrestige:56,confPrestige:82},
-  {name:'Utah',conf:'Big 12',tradition:68,nilBudget:66,facilities:72,brand:66,atmosphere:76,proProspects:66,academic:76,campusLife:76,playingTime:60,champContender:62,coachPrestige:65,confPrestige:82},
-  {name:'Arizona State',conf:'Big 12',tradition:65,nilBudget:66,facilities:70,brand:65,atmosphere:70,proProspects:62,academic:76,campusLife:82,playingTime:62,champContender:52,coachPrestige:55,confPrestige:82},
-  {name:'Arizona',conf:'Big 12',tradition:60,nilBudget:60,facilities:66,brand:58,atmosphere:64,proProspects:58,academic:78,campusLife:80,playingTime:65,champContender:46,coachPrestige:50,confPrestige:82},
-  {name:'Colorado',conf:'Big 12',tradition:60,nilBudget:70,facilities:68,brand:68,atmosphere:66,proProspects:60,academic:80,campusLife:80,playingTime:64,champContender:50,coachPrestige:54,confPrestige:82},
-  {name:'Houston',conf:'Big 12',tradition:62,nilBudget:62,facilities,atmosphere:66,proProspects:60,academic:72,campusLife:70,playingTime:64,champContender:48,coachPrestige:52,confPrestige:82},
-  {name:'Cincinnati',conf:'Big 12',tradition:62,nilBudget:58,facilities:64,brand:60,atmosphere:68,proProspects:60,academic:72,campusLife:68,playingTime:64,champContender:50,coachPrestige:54,confPrestige:82},
-  {name:'UCF',conf:'Big 12',tradition:55,nilBudget:58,facilities:64,brand:58,atmosphere:64,proProspects:55,academic:72,campusLife:75,playingTime:66,champContender:46,coachPrestige:50,confPrestige:82},
-  {name:'BYU',conf:'Big 12',tradition:68,nilBudget:60,facilities:68,brand:65,atmosphere:76,proProspects:60,academic:78,campusLife:65,playingTime:60,champContender:55,coachPrestige:58,confPrestige:82},
-  {name:'Kansas',conf:'Big 12',tradition:48,nilBudget:60,facilities:65,brand:50,atmosphere:55,proProspects:50,academic:80,campusLife:65,playingTime:72,champContender:36,coachPrestige:40,confPrestige:82},
-  // AAC
-  {name:'Tulane',conf:'AAC',tradition:52,nilBudget:48,facilities:55,brand:48,atmosphere:52,proProspects:48,academic:86,campusLife:82,playingTime:70,champContender:42,coachPrestige:46,confPrestige:58},
-  {name:'Memphis',conf:'AAC',tradition:50,nilBudget:46,facilities:52,brand:46,atmosphere:55,proProspects:46,academic:68,campusLife:68,playingTime:72,champContender:40,coachPrestige:44,confPrestige:58},
-  {name:'UTSA',conf:'AAC',tradition:38,nilBudget:40,facilities:46,brand:38,atmosphere:46,proProspects:38,academic:66,campusLife:66,playingTime:78,champContender:32,coachPrestige:36,confPrestige:58},
-  {name:'South Florida',conf:'AAC',tradition:40,nilBudget:42,facilities:48,brand:40,atmosphere:46,proProspects:40,academic:68,campusLife:72,playingTime:76,champContender:34,coachPrestige:38,confPrestige:58},
-  {name:'East Carolina',conf:'AAC',tradition:45,nilBudget:40,facilities:46,brand:40,atmosphere:55,proProspects:40,academic:66,campusLife:62,playingTime:74,champContender:35,coachPrestige:38,confPrestige:58},
-  {name:'Navy',conf:'AAC',tradition:58,nilBudget:38,facilities:50,brand:48,atmosphere:58,proProspects:38,academic:86,campusLife:55,playingTime:68,champContender:35,coachPrestige:42,confPrestige:58},
-  {name:'Rice',conf:'AAC',tradition:45,nilBudget:42,facilities:48,brand:40,atmosphere:44,proProspects:40,academic:92,campusLife:70,playingTime:75,champContender:32,coachPrestige:36,confPrestige:58},
-  {name:'Tulsa',conf:'AAC',tradition:48,nilBudget:38,facilities:44,brand:38,atmosphere:48,proProspects:38,academic:70,campusLife:60,playingTime:74,champContender:34,coachPrestige:38,confPrestige:58},
-  // Sun Belt
-  {name:'App State',conf:'Sun Belt',tradition:52,nilBudget:36,facilities:44,brand:40,atmosphere:52,proProspects:38,academic:66,campusLife:62,playingTime:70,champContender:42,coachPrestige:44,confPrestige:50},
-  {name:'Louisiana',conf:'Sun Belt',tradition:48,nilBudget:34,facilities:42,brand:36,atmosphere:50,proProspects:36,academic:64,campusLife:60,playingTime:72,champContender:38,coachPrestige:40,confPrestige:50},
-  {name:'Troy',conf:'Sun Belt',tradition:48,nilBudget:32,facilities:40,brand:34,atmosphere:46,proProspects:34,academic:64,campusLife:58,playingTime:72,champContender:36,coachPrestige:38,confPrestige:50},
-  {name:'Georgia Southern',conf:'Sun Belt',tradition:50,nilBudget:32,facilities:40,brand:36,atmosphere:50,proProspects:34,academic:64,campusLife:60,playingTime:70,champContender:38,coachPrestige:40,confPrestige:50},
-  {name:'South Alabama',conf:'Sun Belt',tradition:35,nilBudget:32,facilities:40,brand:32,atmosphere:42,proProspects:32,academic:64,campusLife:62,playingTime:76,champContender:28,coachPrestige:32,confPrestige:50},
-  {name:'Arkansas State',conf:'Sun Belt',tradition:42,nilBudget:30,facilities:38,brand:32,atmosphere:44,proProspects:32,academic:62,campusLife:56,playingTime:74,champContender:32,coachPrestige:36,confPrestige:50},
-  {name:'Marshall',conf:'Sun Belt',tradition:45,nilBudget:30,facilities:38,brand:34,atmosphere:46,proProspects:32,academic:64,campusLife:58,playingTime:72,champContender:34,coachPrestige:36,confPrestige:50},
-  {name:'Georgia State',conf:'Sun Belt',tradition:30,nilBudget:30,facilities:38,brand:30,atmosphere:38,proProspects:30,academic:66,campusLife:70,playingTime:78,champContender:24,coachPrestige:28,confPrestige:50},
-  {name:'James Madison',conf:'Sun Belt',tradition:38,nilBudget:30,facilities:38,brand:32,atmosphere:44,proProspects:30,academic:68,campusLife:62,playingTime:76,champContender:30,coachPrestige:32,confPrestige:50},
-  {name:'Old Dominion',conf:'Sun Belt',tradition:30,nilBudget:28,facilities:36,brand:28,atmosphere:36,proProspects:28,academic:64,campusLife:60,playingTime:78,champContender:22,coachPrestige:26,confPrestige:50},
-  {name:'Texas State',conf:'Sun Belt',tradition:32,nilBudget:28,facilities:36,brand:28,atmosphere:38,proProspects:28,academic:62,campusLife,playingTime:78,champContender:22,coachPrestige:26,confPrestige:50},
-  {name:'Southern Miss',conf:'Sun Belt',tradition:42,nilBudget:28,facilities:36,brand:30,atmosphere:42,proProspects:30,academic:62,campusLife:56,playingTime:74,champContender:30,coachPrestige:32,confPrestige:50},
-  {name:'Louisiana Monroe',conf:'Sun Belt',tradition:28,nilBudget:24,facilities:30,brand:24,atmosphere:32,proProspects:24,academic:60,campusLife:52,playingTime:80,champContender:18,coachPrestige:22,confPrestige:50},
-  // C-USA
-  {name:'Western Kentucky',conf:'C-USA',tradition:42,nilBudget:30,facilities:38,brand:32,atmosphere:44,proProspects:30,academic:62,campusLife:56,playingTime:72,champContender:32,coachPrestige:34,confPrestige:45},
-  {name:'UTEP',conf:'C-USA',tradition:38,nilBudget:26,facilities:34,brand:28,atmosphere:40,proProspects:26,academic:62,campusLife:58,playingTime:76,champContender:26,coachPrestige:28,confPrestige:45},
-  {name:'Florida Atlantic',conf:'C-USA',tradition:38,nilBudget:30,facilities:38,brand:30,atmosphere:42,proProspects:30,academic:66,campusLife:70,playingTime:74,champContender:28,coachPrestige:30,confPrestige:45},
-  {name:'UAB',conf:'C-USA',tradition:35,nilBudget:28,facilities:36,brand:28,atmosphere:38,proProspects:26,academic:66,campusLife:60,playingTime:76,champContender:26,coachPrestige:28,confPrestige:45},
-  {name:'North Texas',conf:'C-USA',tradition:35,nilBudget:26,facilities:34,brand:26,atmosphere:36,proProspects:24,academic:64,campusLife:60,playingTime:76,champContender:24,coachPrestige:26,confPrestige:45},
-  {name:'Middle Tennessee',conf:'C-USA',tradition:38,nilBudget:26,facilities:34,brand:26,atmosphere:38,proProspects:26,academic:64,campusLife:58,playingTime:74,champContender:26,coachPrestige:28,confPrestige:45},
-  {name:'Liberty',conf:'C-USA',tradition:35,nilBudget:32,facilities:40,brand:32,atmosphere:44,proProspects:28,academic:70,campusLife:58,playingTime:74,champContender:28,coachPrestige:30,confPrestige:45},
-  {name:'Charlotte',conf:'C-USA',tradition:28,nilBudget:26,facilities:32,brand:26,atmosphere:32,proProspects:24,academic:64,campusLife:65,playingTime:78,champContender:20,coachPrestige:22,confPrestige:45},
-  {name:'Florida International',conf:'C-USA',tradition:28,nilBudget:26,facilities:32,brand:26,atmosphere:32,proProspects:24,academic:64,campusLife:68,playingTime:78,champContender:18,coachPrestige:20,confPrestige:45},
-  {name:'Sam Houston',conf:'C-USA',tradition:30,nilBudget:22,facilities:28,brand:22,atmosphere:32,proProspects:20,academic:60,campusLife:52,playingTime:80,champContender:18,coachPrestige:20,confPrestige:45},
-  {name:'Jacksonville State',conf:'C-USA',tradition:28,nilBudget:20,facilities:26,brand:20,atmosphere:30,proProspects:18,academic:58,campusLife:50,playingTime:80,champContender:16,coachPrestige:18,confPrestige:45},
-  {name:'Kennesaw State',conf:'C-USA',tradition:22,nilBudget:20,facilities:28,brand:20,atmosphere:28,proProspects:16,academic:60,campusLife:55,playingTime:82,champContender:14,coachPrestige:16,confPrestige:45},
-  // MAC
-  {name:'Miami (OH)',conf:'MAC',tradition:48,nilBudget:28,facilities:34,brand:30,atmosphere:40,proProspects:28,academic:74,campusLife:64,playingTime:68,champContender:36,coachPrestige:38,confPrestige:42},
-  {name:'Toledo',conf:'MAC',tradition:45,nilBudget:28,facilities:34,brand:28,atmosphere:42,proProspects:26,academic,campusLife:60,playingTime:70,champContender:34,coachPrestige:36,confPrestige:42},
-  {name:'Ohio',conf:'MAC',tradition:42,nilBudget:26,facilities:32,brand:26,atmosphere:38,proProspects:24,academic:70,campusLife:60,playingTime:70,champContender:32,coachPrestige:34,confPrestige:42},
-  {name:'Northern Illinois',conf:'MAC',tradition:45,nilBudget:26,facilities:32,brand:26,atmosphere:38,proProspects:24,academic:68,campusLife:58,playingTime:70,champContender:32,coachPrestige:34,confPrestige:42},
-  {name:'Western Michigan',conf:'MAC',tradition:40,nilBudget:24,facilities:30,brand:24,atmosphere:36,proProspects:22,academic:68,campusLife:58,playingTime:72,champContender:28,coachPrestige:30,confPrestige:42},
-  {name:'Central Michigan',conf:'MAC',tradition:40,nilBudget:24,facilities:30,brand:24,atmosphere:36,proProspects:22,academic:68,campusLife:58,playingTime:72,champContender:28,coachPrestige:30,confPrestige:42},
-  {name:'Ball State',conf:'MAC',tradition:35,nilBudget:22,facilities:28,brand:22,atmosphere:32,proProspects:20,academic:66,campusLife:56,playingTime:74,champContender:24,coachPrestige:26,confPrestige:42},
-  {name:'Eastern Michigan',conf:'MAC',tradition:32,nilBudget:20,facilities:26,brand:20,atmosphere:30,proProspects:18,academic:64,campusLife:54,playingTime:76,champContender:20,coachPrestige:22,confPrestige:42},
-  {name:'Buffalo',conf:'MAC',tradition:30,nilBudget:20,facilities:26,brand:20,atmosphere:28,proProspects:18,academic:68,campusLife:58,playingTime:76,champContender:18,coachPrestige:20,confPrestige:42},
-  {name:'Kent State',conf:'MAC',tradition:28,nilBudget:18,facilities:24,brand:18,atmosphere:26,proProspects:16,academic:66,campusLife:54,playingTime:78,champContender:16,coachPrestige:18,confPrestige:42},
-  {name:'Akron',conf:'MAC',tradition:26,nilBudget:18,facilities:24,brand:18,atmosphere:26,proProspects:14,academic:64,campusLife:52,playingTime:78,champContender:14,coachPrestige:16,confPrestige:42},
-  {name:'Bowling Green',conf:'MAC',tradition:28,nilBudget:18,facilities:24,brand:18,atmosphere:28,proProspects:14,academic:64,campusLife:52,playingTime:78,champContender:14,coachPrestige:16,confPrestige:42},
-  // MWC
-  {name:'Boise State',conf:'MWC',tradition:65,nilBudget:52,facilities:60,brand:60,atmosphere:72,proProspects:55,academic:66,campusLife:60,playingTime:58,champContender:58,coachPrestige:62,confPrestige:55},
-  {name:'Fresno State',conf:'MWC',tradition:55,nilBudget:42,facilities:48,brand:46,atmosphere:60,proProspects:46,academic:64,campusLife:60,playingTime:64,champContender:46,coachPrestige:48,confPrestige:55},
-  {name:'San Diego State',conf:'MWC',tradition:52,nilBudget:42,facilities:50,brand:48,atmosphere:54,proProspects:44,academic:68,campusLife:78,playingTime:66,champContender:42,coachPrestige:44,confPrestige:55},
-  {name:'UNLV',conf:'MWC',tradition:42,nilBudget:46,facilities:52,brand:46,atmosphere:48,proProspects:40,academic:62,campusLife:80,playingTime:70,champContender:36,coachPrestige:40,confPrestige:55},
-  {name:'Air Force',conf:'MWC',tradition:52,nilBudget:36,facilities:46,brand:44,atmosphere:52,proProspects:36,academic:84,campusLife:50,playingTime:64,champContender:38,coachPrestige:42,confPrestige:55},
-  {name:'Colorado State',conf:'MWC',tradition:45,nilBudget:36,facilities:44,brand:38,atmosphere:48,proProspects:36,academic:70,campusLife:66,playingTime:68,champContender:34,coachPrestige:36,confPrestige:55},
-  {name:'Wyoming',conf:'MWC',tradition:45,nilBudget:30,facilities:38,brand:32,atmosphere:48,proProspects:30,academic:66,campusLife:52,playingTime:70,champContender:30,coachPrestige:32,confPrestige:55},
-  {name:'Utah State',conf:'MWC',tradition:42,nilBudget:28,facilities:36,brand:30,atmosphere:44,proProspects:28,academic:66,campusLife:55,playingTime:70,champContender:30,coachPrestige:32,confPrestige:55},
-  {name:'Nevada',conf:'MWC',tradition:40,nilBudget:30,facilities:38,brand:32,atmosphere:42,proProspects:28,academic:64,campusLife:65,playingTime:72,champContender:28,coachPrestige:30,confPrestige:55},
-  {name:'New Mexico',conf:'MWC',tradition:35,nilBudget:24,facilities:32,brand:24,atmosphere:36,proProspects:22,academic:62,campusLife:55,playingTime:74,champContender:22,coachPrestige:24,confPrestige:55},
-  {name:'San Jose State',conf:'MWC',tradition:35,nilBudget:28,facilities:34,brand:30,atmosphere:36,proProspects:24,academic,campusLife:78,playingTime:74,champContender:22,coachPrestige:24,confPrestige:55},
-  {name:'Hawaii',conf:'MWC',tradition:38,nilBudget:26,facilities:32,brand:30,atmosphere:42,proProspects:24,academic:66,campusLife:88,playingTime:72,champContender:24,coachPrestige:26,confPrestige:55},
-  // Ind
-  {name:'Notre Dame',conf:'Ind',tradition:96,nilBudget:90,facilities:92,brand:98,atmosphere:96,proProspects:90,academic:94,campusLife:74,playingTime:42,champContender:88,coachPrestige:92,confPrestige:94},
-  {name:'Army',conf:'Ind',tradition:60,nilBudget:36,facilities:50,brand:52,atmosphere:56,proProspects:30,academic:88,campusLife:50,playingTime:62,champContender:35,coachPrestige:40,confPrestige:50},
-  {name:'New Mexico State',conf:'Ind',tradition:25,nilBudget:18,facilities:24,brand:18,atmosphere:28,proProspects:14,academic:58,campusLife:50,playingTime:82,champContender:12,coachPrestige:14,confPrestige:40},
+  {name:'Alabama',conf:'SEC',tier:5},{name:'Georgia',conf:'SEC',tier:5},{name:'Ohio State',conf:'Big Ten',tier:5},
+  {name:'Texas',conf:'SEC',tier:5},{name:'Michigan',conf:'Big Ten',tier:5},{name:'LSU',conf:'SEC',tier:5},
+  {name:'Notre Dame',conf:'Ind',tier:5},{name:'Clemson',conf:'ACC',tier:5},{name:'Oklahoma',conf:'SEC',tier:5},
+  {name:'Penn State',conf:'Big Ten',tier:5},{name:'Florida',conf:'SEC',tier:4},{name:'Tennessee',conf:'SEC',tier:4},
+  {name:'Auburn',conf:'SEC',tier:4},{name:'Oregon',conf:'Big Ten',tier:4},{name:'USC',conf:'Big Ten',tier:4},
+  {name:'Miami',conf:'ACC',tier:4},{name:'Texas A&M',conf:'SEC',tier:4},{name:'Oklahoma State',conf:'Big 12',tier:4},
+  {name:'Wisconsin',conf:'Big Ten',tier:4},{name:'Iowa',conf:'Big Ten',tier:4},{name:'Utah',conf:'Big 12',tier:4},
+  {name:'Washington',conf:'Big Ten',tier:4},{name:'Mississippi',conf:'SEC',tier:4},{name:'Arkansas',conf:'SEC',tier:4},
+  {name:'Missouri',conf:'SEC',tier:4},{name:'TCU',conf:'Big 12',tier:4},{name:'Baylor',conf:'Big 12',tier:4},
+  {name:'Kansas State',conf:'Big 12',tier:4},{name:'Iowa State',conf:'Big 12',tier:3},{name:'Florida State',conf:'ACC',tier:4},
+  {name:'Virginia Tech',conf:'ACC',tier:3},{name:'Pittsburgh',conf:'ACC',tier:3},{name:'NC State',conf:'ACC',tier:3},
+  {name:'Wake Forest',conf:'ACC',tier:3},{name:'Duke',conf:'ACC',tier:3},{name:'Louisville',conf:'ACC',tier:3},
+  {name:'Syracuse',conf:'ACC',tier:3},{name:'Boston College',conf:'ACC',tier:3},{name:'Georgia Tech',conf:'ACC',tier:3},
+  {name:'North Carolina',conf:'ACC',tier:3},{name:'Virginia',conf:'ACC',tier:3},{name:'Stanford',conf:'ACC',tier:3},
+  {name:'California',conf:'ACC',tier:3},{name:'SMU',conf:'ACC',tier:3},{name:'Nebraska',conf:'Big Ten',tier:4},
+  {name:'Minnesota',conf:'Big Ten',tier:3},{name:'Michigan State',conf:'Big Ten',tier:3},{name:'Purdue',conf:'Big Ten',tier:3},
+  {name:'Indiana',conf:'Big Ten',tier:3},{name:'Northwestern',conf:'Big Ten',tier:3},{name:'Illinois',conf:'Big Ten',tier:3},
+  {name:'Rutgers',conf:'Big Ten',tier:3},{name:'Maryland',conf:'Big Ten',tier:3},{name:'UCLA',conf:'Big Ten',tier:3},
+  {name:'Texas Tech',conf:'Big 12',tier:3},{name:'West Virginia',conf:'Big 12',tier:3},{name:'Kansas',conf:'Big 12',tier:3},
+  {name:'Houston',conf:'Big 12',tier:3},{name:'Cincinnati',conf:'Big 12',tier:3},{name:'UCF',conf:'Big 12',tier:3},
+  {name:'BYU',conf:'Big 12',tier:3},{name:'Colorado',conf:'Big 12',tier:3},{name:'Arizona State',conf:'Big 12',tier:3},
+  {name:'Arizona',conf:'Big 12',tier:3},{name:'Mississippi State',conf:'SEC',tier:3},{name:'Vanderbilt',conf:'SEC',tier:2},
+  {name:'Kentucky',conf:'SEC',tier:3},{name:'South Carolina',conf:'SEC',tier:3},{name:'Tulane',conf:'AAC',tier:3},
+  {name:'Memphis',conf:'AAC',tier:3},{name:'Navy',conf:'AAC',tier:2},{name:'SMU',conf:'AAC',tier:3},
+  {name:'Temple',conf:'AAC',tier:2},{name:'East Carolina',conf:'AAC',tier:2},{name:'South Florida',conf:'AAC',tier:2},
+  {name:'Tulsa',conf:'AAC',tier:2},{name:'UTSA',conf:'AAC',tier:2},{name:'Rice',conf:'AAC',tier:2},
+  {name:'App State',conf:'Sun Belt',tier:2},{name:'Louisiana',conf:'Sun Belt',tier:2},{name:'Troy',conf:'Sun Belt',tier:2},
+  {name:'South Alabama',conf:'Sun Belt',tier:2},{name:'Arkansas State',conf:'Sun Belt',tier:2},
+  {name:'Georgia Southern',conf:'Sun Belt',tier:2},{name:'Georgia State',conf:'Sun Belt',tier:2},
+  {name:'Marshall',conf:'Sun Belt',tier:2},{name:'Southern Miss',conf:'Sun Belt',tier:2},
+  {name:'Old Dominion',conf:'Sun Belt',tier:2},{name:'Texas State',conf:'Sun Belt',tier:2},
+  {name:'James Madison',conf:'Sun Belt',tier:2},{name:'Louisiana Monroe',conf:'Sun Belt',tier:1},
+  {name:'UTEP',conf:'C-USA',tier:2},{name:'Western Kentucky',conf:'C-USA',tier:2},
+  {name:'Florida Atlantic',conf:'C-USA',tier:2},{name:'Florida International',conf:'C-USA',tier:2},
+  {name:'Charlotte',conf:'C-USA',tier:2},{name:'Middle Tennessee',conf:'C-USA',tier:2},
+  {name:'UAB',conf:'C-USA',tier:2},{name:'North Texas',conf:'C-USA',tier:2},
+  {name:'Liberty',conf:'C-USA',tier:2},{name:'Jacksonville State',conf:'C-USA',tier:1},
+  {name:'Sam Houston',conf:'C-USA',tier:1},{name:'Miami (OH)',conf:'MAC',tier:2},
+  {name:'Ohio',conf:'MAC',tier:2},{name:'Toledo',conf:'MAC',tier:2},{name:'Ball State',conf:'MAC',tier:1},
+  {name:'Central Michigan',conf:'MAC',tier:2},{name:'Eastern Michigan',conf:'MAC',tier:1},
+  {name:'Western Michigan',conf:'MAC',tier:2},{name:'Buffalo',conf:'MAC',tier:1},
+  {name:'Akron',conf:'MAC',tier:1},{name:'Kent State',conf:'MAC',tier:1},
+  {name:'Northern Illinois',conf:'MAC',tier:2},{name:'Bowling Green',conf:'MAC',tier:1},
+  {name:'Boise State',conf:'MWC',tier:3},{name:'Fresno State',conf:'MWC',tier:2},
+  {name:'San Diego State',conf:'MWC',tier:2},{name:'UNLV',conf:'MWC',tier:2},
+  {name:'Nevada',conf:'MWC',tier:2},{name:'Hawaii',conf:'MWC',tier:1},
+  {name:'Colorado State',conf:'MWC',tier:2},{name:'Wyoming',conf:'MWC',tier:2},
+  {name:'Air Force',conf:'MWC',tier:2},{name:'New Mexico',conf:'MWC',tier:1},
+  {name:'Utah State',conf:'MWC',tier:2},{name:'San Jose State',conf:'MWC',tier:1},
+  {name:'Army',conf:'Ind',tier:2},{name:'Kennesaw State',conf:'C-USA',tier:1},
+  {name:'Western Kentucky',conf:'C-USA',tier:2},{name:'New Mexico State',conf:'Ind',tier:1},
 ];
 
 // ═══════════════════════════════════════════════════════════════
-// GRADE CALCULATIONS
+// RNG
+// ═══════════════════════════════════════════════════════════════
+function makeRng(seed) {
+  let s = seed >>> 0;
+  return () => { s = Math.imul(1664525,s)+1013904223>>>0; return s/4294967296; };
+}
+function pickW(arr,r) { return arr[Math.floor(r()*arr.length)]; }
+function weightedPick(items, weights, r) {
+  const total = weights.reduce((a,b)=>a+b,0);
+  let rnd = r()*total;
+  for (let i=0;i<items.length;i++) { rnd-=weights[i]; if(rnd<=0) return items[i]; }
+  return items[items.length-1];
+}
+function weightedState(r) {
+  const states=Object.keys(STATE_WEIGHTS), weights=Object.values(STATE_WEIGHTS);
+  const total=weights.reduce((a,b)=>a+b,0);
+  let rnd=r()*total;
+  for (let i=0;i<states.length;i++) { rnd-=weights[i]; if(rnd<=0) return states[i]; }
+  return states[states.length-1];
+}
+function heightStr(in_) { return Math.floor(in_/12)+"'"+(in_%12)+'"'; }
+
+// ═══════════════════════════════════════════════════════════════
+// STAR POOL
+// ═══════════════════════════════════════════════════════════════
+function buildStarPool(count) {
+  const pool=[];
+  const counts={5:32,4:350,3:1400};
+  const twoCount=Math.floor(count*0.40);
+  const oneCount=Math.max(0,count-32-350-1400-twoCount);
+  [5,5,5,4,4,4,3,3,2,1].forEach(()=>{});
+  for(let i=0;i<32;i++) pool.push(5);
+  for(let i=0;i<350;i++) pool.push(4);
+  for(let i=0;i<1400;i++) pool.push(3);
+  for(let i=0;i<twoCount;i++) pool.push(2);
+  for(let i=0;i<oneCount;i++) pool.push(1);
+  return pool;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PHYSICAL
+// ═══════════════════════════════════════════════════════════════
+function genPhysical(pos,stars,r) {
+  const p=PHYS[pos]||PHYS.ATH;
+  const sf=(stars-1)/4;
+  const hRaw=p.minH+Math.round((sf*0.4+r()*0.6)*(p.maxH-p.minH)+stars*p.sHB);
+  const wRaw=p.minW+Math.round((sf*0.4+r()*0.6)*(p.maxW-p.minW)+stars*p.sWB);
+  return {
+    height:Math.min(p.maxH+1,Math.max(p.minH,hRaw)),
+    weight:Math.min(p.maxW+10,Math.max(p.minW-10,wRaw))
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ARCHETYPE
+// ═══════════════════════════════════════════════════════════════
+function pickArchetype(pos,stars,r) {
+  const pool=POS_ARCHETYPES[pos];
+  if(!pool||pool.length===0) return 'Athlete';
+  const sf=(stars-1)/4;
+  const adj=pool.map(([name,w],idx)=>{
+    const bonus=idx===0?sf*20:idx===1?sf*10:0;
+    const penalty=idx>=pool.length-1?sf*15:0;
+    return [name,Math.max(1,w+bonus-penalty)];
+  });
+  return weightedPick(adj.map(a=>a[0]),adj.map(a=>a[1]),r);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TRAITS
+// ═══════════════════════════════════════════════════════════════
+function genTraits(pos,r) {
+  const pool=[...(POS_TRAITS[pos]||POS_TRAITS.ATH)];
+  const count=Math.floor(r()*3)+1;
+  const chosen=[];
+  pool.sort(()=>r()-0.5);
+  for(const c of pool) {
+    if(chosen.length>=count) break;
+    let conflict=false;
+    for(const pair of EXCLUSIVE_PAIRS) {
+      if(pair.includes(c)&&chosen.some(x=>pair.includes(x)&&x!==c)){conflict=true;break;}
+    }
+    if(!conflict) chosen.push(c);
+  }
+  return chosen;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MOTIVATIONS
+// ═══════════════════════════════════════════════════════════════
+function genMotivations(stars,r) {
+  const shuffled=[...ALL_MOTIVATIONS].sort(()=>r()-0.5).slice(0,3);
+  const dist=DB_DIST[stars]||DB_DIST[1];
+  const rnd=r();
+  let dbCount=0,cum=0;
+  for(let i=0;i<dist.length;i++){cum+=dist[i];if(rnd<cum){dbCount=i;break;}}
+  return shuffled.map((m,i)=>({name:m,isDealbreaker:i<dbCount}));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OVR & GEM/BUST SYSTEM
+// Arrival OVR: what the player is on day 1 of campus
+// Dev ceiling: max OVR achievable with ideal coaching/development
+// Gem/bust: hidden modifier revealed on official visit only
+// Rankings are based on true OVR BEFORE gem/bust — services see
+// the player's talent, not his hidden ceiling modifier
 // ═══════════════════════════════════════════════════════════════
 
-const GRADE_KEYS = ['tradition','nilBudget','facilities','brand','atmosphere','proProspects','academic','campusLife','playingTime','champContender','coachPrestige','confPrestige'];
-
-function calcTierScore(school) {
-  const vals = GRADE_KEYS.map(k => school[k] || 50);
-  return vals.reduce((a,b)=>a+b,0) / vals.length;
-}
-
-function getTierStars(score) {
-  if(score>=88) return 5;
-  if(score>=76) return 4;
-  if(score>=64) return 3;
-  if(score>=52) return 2;
-  return 1;
-}
-
-function gradeLabel(val) {
-  if(val>=90) return {l:'A+',cls:'grade-A'};
-  if(val>=80) return {l:'A',cls:'grade-A'};
-  if(val>=70) return {l:'B+',cls:'grade-B'};
-  if(val>=60) return {l:'B',cls:'grade-B'};
-  if(val>=50) return {l:'C+',cls:'grade-C'};
-  if(val>=40) return {l:'C',cls:'grade-C'};
-  if(val>=30) return {l:'D',cls:'grade-D'};
-  return {l:'F',cls:'grade-D'};
-}
-
-function gradeColor(val) {
-  if(val>=80) return '#5bc47a';
-  if(val>=60) return '#c9a84c';
-  if(val>=40) return '#c47a5b';
-  return '#c45b5b';
-}
-
-const GRADE_LABELS = {
-  tradition:'Program Tradition', nilBudget:'NIL Budget', facilities:'Athletic Facilities',
-  brand:'Brand Exposure', atmosphere:'Stadium Atmosphere', proProspects:'Pro Potential',
-  academic:'Academic Prestige', campusLife:'Campus Lifestyle', playingTime:'Playing Time',
-  champContender:'Championship Contender', coachPrestige:'Coach Prestige', confPrestige:'Conference Prestige'
+// Base OVR ranges by star [min, max]
+const OVR_BASE = {
+  5:[77,81], 4:[71,77], 3:[65,73], 2:[58,65], 1:[50,59]
 };
 
-// ═══════════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════════
-let state = {
-  coachName: '',
-  almaMater: '',
-  pcp: '',
-  role: '',
-  offScheme: '',
-  defScheme: '',
-  startTree: '',
-  school: null,
+// Dev ceiling ranges by star [min, max]
+const OVR_CEIL = {
+  5:[88,96], 4:[80,89], 3:[72,82], 2:[65,74], 1:[58,68]
 };
 
-// ═══════════════════════════════════════════════════════════════
-// STEP NAVIGATION
-// ═══════════════════════════════════════════════════════════════
-function goStep(n) {
-  if(n===2 && !validateStep1()) return;
-  if(n===3 && !validateStep2()) return;
-  if(n===4 && !validateStep3()) return;
-  if(n===5 && !validateStep4()) return;
+// Gem modifiers [arrivalBoost_min, arrivalBoost_max, ceilBoost_min, ceilBoost_max]
+// Heavier at lower star levels — finding hidden talent
+const GEM_MOD = {
+  5:[2,4,5,8],  4:[3,5,6,10],  3:[4,7,8,12],  2:[5,9,10,14],  1:[6,10,12,16]
+};
 
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('step-'+n).classList.add('active');
+// Bust modifiers [arrivalDrop_min, arrivalDrop_max, ceilDrop_min, ceilDrop_max]
+// Dramatic at all levels — especially 5-star
+const BUST_MOD = {
+  5:[6,10,12,18],  4:[5,8,10,15],  3:[4,7,8,12],  2:[3,5,6,9],  1:[2,4,4,7]
+};
 
-  for(let i=1;i<=5;i++) {
-    const dot=document.getElementById('dot-'+i);
-    dot.classList.remove('active','done');
-    if(i<n) dot.classList.add('done');
-    else if(i===n) dot.classList.add('active');
+// Gem/bust rates by star
+const GB_RATES = {
+  5:{bust:0.08,gem:0.00}, // 5-stars rarely gems (already elite), bust 8%
+  4:{bust:0.10,gem:0.08},
+  3:{bust:0.14,gem:0.15},
+  2:{bust:0.18,gem:0.20},
+  1:{bust:0.12,gem:0.25},
+};
+
+function randRange(lo,hi,r){ return lo+Math.floor(r()*(hi-lo+1)); }
+
+function genOVR(stars,r) {
+  const rates=GB_RATES[stars]||GB_RATES[1];
+  const rnd=r();
+
+  // Determine gem/bust status
+  let type='none';
+  if(rnd<rates.bust) type='bust';
+  else if(rnd>1-rates.gem) type='gem';
+
+  // Base arrival OVR
+  const [aLo,aHi]=OVR_BASE[stars]||[50,59];
+  const baseArrival=randRange(aLo,aHi,r);
+
+  // Base dev ceiling
+  const [cLo,cHi]=OVR_CEIL[stars]||[58,68];
+  const baseCeiling=randRange(cLo,cHi,r);
+
+  let arrivalOVR=baseArrival;
+  let devCeiling=baseCeiling;
+
+  if(type==='gem'){
+    const [abLo,abHi,cbLo,cbHi]=GEM_MOD[stars]||GEM_MOD[1];
+    arrivalOVR=Math.min(99,baseArrival+randRange(abLo,abHi,r));
+    devCeiling=Math.min(99,baseCeiling+randRange(cbLo,cbHi,r));
+  } else if(type==='bust'){
+    const [adLo,adHi,cdLo,cdHi]=BUST_MOD[stars]||BUST_MOD[1];
+    arrivalOVR=Math.max(30,baseArrival-randRange(adLo,adHi,r));
+    devCeiling=Math.max(40,baseCeiling-randRange(cdLo,cdHi,r));
   }
 
-  if(n===5) renderSchools();
-}
+  // Ensure ceiling is always above arrival
+  devCeiling=Math.max(devCeiling,arrivalOVR+3);
 
-function validateStep1() {
-  const name = document.getElementById('coach-name').value.trim();
-  if(!name) { alert('Please enter your coach name.'); return false; }
-  if(!state.pcp) { alert('Please select a play calling preference.'); return false; }
-  state.coachName = name;
-  state.almaMater = document.getElementById('alma-mater').value;
-  return true;
-}
-function validateStep2() {
-  if(!state.role) { alert('Please select a starting role.'); return false; }
-  return true;
-}
-function validateStep3() {
-  if(!state.offScheme) { alert('Please select an offensive scheme.'); return false; }
-  if(!state.defScheme) { alert('Please select a defensive scheme.'); return false; }
-  return true;
-}
-function validateStep4() {
-  if(!state.startTree) { alert('Please select a starting skill tree.'); return false; }
-  return true;
+  return { type, arrivalOVR, devCeiling };
 }
 
 // ═══════════════════════════════════════════════════════════════
-// STEP 1 — PCP
+// RATING — Rivals-style 70-100 scale, 4 decimal precision
 // ═══════════════════════════════════════════════════════════════
-function selectPCP(card) {
-  document.querySelectorAll('[data-pcp]').forEach(c=>c.classList.remove('selected'));
-  card.classList.add('selected');
-  state.pcp = card.dataset.pcp;
+function calcRating(svc,stars) {
+  // Weighted average rawScore — service 0 weighted slightly more (like 247 composite)
+  const weights=[1.1,1.0,0.9];
+  const weightedSum=svc.reduce((a,s,i)=>a+s.rawScore*weights[i],0);
+  const weightTotal=weights.reduce((a,b)=>a+b,0);
+  const avgRaw=weightedSum/weightTotal;
+  const ranges={5:[98.0,100.0],4:[90.0,97.99],3:[80.0,89.99],2:[75.0,79.99],1:[70.0,74.99]};
+  const [lo,hi]=ranges[stars]||[70.0,74.99];
+  const normalized=(avgRaw-(stars-0.5))/1.0;
+  const rating=lo+Math.max(0,Math.min(1,normalized))*(hi-lo);
+  // Store to 4 decimal places internally — display rounds to 2
+  // This ensures Caleb Thomas (2,1,2) ranks above Jordan Thomas (1,5,3)
+  return Math.round(rating*10000)/10000;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// STEP 2 — ROLE
+// RANKINGS
 // ═══════════════════════════════════════════════════════════════
-function selectRole(card) {
-  document.querySelectorAll('[data-role]').forEach(c=>c.classList.remove('selected'));
-  card.classList.add('selected');
-  state.role = card.dataset.role;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// STEP 3 — SCHEMES
-// ═══════════════════════════════════════════════════════════════
-function buildSchemeGrids() {
-  const offGrid = document.getElementById('off-scheme-grid');
-  const defGrid = document.getElementById('def-scheme-grid');
-
-  offGrid.innerHTML = OFF_SCHEMES.map(s=>`
-    <div class="scheme-card" data-scheme="${s.name}" data-side="off" onclick="selectScheme(this,'off')">
-      <div class="scheme-name">${s.name}</div>
-      <div class="scheme-desc">${s.desc}</div>
-    </div>`).join('');
-
-  defGrid.innerHTML = DEF_SCHEMES.map(s=>`
-    <div class="scheme-card" data-scheme="${s.name}" data-side="def" onclick="selectScheme(this,'def')">
-      <div class="scheme-name">${s.name}</div>
-      <div class="scheme-desc">${s.desc}</div>
-    </div>`).join('');
-}
-
-function selectScheme(card, side) {
-  document.querySelectorAll(`[data-side="${side}"]`).forEach(c=>c.classList.remove('selected','selected-def'));
-  card.classList.add(side==='off'?'selected':'selected-def');
-  if(side==='off') state.offScheme = card.dataset.scheme;
-  else state.defScheme = card.dataset.scheme;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// STEP 4 — SKILL TREES
-// ═══════════════════════════════════════════════════════════════
-function buildTreeGrid() {
-  const grid = document.getElementById('tree-grid');
-  grid.innerHTML = SKILL_TREES.map(t=>`
-    <div class="tree-card ${t.available?'':'locked'}" data-tree="${t.id}" onclick="${t.available?`selectTree(this)`:''}">
-      <div style="font-size:1.6rem;margin-bottom:0.4rem;">${t.icon}</div>
-      <div style="font-size:0.62rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.3rem;color:${t.available?'#c9a84c':'#555'};">${t.available?'Available':'Locked'}</div>
-      <div class="card-title">${t.name}</div>
-      <div class="card-sub" style="margin-top:0.3rem;">${t.desc}</div>
-      <div class="tree-nodes">
-        ${t.nodes.map((n,i)=>`<span class="tree-node ${i===0&&t.available?'available':''}">${n}</span>`).join('')}
-      </div>
-    </div>`).join('');
-}
-
-function selectTree(card) {
-  document.querySelectorAll('.tree-card').forEach(c=>c.classList.remove('selected'));
-  card.classList.add('selected');
-  state.startTree = card.dataset.tree;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// STEP 5 — SCHOOL SELECTION
-// ═══════════════════════════════════════════════════════════════
-let selectedSchool = null;
-
-function renderSchools() {
-  const confF = document.getElementById('conf-filter').value;
-  const tierF = document.getElementById('tier-filter').value;
-  const sortF = document.getElementById('sort-schools').value;
-
-  // Update subtitle based on role
-  const roleLabel = state.role==='HC'?'Head Coach':state.role==='OC'?'Offensive Coordinator':'Defensive Coordinator';
-  document.getElementById('school-sub').textContent =
-    `Select the program where you'll begin as ${roleLabel}. The existing ${state.role} will enter the coaching pool.`;
-
-  let schools = FBS_SCHOOLS.map(s=>({
-    ...s,
-    tierScore: calcTierScore(s),
-    tierStars: getTierStars(calcTierScore(s))
-  }));
-
-  if(confF) schools = schools.filter(s=>s.conf===confF);
-  if(tierF) schools = schools.filter(s=>s.tierStars===parseInt(tierF));
-
-  schools.sort((a,b)=>{
-    if(sortF==='tier') return b.tierScore-a.tierScore;
-    if(sortF==='nil') return (b.nilBudget||0)-(a.nilBudget||0);
-    if(sortF==='tradition') return (b.tradition||0)-(a.tradition||0);
-    if(sortF==='name') return a.name.localeCompare(b.name);
-    return b.tierScore-a.tierScore;
+function assignRankings(recruits) {
+  // Sort by weighted composite rawScore — pure talent signal
+  // QB representation handled by pool size and star boost in generation
+  const bySignal=[...recruits].sort((a,b)=>{
+    const sigA=a.svc.reduce((s,sv,i)=>s+sv.rawScore*[1.1,1.0,0.9][i],0)/3;
+    const sigB=b.svc.reduce((s,sv,i)=>s+sv.rawScore*[1.1,1.0,0.9][i],0)/3;
+    return sigB-sigA;
+  });
+  const posCounts={},stateCounts={};
+  bySignal.forEach((r,idx)=>{
+    r.natRank=idx+1;
+    r.natRankDisplay=idx<1500?(idx+1):null;
+    posCounts[r.pos]=(posCounts[r.pos]||0)+1; r.posRank=posCounts[r.pos];
+    stateCounts[r.state]=(stateCounts[r.state]||0)+1; r.stateRank=stateCounts[r.state];
   });
 
-  const list = document.getElementById('school-list');
-  list.innerHTML = schools.map(s=>{
-    const keyGrades = ['tradition','nilBudget','facilities','brand','champContender'].map(k=>{
-      const g=gradeLabel(s[k]||50);
-      return `<span class="grade-chip ${g.cls}">${GRADE_LABELS[k].split(' ')[0]} ${g.l}</span>`;
-    }).join('');
-    const stars='★'.repeat(s.tierStars)+'<span style="color:#333;">'+'★'.repeat(5-s.tierStars)+'</span>';
-    return `<div class="school-card ${selectedSchool?.name===s.name?'selected':''}" onclick="selectSchool('${s.name}')">
-      <div>
-        <div class="school-name">${s.name}</div>
-        <div class="school-meta">${s.conf} · ${roleLabel} opening</div>
-        <div class="school-grades">${keyGrades}</div>
-      </div>
-      <div style="text-align:right;">
-        <div class="school-tier-stars">${stars}</div>
-        <div style="font-size:0.65rem;color:#555;margin-top:0.2rem;">${s.tierScore.toFixed(0)} pts</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function selectSchool(name) {
-  selectedSchool = FBS_SCHOOLS.find(s=>s.name===name);
-  state.school = selectedSchool;
-  renderSchools();
-  renderSchoolDetail();
-}
-
-function renderSchoolDetail() {
-  const el = document.getElementById('school-detail');
-  if(!selectedSchool){el.classList.remove('visible');return;}
-  el.classList.add('visible');
-
-  const s = {...selectedSchool, tierScore:calcTierScore(selectedSchool)};
-
-  const gradeRows = GRADE_KEYS.map(k=>{
-    const val=s[k]||50;
-    const g=gradeLabel(val);
-    const color=gradeColor(val);
-    return `<div class="detail-grade-row">
-      <span class="detail-grade-label">${GRADE_LABELS[k]}</span>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div class="grade-bar"><div class="grade-bar-fill" style="width:${val}%;background:${color};"></div></div>
-        <span class="grade-chip ${g.cls}" style="min-width:28px;text-align:center;">${g.l}</span>
-      </div>
-    </div>`;
-  }).join('');
-
-  const nilDisplay = s.nilBudget>=85?'$8M+':s.nilBudget>=70?'$4-8M':s.nilBudget>=55?'$2-4M':s.nilBudget>=40?'$1-2M':'<$1M';
-  const collStrength = s.nilBudget>=85?'Elite Collective':s.nilBudget>=70?'Strong Collective':s.nilBudget>=55?'Developing Collective':'Emerging Collective';
-  const tierStars = getTierStars(s.tierScore);
-
-  el.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">
-      <div>
-        <div style="font-size:1.1rem;font-weight:700;color:#e8e8e8;">${s.name}</div>
-        <div style="font-size:0.75rem;color:#666;margin-top:0.15rem;">${s.conf} · Program Tier ${'★'.repeat(tierStars)}</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:0.72rem;color:#888;">NIL Budget</div>
-        <div style="font-size:1rem;font-weight:700;color:#c9a84c;">${nilDisplay}</div>
-        <div style="font-size:0.68rem;color:#666;">${collStrength}</div>
-      </div>
-    </div>
-    <div class="detail-grid">${gradeRows}</div>`;
+  // Service rankings — each service sorts by their own rawScore independently
+  SERVICES.forEach((svc,si)=>{
+    const bySvc=[...recruits].sort((a,b)=>b.svc[si].rawScore-a.svc[si].rawScore);
+    bySvc.forEach((r,idx)=>{
+      r.svc[si].natRank=idx+1;
+      r.svc[si].natRankDisplay=idx<1500?(idx+1):null;
+    });
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
-// START CAREER
+// CLASS SCORE (Gaussian-weighted, excludes K/P, drops bottom 3)
 // ═══════════════════════════════════════════════════════════════
-function startCareer() {
-  if(!state.school) { alert('Please select a program.'); return; }
+function calcClassScore(recruitList) {
+  const eligible=recruitList
+    .filter(r=>r.pos!=='K'&&r.pos!=='P')
+    .sort((a,b)=>b.rating-a.rating);
+  if(eligible.length<=3) return 0;
+  const scored=eligible.slice(0,eligible.length-3);
+  let score=0,weight=1.0;
+  scored.forEach(r=>{ score+=r.rating*weight; weight*=0.97; });
+  return Math.round(score*100)/100;
+}
 
-  // Save career state to sessionStorage for recruiting board to read
-  const career = {
-    coachName: state.coachName,
-    almaMater: state.almaMater,
-    pcp: state.pcp,
-    role: state.role,
-    offScheme: state.offScheme,
-    defScheme: state.defScheme,
-    startTree: state.startTree,
-    school: state.school,
-    year: 2026,
-    season: 1,
-  };
-  sessionStorage.setItem('dynastyCareer', JSON.stringify(career));
-  window.location.href = 'recruiting.html';
+// ═══════════════════════════════════════════════════════════════
+// MAIN RECRUIT GENERATION
+// ═══════════════════════════════════════════════════════════════
+function generateRecruits(count,classYear) {
+  const r=makeRng(classYear*7919+31337);
+  const starPool=buildStarPool(count);
+  for(let i=starPool.length-1;i>0;i--){
+    const j=Math.floor(r()*(i+1));
+    [starPool[i],starPool[j]]=[starPool[j],starPool[i]];
+  }
+  const recruits=[];
+  const usedNames=new Set();
+  for(let i=0;i<count;i++){
+    const pos=pickW(POS_POOL_BASE,r);
+    let stars=Math.min(starPool[i]||1,POS_STAR_CAP[pos]);
+
+    // QB and ATH skew higher in real rankings — services value them more
+    // Occasionally bump a 3-star QB to 4-star, or 4-star to 5-star
+    if(pos==='QB'&&stars===3&&r()<0.18) stars=4;
+    if(pos==='QB'&&stars===4&&r()<0.08) stars=5;
+    if(pos==='ATH'&&stars===3&&r()<0.12) stars=4;
+    stars=Math.min(stars,POS_STAR_CAP[pos]);
+    const state=weightedState(r);
+    const city=pickW(STATE_CITIES[state]||DEF_CITIES,r);
+    const phys=genPhysical(pos,stars,r);
+    const hsScheme=pickW(HS_SCHEMES,r);
+    const extraSport=pickW(EXTRA_SPORTS_BY_POS[pos]||['None'],r);
+
+    // Generate a shared consensus signal for this recruit
+    // High-star recruits have stronger consensus — services mostly agree on elite talent
+    // The consensus signal is the "true" quality, each service adds independent noise on top
+    const consensusSignal = stars + (r() - 0.5) * 0.08; // very tight shared base
+
+    const svc=SERVICES.map((svcName,si)=>{
+      const bias=SVC_BIAS[svcName][pos];
+      const accuracyNoise=(1-bias)*0.4;
+      // Independent noise per service — tuned to produce target rank spreads:
+      // 5-star: ±5 spots | high 4-star: ±10-15 | low 4-star: ±15-25
+      // high 3-star: ±30-60 | mid/low 3-star+: wide open
+      const starVariance = stars===5 ? 0.010 :
+                           stars===4 ? 0.025 :
+                           stars===3 ? 0.055 :
+                           stars===2 ? 0.55  : 0.70;
+      const indNoise = accuracyNoise + starVariance;
+      const indSignal = (r() - 0.5) * indNoise * 2;
+      // Consensus weight — 5-stars are 85% consensus, 4-stars 65%, 3-stars 40%, lower 10%
+      const consensusWeight = stars===5 ? 0.85 :
+                              stars===4 ? 0.65 :
+                              stars===3 ? 0.40 : 0.10;
+      const rawScore = consensusSignal * consensusWeight + (stars + indSignal) * (1 - consensusWeight);
+      const svcStars=Math.max(1,Math.min(POS_STAR_CAP[pos],Math.round(rawScore)));
+      return{name:svcName,stars:svcStars,rawScore:Math.max(0.5,Math.min(5.5,rawScore)),natRank:9999,natRankDisplay:null};
+    });
+
+    const rating=calcRating(svc,stars);
+
+    // OVR — generated AFTER service ratings so rankings reflect true talent
+    // Gem/bust modifies the player but NOT their recruit ranking
+    const ovrData=genOVR(stars,r);
+
+    let athPref=null,athLoyalty=0;
+    if(pos==='ATH'){const ap=pickW(ATH_PREF,r);athPref=ap;athLoyalty=ap.loyalty+(r()-0.5)*0.2;}
+
+    const archetypePos=pos==='ATH'&&athPref?athPref.prim:pos;
+    const archetype=pickArchetype(archetypePos,stars,r);
+    const hasParentAlma=r()>0.87;
+    const parentAlma=hasParentAlma?pickW(SCHOOLS_LIST,r):null;
+    const motivations=genMotivations(stars,r);
+    if(pos==='ATH'&&athLoyalty>0.6) motivations[0]={name:'Position Promise',isDealbreaker:stars>=4};
+    const traits=genTraits(pos,r);
+
+    // Generate unique name — retry until unused combination found
+    let fullName;
+    let attempts=0;
+    do {
+      const fn=pickW(FIRST_NAMES,r);
+      const ln=pickW(LAST_NAMES,r);
+      fullName=fn+' '+ln;
+      attempts++;
+    } while(usedNames.has(fullName)&&attempts<20);
+    usedNames.add(fullName);
+
+    recruits.push({
+      id:i,
+      name:fullName,
+      pos,state,city,hsScheme,stars,
+      height:phys.height,weight:phys.weight,
+      extraSport,archetype,svc,rating,
+      natRank:9999,natRankDisplay:null,posRank:0,stateRank:0,
+      // OVR — all hidden until official visit
+      ovrType:ovrData.type,         // 'none' | 'gem' | 'bust'
+      arrivalOVR:ovrData.arrivalOVR, // hidden
+      devCeiling:ovrData.devCeiling, // hidden
+      athPref,athLoyalty,parentAlma,motivations,traits,
+      interest:Math.round(20+r()*60),
+      classYear,scouted:false,
+      commitStatus:'open',
+      commitSchool:null,
+    });
+  }
+  assignRankings(recruits);
+  return recruits;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCHOOL CLASS GENERATION (for class rankings)
+// Each school gets a simulated class based on their tier
+// ═══════════════════════════════════════════════════════════════
+function generateSchoolClasses(classYear) {
+  const classes={};
+  FBS_SCHOOLS.forEach((school,si)=>{
+    const r=makeRng(classYear*1337+si*97+42);
+    const classSize=18+Math.floor(r()*10); // 18-27 players
+    const recruits=[];
+    // Tier determines rating range
+    const tierRanges={5:[88,100],4:[82,96],3:[78,90],2:[74,85],1:[70,80]};
+    const [lo,hi]=tierRanges[school.tier]||[70,80];
+    for(let i=0;i<classSize;i++){
+      const pos=pickW(POS_POOL_BASE,r);
+      if(pos==='K'||pos==='P') continue; // exclude from score
+      const baseRating=lo+(r()*(hi-lo));
+      // Add some variance
+      const rating=Math.max(70,Math.min(100,baseRating+(r()-0.5)*8));
+      const stars=rating>=98?5:rating>=90?4:rating>=80?3:rating>=75?2:1;
+      recruits.push({pos,rating:Math.round(rating*100)/100,stars});
+    }
+    classes[school.name]={school,recruits,score:calcClassScore(recruits)};
+  });
+  return classes;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCHEME FIT
+// ═══════════════════════════════════════════════════════════════
+const SCHEME_FIT={
+  'Spread RPO':{QB:0.9,RB:0.8,WR:0.9,TE:0.6,IOL:0.6,OT:0.6,EDGE:0.5,DL:0.5,LB:0.5,CB:0.5,S:0.5,ATH:0.7,K:0.5,P:0.5},
+  'Air Raid':{QB:0.95,RB:0.5,WR:0.95,TE:0.7,IOL:0.55,OT:0.55,EDGE:0.5,DL:0.5,LB:0.5,CB:0.5,S:0.5,ATH:0.65,K:0.5,P:0.5},
+  'Pro Style':{QB:0.8,RB:0.8,WR:0.7,TE:0.85,IOL:0.85,OT:0.85,EDGE:0.7,DL:0.75,LB:0.75,CB:0.65,S:0.65,ATH:0.6,K:0.6,P:0.6},
+  'Power Run':{QB:0.6,RB:0.95,WR:0.55,TE:0.8,IOL:0.95,OT:0.95,EDGE:0.7,DL:0.85,LB:0.85,CB:0.55,S:0.6,ATH:0.55,K:0.5,P:0.5},
+  'Triple Option':{QB:0.7,RB:0.95,WR:0.4,TE:0.5,IOL:0.85,OT:0.85,EDGE:0.6,DL:0.65,LB:0.7,CB:0.5,S:0.55,ATH:0.75,K:0.5,P:0.5},
+  'West Coast':{QB:0.85,RB:0.75,WR:0.85,TE:0.8,IOL:0.75,OT:0.75,EDGE:0.6,DL:0.65,LB:0.65,CB:0.6,S:0.65,ATH:0.65,K:0.55,P:0.55},
+  'Run-and-Shoot':{QB:0.9,RB:0.6,WR:0.95,TE:0.5,IOL:0.55,OT:0.55,EDGE:0.5,DL:0.5,LB:0.5,CB:0.5,S:0.5,ATH:0.7,K:0.5,P:0.5},
+};
+function getFit(pos,scheme){
+  const v=(SCHEME_FIT[scheme]||{})[pos]||0.5;
+  if(v>=0.8) return{label:'High',cls:'fit-high'};
+  if(v>=0.6) return{label:'Med',cls:'fit-med'};
+  return{label:'Low',cls:'fit-low'};
+}
+function interestColor(v){if(v>=70)return'#5bc47a';if(v>=40)return'#c4b45b';return'#c47a5b';}
+function starsHtml(n){return'<span class="stars">'+'★'.repeat(n)+'<span style="color:#2a2d3a;">'+'★'.repeat(5-n)+'</span></span>';}
+
+// ═══════════════════════════════════════════════════════════════
+// CAREER CONTEXT — loaded from school selection screen
+// ═══════════════════════════════════════════════════════════════
+const careerRaw=sessionStorage.getItem('dynastyCareer');
+const career=careerRaw?JSON.parse(careerRaw):null;
+const MY_SCHEME=career?career.offScheme:'Spread RPO';
+const MY_SCHOOL=career?career.school:null;
+const MY_ROLE=career?career.role:'HC';
+const MY_COACH=career?career.coachName:'Coach';
+if(career){
+  document.getElementById('header-info').textContent=
+    `${MY_COACH} · ${MY_ROLE} · ${MY_SCHOOL?.name||''} · Class of ${career.year||2026}`;
 }
 
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
+let recruits2026=generateRecruits(4500,2026);
+let recruits2027=generateRecruits(4500,2027);
+let allRecruits=recruits2026;
+let schoolClasses2026=generateSchoolClasses(2026);
+let schoolClasses2027=generateSchoolClasses(2027);
+let filtered=[];
+let sortCol='natRank',sortDir=1;
+let selectedId=null;
+let bigBoard=[];
+let activeTab='detail';
+let activeCrTab='hs';
 
-// Populate alma mater dropdown
-const almaSelect = document.getElementById('alma-mater');
-FBS_SCHOOLS.sort((a,b)=>a.name.localeCompare(b.name)).forEach(s=>{
-  const o=document.createElement('option');
-  o.value=s.name; o.textContent=s.name;
-  almaSelect.appendChild(o);
+// Populate state filter
+(function(){
+  const states=[...new Set([...recruits2026,...recruits2027].map(r=>r.state))].sort();
+  const sel=document.getElementById('state-filter');
+  states.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
+})();
+
+// Populate archetype filter
+(function(){
+  const all=Object.values(POS_ARCHETYPES).flat().map(a=>Array.isArray(a)?a[0]:a);
+  const unique=[...new Set(all)].sort();
+  const sel=document.getElementById('arch-filter');
+  unique.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;sel.appendChild(o);});
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  activeTab=tab;
+  document.querySelectorAll('.rp-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.getElementById('tab-detail').style.display=tab==='detail'?'block':'none';
+  document.getElementById('tab-bigboard').style.display=tab==='bigboard'?'flex':'none';
+  document.getElementById('tab-rankings').style.display=tab==='rankings'?'flex':'none';
+  if(tab==='rankings') renderClassRankings();
+  if(tab==='bigboard') renderBigBoard();
+}
+
+function switchCrTab(tab) {
+  activeCrTab=tab;
+  document.querySelectorAll('.cr-tab').forEach(t=>t.classList.toggle('active',t.dataset.cr===tab));
+  renderClassRankings();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FILTERING & SORTING
+// ═══════════════════════════════════════════════════════════════
+function getFiltered() {
+  const search=document.getElementById('search-input').value.toLowerCase();
+  const starF=parseInt(document.querySelector('.star-btn.active').dataset.star);
+  const posF=document.getElementById('pos-filter').value;
+  const stateF=document.getElementById('state-filter').value;
+  const schemeF=document.getElementById('scheme-filter').value;
+  const yearF=document.getElementById('year-filter').value;
+  const archF=document.getElementById('arch-filter').value;
+  const commitF=document.getElementById('commit-filter').value;
+  allRecruits=yearF==='2027'?recruits2027:recruits2026;
+  return allRecruits.filter(r=>{
+    if(search&&!r.name.toLowerCase().includes(search)&&!r.city.toLowerCase().includes(search)&&!r.state.toLowerCase().includes(search)) return false;
+    if(starF>0&&r.stars!==starF) return false;
+    if(posF&&r.pos!==posF) return false;
+    if(stateF&&r.state!==stateF) return false;
+    if(schemeF&&r.hsScheme!==schemeF) return false;
+    if(archF&&r.archetype!==archF) return false;
+    if(commitF&&r.commitStatus!==commitF) return false;
+    return true;
+  });
+}
+
+function sorted(arr) {
+  return [...arr].sort((a,b)=>{
+    if(sortCol==='natRank') {
+      // Check which service is selected and sort by that service's rank
+      const svcSel=document.getElementById('rank-service').value;
+      if(svcSel==='rating') return sortDir*(a.natRank-b.natRank);
+      const si=parseInt(svcSel);
+      return sortDir*(a.svc[si].natRank-b.svc[si].natRank);
+    }
+    if(sortCol==='rating') return sortDir*(b.rating-a.rating);
+    if(sortCol==='commitStatus') return sortDir*a.commitStatus.localeCompare(b.commitStatus);
+    let av=a[sortCol],bv=b[sortCol];
+    if(av==null) av=9999; if(bv==null) bv=9999;
+    if(typeof av==='string') return sortDir*av.localeCompare(bv);
+    return sortDir*(bv-av);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER TABLE
+// ═══════════════════════════════════════════════════════════════
+function renderTable() {
+  filtered=sorted(getFiltered());
+  const myScheme=MY_SCHEME;
+  const tbody=document.getElementById('recruit-tbody');
+  const MAX=200;
+  const shown=filtered.slice(0,MAX);
+  document.getElementById('results-count').textContent=
+    `Showing ${Math.min(MAX,filtered.length).toLocaleString()} of ${filtered.length.toLocaleString()} recruits`;
+
+  tbody.innerHTML=shown.map(r=>{
+    const fit=getFit(r.pos,myScheme);
+    const onBB=bigBoard.some(b=>b.id===r.id&&b.classYear===r.classYear);
+    const rankD=r.natRankDisplay?`<span class="nat-rank">#${r.natRankDisplay}</span>`:'<span style="color:#333;">NR</span>';
+    const commitD=r.commitStatus==='soft'?'<span class="commit-badge commit-soft">Soft</span>':
+                  r.commitStatus==='hard'?'<span class="commit-badge commit-soft" style="background:#1a3a2a;color:#5bc47a;border-color:#2a5a3a;">Hard</span>':
+                  '<span class="commit-none">Open</span>';
+    return`<tr data-id="${r.id}" class="${selectedId===r.id?'selected':''}">
+      <td>${rankD}</td>
+      <td>${starsHtml(r.stars)}</td>
+      <td style="color:#c9a84c;font-weight:700;">${r.rating.toFixed(2)}</td>
+      <td style="font-weight:500;">${r.name}</td>
+      <td><span class="pos-badge pos-${r.pos}">${r.pos}</span></td>
+      <td style="color:#777;font-size:0.72rem;">${r.archetype}</td>
+      <td style="white-space:nowrap;color:#888;">${heightStr(r.height)}</td>
+      <td style="color:#888;">${r.weight}</td>
+      <td style="color:#666;font-size:0.72rem;">${r.state}</td>
+      <td><span class="fit-chip ${fit.cls}">${fit.label}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:5px;">
+          <div class="interest-bar"><div class="interest-fill" style="width:${r.interest}%;background:${interestColor(r.interest)};"></div></div>
+          <span style="font-size:0.65rem;color:#555;">${r.interest}%</span>
+        </div>
+      </td>
+      <td>${commitD}</td>
+      <td>
+        <button class="add-btn ${onBB?'added':''}" onclick="toggleBigBoard(${r.id},event)">
+          ${onBB?'✓':'+ Board'}
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('tr').forEach(row=>{
+    row.addEventListener('click',e=>{
+      if(e.target.classList.contains('add-btn')) return;
+      selectedId=parseInt(row.dataset.id);
+      renderDetail(selectedId);
+      switchTab('detail');
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BIG BOARD
+// ═══════════════════════════════════════════════════════════════
+function toggleBigBoard(id,e) {
+  e.stopPropagation();
+  const r=allRecruits.find(x=>x.id===id);
+  if(!r) return;
+  const idx=bigBoard.findIndex(b=>b.id===id&&b.classYear===r.classYear);
+  if(idx>-1){bigBoard.splice(idx,1);}
+  else{if(bigBoard.length>=35){alert('Big board limited to 35 recruits.');return;}bigBoard.push(r);}
+  renderBigBoard();
+  renderTable();
+  if(activeTab==='rankings') renderClassRankings();
+}
+
+function renderBigBoard() {
+  const el=document.getElementById('bigboard-list');
+  document.getElementById('bb-count').textContent=bigBoard.length;
+  const myScore=calcClassScore(bigBoard);
+  const scoreEl=document.getElementById('bb-score');
+  const rankEl=document.getElementById('bb-rank-display');
+
+  if(bigBoard.length===0){
+    el.innerHTML='<div class="empty-board">Add recruits to build your board</div>';
+    scoreEl.textContent='—';rankEl.textContent='No class score yet';
+    return;
+  }
+
+  scoreEl.textContent=myScore.toFixed(2);
+
+  // Find my rank among all schools
+  const yearF=document.getElementById('year-filter').value;
+  const classes=yearF==='2027'?schoolClasses2027:schoolClasses2026;
+  const scores=Object.values(classes).map(c=>c.score).concat([myScore]).sort((a,b)=>b-a);
+  const myRank=scores.indexOf(myScore)+1;
+  rankEl.textContent=`#${myRank} nationally`;
+
+  el.innerHTML=bigBoard
+    .sort((a,b)=>b.rating-a.rating)
+    .map((r,i)=>`
+    <div class="bb-item" onclick="renderDetail(${r.id});switchTab('detail');">
+      <span class="bb-num">${i+1}</span>
+      <span class="pos-badge pos-${r.pos}" style="font-size:0.6rem;padding:0.08rem 0.3rem;">${r.pos}</span>
+      <span class="bb-name">${r.name}</span>
+      <span class="bb-rating">${r.rating.toFixed(2)}</span>
+      <span class="stars" style="font-size:0.62rem;">${'★'.repeat(r.stars)}</span>
+      <button class="remove-btn" onclick="event.stopPropagation();toggleBigBoard(${r.id},event)">×</button>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLASS RANKINGS
+// ═══════════════════════════════════════════════════════════════
+function renderClassRankings() {
+  const el=document.getElementById('cr-list');
+  const confF=document.getElementById('cr-conf-filter').value;
+  const yearF=document.getElementById('year-filter').value;
+  const classes=yearF==='2027'?schoolClasses2027:schoolClasses2026;
+
+  // Build my score
+  const myScore=calcClassScore(bigBoard);
+
+  // Build ranked list
+  let rows=Object.values(classes).map(c=>({
+    name:c.school.name,
+    conf:c.school.conf,
+    tier:c.school.tier,
+    score:c.score,
+    count:c.recruits.length,
+    isMe:false,
+  }));
+
+  // Insert player's class as "My Class"
+  rows.push({name:'My Class',conf:'—',tier:0,score:myScore,count:bigBoard.filter(r=>r.pos!=='K'&&r.pos!=='P').length,isMe:true});
+
+  // Filter by conf
+  if(confF) rows=rows.filter(r=>r.conf===confF||r.isMe);
+
+  // Sort by score
+  rows.sort((a,b)=>b.score-a.score);
+
+  el.innerHTML=rows.map((row,i)=>`
+    <div class="cr-row ${row.isMe?'my-school':''}">
+      <span class="cr-rank">${i+1}</span>
+      <div style="flex:1;">
+        <div class="cr-school">${row.name}${row.isMe?' ⭐':''}</div>
+        <div class="cr-conf">${row.conf}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cr-score">${row.score>0?row.score.toFixed(2):'—'}</div>
+        <div class="cr-count">${row.count} recruits</div>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════════════════════════════
+function renderDetail(id) {
+  const r=allRecruits.find(x=>x.id===id);
+  if(!r) return;
+  const myScheme=MY_SCHEME;
+  const fit=getFit(r.pos,myScheme);
+  const el=document.getElementById('tab-detail');
+
+  const rankLine=r.natRankDisplay
+    ?`#${r.natRankDisplay} National · #${r.posRank} ${r.pos} · #${r.stateRank} in ${r.state}`
+    :`NR National · #${r.posRank} ${r.pos} · #${r.stateRank} in ${r.state}`;
+
+  const svcHtml=r.svc.map(s=>`
+    <div class="service-row">
+      <span class="service-name">${s.name}</span>
+      <span>${starsHtml(s.stars)}</span>
+      <span class="service-rank">${s.natRankDisplay?'#'+s.natRankDisplay:'NR'}</span>
+    </div>`).join('');
+
+  const athHtml=r.pos==='ATH'?`
+    <div class="detail-row"><span class="detail-row-label">Prefers to play</span><span class="detail-row-val" style="color:#e0a050;">${r.athPref?r.athPref.prim:'—'}</span></div>
+    <div class="detail-row"><span class="detail-row-label">Could also play</span><span class="detail-row-val">${r.athPref?r.athPref.sec:'—'}</span></div>
+    <div class="detail-row"><span class="detail-row-label">Position loyalty</span><span class="detail-row-val">${r.athLoyalty>0.6?'High':r.athLoyalty>0.35?'Medium':'Low'}</span></div>`:'';
+
+  const commitColors={open:'#555',soft:'#5bc47a',hard:'#c9a84c'};
+  const commitLabel={open:'Open',soft:'Soft Committed',hard:'Hard Committed'};
+
+  el.innerHTML=`
+    <div class="detail-header">
+      <div class="detail-name">${r.name}</div>
+      <div class="detail-sub">${starsHtml(r.stars)} · ${r.archetype} · Class of ${r.classYear}</div>
+      <div class="rating-big">${r.rating.toFixed(2)}</div>
+      <div style="font-size:0.68rem;color:#555;margin-top:0.2rem;">${rankLine}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Physical Profile</div>
+      <div class="detail-row"><span class="detail-row-label">Position</span><span class="pos-badge pos-${r.pos}">${r.pos}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Height</span><span class="detail-row-val">${heightStr(r.height)}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Weight</span><span class="detail-row-val">${r.weight} lbs</span></div>
+      <div class="detail-row"><span class="detail-row-label">Hometown</span><span class="detail-row-val">${r.city}, ${r.state}</span></div>
+      <div class="detail-row"><span class="detail-row-label">HS Scheme</span><span class="detail-row-val">${r.hsScheme}</span></div>
+      <div class="detail-row"><span class="detail-row-label">Scheme Fit</span><span class="fit-chip ${fit.cls}">${fit.label}</span></div>
+      ${r.extraSport!=='None'?`<div class="detail-row"><span class="detail-row-label">Also plays</span><span class="detail-row-val">${r.extraSport}</span></div>`:''}
+      ${athHtml}
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Service Rankings</div>
+      ${svcHtml}
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Recruit Status</div>
+      <div class="detail-row"><span class="detail-row-label">Status</span><span class="detail-row-val" style="color:${commitColors[r.commitStatus]};">${commitLabel[r.commitStatus]}</span></div>
+      ${r.commitSchool?`<div class="detail-row"><span class="detail-row-label">Committed to</span><span class="detail-row-val">${r.commitSchool}</span></div>`:''}
+      <div style="display:flex;gap:0.4rem;margin-top:0.5rem;flex-wrap:wrap;">
+        <button onclick="setCommit(${r.id},'soft')" style="background:${r.commitStatus==='soft'?'#1e3a2a':'#12151f'};border:1px solid #2a4a2a;color:#5bc47a;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.68rem;cursor:pointer;">Soft Commit</button>
+        <button onclick="setCommit(${r.id},'hard')" style="background:${r.commitStatus==='hard'?'#1e3a2a':'#12151f'};border:1px solid #3a5a2a;color:#7bc47a;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.68rem;cursor:pointer;">Hard Commit</button>
+        <button onclick="setCommit(${r.id},'open')" style="background:#12151f;border:1px solid #2a2d3a;color:#555;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.68rem;cursor:pointer;">Clear</button>
+        ${!r.scouted?`<button onclick="scoutRecruit(${r.id})" style="background:#12151f;border:1px solid #2a3a5a;color:#5ba3e0;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.68rem;cursor:pointer;">🔍 Official Visit</button>`:'<span style="font-size:0.65rem;color:#555;padding:0.2rem 0;">✓ Scouted</span>'}
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Known Background</div>
+      ${r.parentAlma?`<div class="detail-row"><span class="detail-row-label">Family ties</span><span class="detail-row-val" style="color:#c9a84c;">${r.parentAlma} alum</span></div>`:'<div style="font-size:0.72rem;color:#444;padding:0.2rem 0;">No known family ties</div>'}
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Motivations <span style="color:#444;font-size:0.58rem;font-weight:400;"> · ⚠ = dealbreaker</span></div>
+      <div>${r.motivations.map(m=>`<span class="motivation-tag ${m.isDealbreaker?'db':''}">${m.name}${m.isDealbreaker?' ⚠':''}</span>`).join('')}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Traits & Potential</div>
+      ${r.scouted ? `
+        <div class="detail-row">
+          <span class="detail-row-label">Arrival OVR</span>
+          <span class="detail-row-val" style="color:#c9a84c;font-weight:700;">${r.arrivalOVR}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row-label">Dev Ceiling</span>
+          <span class="detail-row-val" style="color:${r.devCeiling>=90?'#5bc47a':r.devCeiling>=80?'#c9a84c':'#c47a5b'};font-weight:700;">${r.devCeiling}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row-label">Projection</span>
+          <span class="detail-row-val" style="color:${r.ovrType==='gem'?'#5bc47a':r.ovrType==='bust'?'#c45b5b':'#888'};">
+            ${r.ovrType==='gem'?'💎 Hidden Gem':r.ovrType==='bust'?'⚠️ Bust Risk':'Normal Development'}
+          </span>
+        </div>
+        <div style="margin-top:0.5rem;">${r.traits.map(t=>`<span style="display:inline-block;background:#12151f;border:1px solid #2a2d3a;border-radius:3px;font-size:0.65rem;padding:0.12rem 0.4rem;color:#888;margin:0.1rem 0.1rem 0 0;">${t}</span>`).join('')}</div>
+      ` : `<div class="hidden-note">🔒 Schedule an official visit to reveal OVR, ceiling, projection, and traits</div>`}
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Program Interest</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:0.2rem;">
+        <div class="interest-bar" style="width:110px;height:7px;"><div class="interest-fill" style="width:${r.interest}%;background:${interestColor(r.interest)};"></div></div>
+        <span style="font-size:0.82rem;font-weight:700;color:${interestColor(r.interest)};">${r.interest}%</span>
+      </div>
+      <div style="font-size:0.65rem;color:#444;margin-top:0.3rem;">Base interest · will update with school matching</div>
+    </div>`;
+}
+
+function scoutRecruit(id) {
+  const r=allRecruits.find(x=>x.id===id);
+  if(!r) return;
+  r.scouted=true;
+  renderDetail(id);
+  renderTable();
+}
+
+function setCommit(id,status) {
+  const r=allRecruits.find(x=>x.id===id);
+  if(!r) return;
+  r.commitStatus=status;
+  r.commitSchool=status!=='open'?'My School':null;
+  renderDetail(id);
+  renderTable();
+  if(activeTab==='bigboard') renderBigBoard();
+  if(activeTab==='rankings') renderClassRankings();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EVENT LISTENERS
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('star-filter').addEventListener('click',e=>{
+  if(!e.target.classList.contains('star-btn')) return;
+  document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  renderTable();
 });
 
-buildSchemeGrids();
-buildTreeGrid();
+['search-input','pos-filter','state-filter','scheme-filter','year-filter','arch-filter','commit-filter'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',renderTable);
+  document.getElementById(id).addEventListener('change',renderTable);
+});
+
+document.getElementById('rank-service').addEventListener('change',()=>{
+  sortCol='natRank'; sortDir=1;
+  renderTable();
+});
+
+document.querySelectorAll('th[data-sort]').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const col=th.dataset.sort;
+    if(sortCol===col){sortDir*=-1;}else{sortCol=col;sortDir=col==='natRank'?1:-1;}
+    renderTable();
+  });
+});
+
+renderTable();
+renderBigBoard();
 </script>
 </body>
 </html>
