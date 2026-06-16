@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dynasty – Hub</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0c12; color: #e8e8e8; min-height: 100vh; overflow-x: hidden; }
+
+/* TOP BAR */
+.topbar { background: #1a1d27; border-bottom: 2px solid #c9a84c33; padding: 0 1.5rem; height: 52px; display: flex; align-items: center; gap: 1.5rem; position: sticky; top: 0; z-index: 100; }
+.topbar-logo { font-size: 1rem; font-weight: 800; letter-spacing: 0.1em; color: #c9a84c; flex-shrink: 0; }
+.topbar-divider { width: 1px; height: 24px; background: #2a2d3a; flex-shrink: 0; }
+.topbar-school { font-size: 0.85rem; font-weight: 700; color: #e8e8e8; flex-shrink: 0; }
+.topbar-role { font-size: 0.72rem; color: #666; flex-shrink: 0; }
+.topbar-spacer { flex: 1; }
+.topbar-stat { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
+.topbar-stat-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #444; }
+.topbar-stat-val { font-size: 0.82rem; font-weight: 700; color: #c9a84c; line-height: 1.1; }
+.week-badge { background: #c9a84c; color: #0a0c12; font-size: 0.72rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 4px; letter-spacing: 0.04em; flex-shrink: 0; }
+.hours-bar-wrap { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; min-width: 120px; }
+.hours-bar-top { display: flex; justify-content: space-between; font-size: 0.6rem; }
+.hours-bar-label { color: #555; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.hours-bar-val { color: #c9a84c; font-weight: 700; }
+.hours-bar { height: 4px; background: #2a2d3a; border-radius: 2px; overflow: hidden; }
+.hours-bar-fill { height: 100%; background: #c9a84c; border-radius: 2px; transition: width 0.3s; }
+.hours-bar-fill.low { background: #c47a5b; }
+
+/* LAYOUT */
+.hub-layout { display: grid; grid-template-columns: 260px 1fr 300px; height: calc(100vh - 52px); }
+
+/* LEFT PANEL */
+.left-panel { background: #12151f; border-right: 1px solid #1e2130; overflow-y: auto; display: flex; flex-direction: column; }
+.panel-section { border-bottom: 1px solid #1e2130; }
+.panel-section-title { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #444; padding: 0.75rem 1rem 0.4rem; }
+
+/* CALENDAR */
+.cal-header { padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; }
+.cal-month { font-size: 0.82rem; font-weight: 700; color: #e8e8e8; }
+.cal-year { font-size: 0.72rem; color: #555; }
+.cal-phase { font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 3px; margin: 0 1rem 0.75rem; }
+.phase-signing { background: #1e3a2a; color: #5bc47a; }
+.phase-spring { background: #1e2a3a; color: #5ba3e0; }
+.phase-summer { background: #2a2a1e; color: #c4b45b; }
+.phase-camp { background: #2a1e2a; color: #c07ad4; }
+.phase-season { background: #2a1e1e; color: #c47a5b; }
+.phase-bowl { background: #3a2010; color: #e09050; }
+.phase-portal { background: #1a2a2a; color: #5bc4c4; }
+
+/* WEEKLY TASKS */
+.task-list { padding: 0.5rem 0; }
+.task-item { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.45rem 1rem; cursor: pointer; transition: background 0.1s; }
+.task-item:hover { background: #1a1d27; }
+.task-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9a84c; flex-shrink: 0; margin-top: 5px; }
+.task-dot.done { background: #5bc47a; }
+.task-dot.locked { background: #2a2d3a; }
+.task-text { font-size: 0.76rem; color: #aaa; line-height: 1.4; }
+.task-text.done { color: #555; text-decoration: line-through; }
+.task-cost { font-size: 0.62rem; color: #555; margin-top: 0.1rem; }
+
+/* HOURS BREAKDOWN */
+.hours-breakdown { padding: 0.5rem 1rem 0.75rem; }
+.hb-row { display: flex; justify-content: space-between; align-items: center; padding: 0.2rem 0; font-size: 0.72rem; }
+.hb-label { color: #666; }
+.hb-val { color: #888; font-weight: 600; }
+.hb-total { color: #c9a84c; font-weight: 700; font-size: 0.78rem; border-top: 1px solid #2a2d3a; margin-top: 0.3rem; padding-top: 0.3rem; }
+
+/* ADVANCE WEEK */
+.advance-wrap { padding: 1rem; margin-top: auto; border-top: 1px solid #1e2130; }
+.advance-btn { width: 100%; background: #c9a84c; color: #0a0c12; border: none; border-radius: 7px; padding: 0.7rem; font-size: 0.85rem; font-weight: 800; cursor: pointer; letter-spacing: 0.04em; transition: all 0.15s; }
+.advance-btn:hover { background: #d4b45c; transform: translateY(-1px); }
+.advance-btn:active { transform: translateY(0); }
+.advance-sub { font-size: 0.65rem; color: #444; text-align: center; margin-top: 0.4rem; }
+
+/* CENTER */
+.center-panel { overflow-y: auto; padding: 1.25rem; background: #0a0c12; }
+.center-greeting { margin-bottom: 1.25rem; }
+.greeting-title { font-size: 1.1rem; font-weight: 700; color: #e8e8e8; }
+.greeting-sub { font-size: 0.78rem; color: #555; margin-top: 0.2rem; }
+
+/* NAV CARDS */
+.nav-section-title { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #444; margin-bottom: 0.6rem; margin-top: 1.25rem; }
+.nav-section-title:first-of-type { margin-top: 0; }
+.nav-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem; }
+.nav-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem; }
+.nav-card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 9px; padding: 1rem; cursor: pointer; transition: all 0.15s; text-decoration: none; display: block; }
+.nav-card:hover { border-color: #c9a84c55; background: #1e2130; transform: translateY(-1px); }
+.nav-card.primary { border-color: #c9a84c44; }
+.nav-card.primary:hover { border-color: #c9a84c; }
+.nav-card-icon { font-size: 1.4rem; margin-bottom: 0.4rem; }
+.nav-card-title { font-size: 0.85rem; font-weight: 700; color: #e8e8e8; margin-bottom: 0.2rem; }
+.nav-card-sub { font-size: 0.68rem; color: #555; line-height: 1.4; }
+.nav-card-badge { display: inline-block; font-size: 0.58rem; font-weight: 700; padding: 0.08rem 0.35rem; border-radius: 2px; margin-top: 0.35rem; }
+.badge-hours { background: #1e2a3a; color: #5ba3e0; }
+.badge-nil { background: #1e3a2a; color: #5bc47a; }
+.badge-free { background: #2a2a2a; color: #666; }
+.badge-alert { background: #2a1e1e; color: #c47a5b; }
+
+/* SEASON RECORD */
+.record-bar { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 9px; padding: 0.85rem 1rem; display: flex; align-items: center; gap: 1.5rem; margin-bottom: 0.6rem; }
+.record-item { display: flex; flex-direction: column; align-items: center; }
+.record-num { font-size: 1.4rem; font-weight: 800; color: #e8e8e8; line-height: 1; }
+.record-num.wins { color: #5bc47a; }
+.record-num.losses { color: #c47a5b; }
+.record-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.08em; color: #444; margin-top: 0.1rem; }
+.record-divider { width: 1px; height: 30px; background: #2a2d3a; }
+.record-next { flex: 1; }
+.record-next-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; color: #444; margin-bottom: 0.2rem; }
+.record-next-game { font-size: 0.8rem; font-weight: 600; color: #e8e8e8; }
+.record-next-detail { font-size: 0.68rem; color: #555; margin-top: 0.1rem; }
+
+/* RIGHT PANEL - NEWS FEED */
+.right-panel { background: #12151f; border-left: 1px solid #1e2130; display: flex; flex-direction: column; overflow: hidden; }
+.feed-header { padding: 0.75rem 1rem; border-bottom: 1px solid #1e2130; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.feed-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #555; }
+.feed-refresh { font-size: 0.65rem; color: #444; cursor: pointer; border: 1px solid #2a2d3a; border-radius: 3px; padding: 0.15rem 0.4rem; transition: all 0.1s; }
+.feed-refresh:hover { border-color: #c9a84c; color: #c9a84c; }
+.feed-tabs { display: flex; border-bottom: 1px solid #1e2130; flex-shrink: 0; }
+.feed-tab { flex: 1; padding: 0.5rem; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #444; cursor: pointer; text-align: center; border-bottom: 2px solid transparent; transition: all 0.12s; }
+.feed-tab.active { color: #c9a84c; border-bottom-color: #c9a84c; }
+.feed-list { flex: 1; overflow-y: auto; }
+.feed-item { padding: 0.85rem 1rem; border-bottom: 1px solid #1a1d27; cursor: pointer; transition: background 0.08s; }
+.feed-item:hover { background: #1a1d27; }
+.feed-item-header { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem; }
+.feed-handle { font-size: 0.68rem; font-weight: 700; color: #c9a84c; }
+.feed-time { font-size: 0.62rem; color: #444; margin-left: auto; }
+.feed-tag { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.08rem 0.3rem; border-radius: 2px; }
+.ftag-recruiting { background: #1e3a2a; color: #5bc47a; }
+.ftag-coaching { background: #1e2a3a; color: #5ba3e0; }
+.ftag-rankings { background: #2a2a1e; color: #c4b45b; }
+.ftag-awards { background: #2a1e2a; color: #c07ad4; }
+.ftag-transfer { background: #1a2a2a; color: #5bc4c4; }
+.ftag-nil { background: #2a1e1e; color: #c47a5b; }
+.feed-text { font-size: 0.74rem; color: #aaa; line-height: 1.5; }
+.feed-loading { padding: 2rem 1rem; text-align: center; color: #444; font-size: 0.78rem; }
+.feed-dot { display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: #444; margin: 0 2px; animation: pulse 1.2s infinite; }
+.feed-dot:nth-child(2) { animation-delay: 0.2s; }
+.feed-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">THE DYNASTY</div>
+  <div class="topbar-divider"></div>
+  <div>
+    <div class="topbar-school" id="tb-school">—</div>
+    <div class="topbar-role" id="tb-role">—</div>
+  </div>
+  <div class="topbar-divider"></div>
+  <div class="week-badge" id="tb-week">Week 1</div>
+  <div class="topbar-stat">
+    <span class="topbar-stat-label">Season</span>
+    <span class="topbar-stat-val" id="tb-year">2026</span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="hours-bar-wrap">
+    <div class="hours-bar-top">
+      <span class="hours-bar-label">Staff Hours</span>
+      <span class="hours-bar-val"><span id="tb-hours">100</span> / <span id="tb-max-hours">100</span></span>
+    </div>
+    <div class="hours-bar">
+      <div class="hours-bar-fill" id="tb-hours-bar" style="width:100%"></div>
+    </div>
+  </div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-stat">
+    <span class="topbar-stat-label">NIL Budget</span>
+    <span class="topbar-stat-val" id="tb-nil">—</span>
+  </div>
+  <div class="topbar-divider"></div>
+  <a href="setup.html" style="font-size:0.65rem;color:#333;text-decoration:none;border:1px solid #2a2d3a;padding:0.25rem 0.5rem;border-radius:4px;transition:all 0.1s;" onmouseover="this.style.color='#888'" onmouseout="this.style.color='#333'">New Career</a>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="hub-layout">
+
+  <!-- LEFT: Calendar + Tasks -->
+  <div class="left-panel">
+    <div class="panel-section">
+      <div class="cal-header">
+        <div>
+          <div class="cal-month" id="cal-month">January</div>
+          <div class="cal-year" id="cal-year-label">2026</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.62rem;color:#444;">Week</div>
+          <div style="font-size:1.2rem;font-weight:800;color:#c9a84c;line-height:1;" id="cal-week-num">1</div>
+          <div style="font-size:0.58rem;color:#333;">of 52</div>
+        </div>
+      </div>
+      <div class="cal-phase" id="cal-phase">Early Signing Period</div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">This Week's Tasks</div>
+      <div class="task-list" id="task-list"></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">Hours Spent This Week</div>
+      <div class="hours-breakdown" id="hours-breakdown">
+        <div class="hb-row"><span class="hb-label">Available</span><span class="hb-val hb-total" id="hb-available">100 hrs</span></div>
+      </div>
+    </div>
+
+    <div class="advance-wrap">
+      <button class="advance-btn" onclick="advanceWeek()">Advance to Week <span id="next-week-num">2</span> →</button>
+      <div class="advance-sub" id="advance-sub">Spend your hours before advancing</div>
+    </div>
+  </div>
+
+  <!-- CENTER: Nav -->
+  <div class="center-panel">
+    <div class="center-greeting">
+      <div class="greeting-title" id="greeting-title">Welcome, Coach</div>
+      <div class="greeting-sub" id="greeting-sub">Here's where things stand heading into Week 1.</div>
+    </div>
+
+    <!-- Season Record -->
+    <div class="record-bar">
+      <div class="record-item">
+        <div class="record-num wins" id="rec-wins">0</div>
+        <div class="record-label">Wins</div>
+      </div>
+      <div class="record-divider"></div>
+      <div class="record-item">
+        <div class="record-num losses" id="rec-losses">0</div>
+        <div class="record-label">Losses</div>
+      </div>
+      <div class="record-divider"></div>
+      <div class="record-item">
+        <div class="record-num" id="rec-rank" style="color:#c9a84c;">—</div>
+        <div class="record-label">Ranking</div>
+      </div>
+      <div class="record-divider"></div>
+      <div class="record-next">
+        <div class="record-next-label">Next Game</div>
+        <div class="record-next-game" id="next-game">Preseason</div>
+        <div class="record-next-detail" id="next-game-detail">Season hasn't started</div>
+      </div>
+    </div>
+
+    <!-- PRIMARY ACTIONS -->
+    <div class="nav-section-title">Primary Actions</div>
+    <div class="nav-grid-2">
+      <a class="nav-card primary" href="recruiting.html">
+        <div class="nav-card-icon">🎯</div>
+        <div class="nav-card-title">Recruiting</div>
+        <div class="nav-card-sub">Manage your big board, contact recruits, schedule visits and camps.</div>
+        <span class="nav-card-badge badge-hours">Uses Staff Hours</span>
+      </a>
+      <div class="nav-card primary" onclick="comingSoon('Game Plan')">
+        <div class="nav-card-icon">📋</div>
+        <div class="nav-card-title">Game Plan</div>
+        <div class="nav-card-sub">Set your offensive and defensive approach for this week's opponent.</div>
+        <span class="nav-card-badge badge-hours">Uses Staff Hours</span>
+      </div>
+    </div>
+
+    <!-- COACHING -->
+    <div class="nav-section-title">Coaching</div>
+    <div class="nav-grid-3">
+      <div class="nav-card" onclick="comingSoon('Depth Chart')">
+        <div class="nav-card-icon">📊</div>
+        <div class="nav-card-title">Depth Chart</div>
+        <div class="nav-card-sub">Set your starters and package personnel.</div>
+        <span class="nav-card-badge badge-free">Free Action</span>
+      </div>
+      <div class="nav-card" onclick="comingSoon('Playbook')">
+        <div class="nav-card-icon">📖</div>
+        <div class="nav-card-title">Playbook</div>
+        <div class="nav-card-sub">Review your scheme concepts and formations.</div>
+        <span class="nav-card-badge badge-free">Free Action</span>
+      </div>
+      <div class="nav-card" onclick="comingSoon('Scouting')">
+        <div class="nav-card-icon">🔍</div>
+        <div class="nav-card-title">Scouting</div>
+        <div class="nav-card-sub">Break down this week's opponent tendencies.</div>
+        <span class="nav-card-badge badge-hours">Uses Staff Hours</span>
+      </div>
+    </div>
+
+    <!-- PROGRAM -->
+    <div class="nav-section-title">Program</div>
+    <div class="nav-grid-3">
+      <div class="nav-card" onclick="comingSoon('Nation Goals')">
+        <div class="nav-card-icon">🎖️</div>
+        <div class="nav-card-title">Nation Goals</div>
+        <div class="nav-card-sub">Your fanbase and collective's demands this season.</div>
+        <span class="nav-card-badge badge-free">Free Action</span>
+      </div>
+      <div class="nav-card" onclick="comingSoon('Collective & NIL')">
+        <div class="nav-card-icon">💰</div>
+        <div class="nav-card-title">Collective & NIL</div>
+        <div class="nav-card-sub">Manage NIL budget, donor relationships, and player contracts.</div>
+        <span class="nav-card-badge badge-nil">NIL Currency</span>
+      </div>
+      <div class="nav-card" onclick="comingSoon('Facilities')">
+        <div class="nav-card-icon">🏟️</div>
+        <div class="nav-card-title">Facilities</div>
+        <div class="nav-card-sub">Invest in upgrades that boost recruiting and player development.</div>
+        <span class="nav-card-badge badge-nil">NIL Currency</span>
+      </div>
+    </div>
+    <div class="nav-grid-2">
+      <div class="nav-card" onclick="comingSoon('School Grades')">
+        <div class="nav-card-icon">📈</div>
+        <div class="nav-card-title">School Grades</div>
+        <div class="nav-card-sub">View your program's current attribute grades and tier.</div>
+        <span class="nav-card-badge badge-free">Free Action</span>
+      </div>
+      <div class="nav-card" onclick="comingSoon('Fundraising')">
+        <div class="nav-card-icon">🤝</div>
+        <div class="nav-card-title">Fundraising</div>
+        <div class="nav-card-sub">Work your donor network to grow the NIL budget.</div>
+        <span class="nav-card-badge badge-hours">Uses Staff Hours</span>
+      </div>
+    </div>
+
+    <!-- STAFF -->
+    <div class="nav-section-title">Staff</div>
+    <div class="nav-grid-3">
+      <div class="nav-card" onclick="comingSoon('Skill Trees')">
+        <div class="nav-card-icon">🌳</div>
+        <div class="nav-card-title">Skill Trees</div>
+        <div class="nav-card-sub">Spend coach XP to unlock abilities and bonuses.</div>
+        <span class="nav-card-badge badge-free">Free Action</span>
+      </div>
+      <div class="nav-card" onclick="comingSoon('Coaching Staff')">
+        <div class="nav-card-icon">👥</div>
+        <div class="nav-card-title">Coaching Staff</div>
+        <div class="nav-card-sub">Hire, fire, and manage your assistant coaches.</div>
+        <span class="nav-card-badge badge-free">Free Action</span>
+      </div>
+      <div class="nav-card" onclick="comingSoon('Coach Profile')">
+        <div class="nav-card-icon">🏅</div>
+        <div class="nav-card-title">Coach Profile</div>
+        <div class="nav-card-sub">Your career stats, reputation, and coaching history.</div>
+        <span class="nav-card-badge badge-free">Free Action</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: News Feed -->
+  <div class="right-panel">
+    <div class="feed-header">
+      <div class="feed-title">CFB Feed</div>
+      <div class="feed-refresh" onclick="loadFeed()">↻ Refresh</div>
+    </div>
+    <div class="feed-tabs">
+      <div class="feed-tab active" data-tab="all" onclick="switchFeedTab(this)">All</div>
+      <div class="feed-tab" data-tab="recruiting" onclick="switchFeedTab(this)">Recruiting</div>
+      <div class="feed-tab" data-tab="coaching" onclick="switchFeedTab(this)">Coaching</div>
+      <div class="feed-tab" data-tab="rankings" onclick="switchFeedTab(this)">Rankings</div>
+    </div>
+    <div class="feed-list" id="feed-list">
+      <div class="feed-loading">
+        <div style="margin-bottom:0.5rem;">Loading feed</div>
+        <div class="feed-dot"></div><div class="feed-dot"></div><div class="feed-dot"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// GEMINI API
+// ═══════════════════════════════════════════
+const GEMINI_KEY = 'AQ.Ab8RN6K91SmF_DM0DPZNaBfLDkLtMDpgRb5h2PcK-1IbgdV6vw';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
+
+// ═══════════════════════════════════════════
+// CAREER STATE
+// ═══════════════════════════════════════════
+const careerRaw = sessionStorage.getItem('dynastyCareer');
+const career = careerRaw ? JSON.parse(careerRaw) : {
+  coachName:'Coach', school:{name:'Your School',conf:'—',nilBudget:50},
+  role:'HC', offScheme:'Spread RPO', defScheme:'4-3 Base',
+  year:2026, season:1,
+};
+
+// Game state — will eventually be persisted
+let gameState = {
+  week: career.week || 1,
+  year: career.year || 2026,
+  hoursTotal: 100,
+  hoursUsed: 0,
+  wins: 0,
+  losses: 0,
+  ranking: null,
+  hoursLog: [],
+};
+
+// ═══════════════════════════════════════════
+// CALENDAR DATA
+// ═══════════════════════════════════════════
+const WEEK_DATA = [
+  // Week: {month, phase, phaseCls, tasks, seasonWeek}
+  {w:1,  month:'January',   phase:'Early Signing Period',  cls:'phase-signing', tasks:['Sign recruiting class','Review transfer portal','Renew staff contracts']},
+  {w:2,  month:'January',   phase:'Early Signing Period',  cls:'phase-signing', tasks:['Sign recruiting class','Contact unsigned commits','Evaluate portal additions']},
+  {w:3,  month:'January',   phase:'Transfer Portal',       cls:'phase-portal',  tasks:['Recruit transfer portal','Evaluate portal fits','NIL outreach to portal targets']},
+  {w:4,  month:'January',   phase:'Transfer Portal',       cls:'phase-portal',  tasks:['Recruit transfer portal','Finalize portal offers','Coaching staff review']},
+  {w:5,  month:'February',  phase:'Coaching Carousel',     cls:'phase-signing', tasks:['Review assistant staff','Evaluate open positions','Scout spring recruits']},
+  {w:6,  month:'February',  phase:'Coaching Carousel',     cls:'phase-signing', tasks:['Finalize coaching staff','Begin spring recruit outreach','Fundraise']},
+  {w:7,  month:'February',  phase:'Spring Prep',           cls:'phase-spring',  tasks:['Install spring playbook','Set spring depth chart','Begin spring recruit outreach']},
+  {w:8,  month:'February',  phase:'Spring Prep',           cls:'phase-spring',  tasks:['Spring practice prep','Evaluate returning roster','Contact spring recruits']},
+  {w:9,  month:'March',     phase:'Spring Practice',       cls:'phase-spring',  tasks:['Spring practice','Evaluate position battles','Official visits']},
+  {w:10, month:'March',     phase:'Spring Practice',       cls:'phase-spring',  tasks:['Spring practice','Host official visits','Scout junior class']},
+  {w:11, month:'March',     phase:'Spring Practice',       cls:'phase-spring',  tasks:['Spring practice','Recruiting calls','Fundraise']},
+  {w:12, month:'March',     phase:'Spring Practice',       cls:'phase-spring',  tasks:['Spring practice','Host official visits','Evaluate portal options']},
+  {w:13, month:'April',     phase:'Spring Game',           cls:'phase-spring',  tasks:['Finalize spring game roster','Host spring game','Contact recruits post-spring']},
+  {w:14, month:'April',     phase:'Post Spring',           cls:'phase-spring',  tasks:['Debrief spring game','Facility planning','Recruit calls']},
+  {w:15, month:'May',       phase:'Summer Recruiting',     cls:'phase-summer',  tasks:['Schedule 7-on-7 camp','Recruit calls','Host unofficial visits']},
+  {w:16, month:'May',       phase:'Summer Recruiting',     cls:'phase-summer',  tasks:['Host 7-on-7 camp','Recruit calls','Fundraise']},
+  {w:17, month:'May',       phase:'Summer Recruiting',     cls:'phase-summer',  tasks:['Recruit calls','Host unofficial visits','Coaching clinic']},
+  {w:18, month:'June',      phase:'Summer Recruiting',     cls:'phase-summer',  tasks:['Host 7-on-7 camp','Recruit calls','Fundraise']},
+  {w:19, month:'June',      phase:'Summer Recruiting',     cls:'phase-summer',  tasks:['Recruit calls','Host unofficial visits','Scout junior class']},
+  {w:20, month:'June',      phase:'Dead Period',           cls:'phase-summer',  tasks:['Fundraise','Facility upgrades','Review roster']},
+  {w:21, month:'July',      phase:'Dead Period',           cls:'phase-summer',  tasks:['Fundraise','Facility upgrades','Staff development']},
+  {w:22, month:'July',      phase:'Preseason Prep',        cls:'phase-camp',    tasks:['Finalize depth chart','Install fall playbook','Recruit calls']},
+  {w:23, month:'July',      phase:'Preseason Prep',        cls:'phase-camp',    tasks:['Set fall depth chart','Install game plans','Recruit calls']},
+  {w:24, month:'July',      phase:'Preseason Prep',        cls:'phase-camp',    tasks:['Finalize fall camp roster','Scout Week 1 opponent','Recruit calls']},
+  {w:25, month:'August',    phase:'Fall Camp',             cls:'phase-camp',    tasks:['Fall camp','Set depth chart','Scout Week 1 opponent']},
+  {w:26, month:'August',    phase:'Fall Camp',             cls:'phase-camp',    tasks:['Fall camp','Game plan Week 1','Finalize depth chart']},
+  {w:27, month:'August',    phase:'Fall Camp',             cls:'phase-camp',    tasks:['Fall camp','Game plan Week 1','Recruit calls']},
+  {w:28, month:'August',    phase:'Week 1 Prep',           cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:29, month:'September', phase:'Regular Season Wk 1',   cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:30, month:'September', phase:'Regular Season Wk 2',   cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:31, month:'September', phase:'Regular Season Wk 3',   cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:32, month:'September', phase:'Regular Season Wk 4',   cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:33, month:'October',   phase:'Regular Season Wk 5',   cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:34, month:'October',   phase:'Regular Season Wk 6',   cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:35, month:'October',   phase:'Regular Season Wk 7',   cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:36, month:'October',   phase:'Regular Season Wk 8',   cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:37, month:'November',  phase:'Regular Season Wk 9',   cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:38, month:'November',  phase:'Regular Season Wk 10',  cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:39, month:'November',  phase:'Regular Season Wk 11',  cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:40, month:'November',  phase:'Regular Season Wk 12',  cls:'phase-season',  tasks:['Set weekly game plan','Scout opponent','Early signing prep'], game:true},
+  {w:41, month:'November',  phase:'Conference Championship',cls:'phase-bowl',   tasks:['Set weekly game plan','Scout opponent','Recruit calls'], game:true},
+  {w:42, month:'December',  phase:'Bowl Season',           cls:'phase-bowl',    tasks:['Bowl game prep','Recruit calls','Evaluate transfer portal'], game:true},
+  {w:43, month:'December',  phase:'Bowl Season',           cls:'phase-bowl',    tasks:['Bowl game prep','Recruit calls','NIL retention negotiations'], game:true},
+  {w:44, month:'December',  phase:'Playoff / Bowl',        cls:'phase-bowl',    tasks:['Playoff game prep','Recruit calls','Portal watch'], game:true},
+  {w:45, month:'December',  phase:'Early Signing Period',  cls:'phase-signing', tasks:['Sign recruiting class','Contact unsigned commits','Portal opens soon']},
+  {w:46, month:'December',  phase:'Early Signing Period',  cls:'phase-signing', tasks:['Sign recruiting class','Finalize portal list','Coaching staff review']},
+  {w:47, month:'December',  phase:'Transfer Portal',       cls:'phase-portal',  tasks:['Recruit transfer portal','NIL outreach','Coaching carousel watch']},
+  {w:48, month:'December',  phase:'Transfer Portal',       cls:'phase-portal',  tasks:['Recruit transfer portal','Finalize portal targets','Fundraise']},
+  {w:49, month:'January',   phase:'National Championship', cls:'phase-bowl',    tasks:['Championship prep','Recruit calls','Portal evaluation'], game:true},
+  {w:50, month:'January',   phase:'Offseason Review',      cls:'phase-signing', tasks:['Review season','Set offseason goals','Fundraise']},
+  {w:51, month:'January',   phase:'Offseason',             cls:'phase-signing', tasks:['Coaching staff review','Recruit calls','Facility planning']},
+  {w:52, month:'January',   phase:'New Year — Season End', cls:'phase-signing', tasks:['Prepare for new season','Final portal review','Set program goals']},
+];
+
+function getWeekData(w) {
+  return WEEK_DATA.find(d=>d.w===w) || WEEK_DATA[0];
+}
+
+// ═══════════════════════════════════════════
+// NIL DISPLAY
+// ═══════════════════════════════════════════
+function nilLabel(v) {
+  if(!v) return '—';
+  return v>=90?'$10M+':v>=80?'$6-10M':v>=70?'$4-6M':v>=60?'$2-4M':v>=50?'$1-2M':'<$1M';
+}
+
+// ═══════════════════════════════════════════
+// UI UPDATE
+// ═══════════════════════════════════════════
+function updateTopBar() {
+  document.getElementById('tb-school').textContent = career.school?.name || '—';
+  document.getElementById('tb-role').textContent = `${career.role||'HC'} · ${career.offScheme||'—'} / ${career.defScheme||'—'}`;
+  document.getElementById('tb-week').textContent = `Week ${gameState.week}`;
+  document.getElementById('tb-year').textContent = gameState.year;
+  document.getElementById('tb-nil').textContent = nilLabel(career.school?.nilBudget);
+  updateHoursBar();
+}
+
+function updateHoursBar() {
+  const remaining = gameState.hoursTotal - gameState.hoursUsed;
+  const pct = Math.max(0, remaining / gameState.hoursTotal * 100);
+  document.getElementById('tb-hours').textContent = remaining;
+  document.getElementById('tb-max-hours').textContent = gameState.hoursTotal;
+  const bar = document.getElementById('tb-hours-bar');
+  bar.style.width = pct + '%';
+  bar.className = 'hours-bar-fill' + (pct < 25 ? ' low' : '');
+}
+
+function updateCalendar() {
+  const wd = getWeekData(gameState.week);
+  document.getElementById('cal-month').textContent = wd.month;
+  document.getElementById('cal-year-label').textContent = gameState.year;
+  document.getElementById('cal-week-num').textContent = gameState.week;
+  document.getElementById('next-week-num').textContent = gameState.week < 52 ? gameState.week + 1 : 1;
+  const phase = document.getElementById('cal-phase');
+  phase.textContent = wd.phase;
+  phase.className = 'cal-phase ' + wd.cls;
+  document.getElementById('advance-sub').textContent =
+    gameState.hoursUsed === 0 ? 'No hours spent this week' :
+    `${gameState.hoursUsed} hours spent · ${gameState.hoursTotal - gameState.hoursUsed} remaining`;
+}
+
+function updateTasks() {
+  const wd = getWeekData(gameState.week);
+  const list = document.getElementById('task-list');
+  const taskCosts = {
+    'Sign recruiting class': 0,
+    'Set weekly game plan': 15,
+    'Scout opponent': 20,
+    'Recruit calls': 10,
+    'Host official visits': 25,
+    'Schedule 7-on-7 camp': 20,
+    'Host 7-on-7 camp': 30,
+    'Fundraise': 15,
+    'Coaching clinic': 20,
+    'Spring practice': 0,
+    'Fall camp': 0,
+    'Set depth chart': 0,
+    'Review transfer portal': 10,
+    'Recruit transfer portal': 15,
+    'NIL outreach': 10,
+    'Facility upgrades': 0,
+    'Bowl game prep': 20,
+    'Playoff game prep': 25,
+    'Championship prep': 25,
+  };
+  list.innerHTML = wd.tasks.map(t => {
+    const cost = taskCosts[t] || 0;
+    return `<div class="task-item">
+      <div class="task-dot"></div>
+      <div>
+        <div class="task-text">${t}</div>
+        ${cost > 0 ? `<div class="task-cost">${cost} staff hours</div>` : '<div class="task-cost">Free action</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateHoursBreakdown() {
+  const remaining = gameState.hoursTotal - gameState.hoursUsed;
+  const el = document.getElementById('hours-breakdown');
+  let html = `<div class="hb-row hb-total"><span class="hb-label">Remaining</span><span class="hb-val" style="color:${remaining<20?'#c47a5b':'#c9a84c'};">${remaining} hrs</span></div>`;
+  if (gameState.hoursLog.length > 0) {
+    html += gameState.hoursLog.map(l=>`<div class="hb-row"><span class="hb-label">${l.action}</span><span class="hb-val">${l.hours} hrs</span></div>`).join('');
+  }
+  el.innerHTML = html;
+}
+
+function updateGreeting() {
+  const wd = getWeekData(gameState.week);
+  document.getElementById('greeting-title').textContent = `Week ${gameState.week} — ${wd.phase}`;
+  document.getElementById('greeting-sub').textContent =
+    `${gameState.year} Season · ${career.school?.name||'Your School'} · ${career.coachName||'Coach'}`;
+  document.getElementById('rec-wins').textContent = gameState.wins;
+  document.getElementById('rec-losses').textContent = gameState.losses;
+  document.getElementById('rec-rank').textContent = gameState.ranking || '—';
+  const inSeason = wd.game;
+  document.getElementById('next-game').textContent = inSeason ? 'This Saturday' : 'Preseason';
+  document.getElementById('next-game-detail').textContent = inSeason ? `${wd.phase}` : 'Regular season begins Week 28';
+}
+
+// ═══════════════════════════════════════════
+// ADVANCE WEEK
+// ═══════════════════════════════════════════
+function advanceWeek() {
+  gameState.week = gameState.week < 52 ? gameState.week + 1 : 1;
+  if (gameState.week === 1) gameState.year++;
+  gameState.hoursUsed = 0;
+  gameState.hoursLog = [];
+
+  // Save to sessionStorage
+  career.week = gameState.week;
+  career.year = gameState.year;
+  sessionStorage.setItem('dynastyCareer', JSON.stringify(career));
+
+  updateTopBar();
+  updateCalendar();
+  updateTasks();
+  updateHoursBreakdown();
+  updateGreeting();
+  loadFeed();
+}
+
+// ═══════════════════════════════════════════
+// NEWS FEED — Gemini API
+// ═══════════════════════════════════════════
+const REPORTERS = [
+  {handle:'@CFBInsider',    name:'Marcus Webb',     specialty:'general'},
+  {handle:'@RecruitingBeat',name:'Dana Holloway',   specialty:'recruiting'},
+  {handle:'@CoachingCarousel',name:'Trey Simmons',  specialty:'coaching'},
+  {handle:'@HeimanWatch',   name:'Kelsey Parks',    specialty:'awards'},
+  {handle:'@TransferWire',  name:'Josh Reeves',     specialty:'transfer'},
+  {handle:'@NILReport',     name:'Alicia Chen',     specialty:'nil'},
+  {handle:'@ConfidentialCFB',name:'Ray Dillard',    specialty:'general'},
+  {handle:'@RankingsDesk',  name:'Simone Taylor',   specialty:'rankings'},
+];
+
+const FEED_TAGS = {
+  recruiting:'ftag-recruiting', coaching:'ftag-coaching',
+  rankings:'ftag-rankings', awards:'ftag-awards',
+  transfer:'ftag-transfer', nil:'ftag-nil', general:'ftag-coaching'
+};
+
+let allArticles = [];
+let feedTab = 'all';
+
+async function loadFeed() {
+  const el = document.getElementById('feed-list');
+  el.innerHTML = `<div class="feed-loading"><div style="margin-bottom:0.5rem;">Generating feed</div><div class="feed-dot"></div><div class="feed-dot"></div><div class="feed-dot"></div></div>`;
+
+  const wd = getWeekData(gameState.week);
+  const school = career.school?.name || 'your school';
+  const conf = career.school?.conf || 'your conference';
+  const week = gameState.week;
+  const year = gameState.year;
+  const phase = wd.phase;
+
+  const prompt = `You are generating a college football news feed for a coaching simulation game. Generate exactly 8 short social media posts (like tweets) about college football. Each post must be under 256 characters. Each post should be from a different reporter perspective. Include a mix of: recruiting news, coaching rumors, ranking updates, award races, transfer portal activity, NIL news. Make them feel real and varied. The current game context: Week ${week} of ${year}, phase is "${phase}", the player coaches ${school} in the ${conf}. Reference ${school} in 2-3 of the posts naturally. Format your response as JSON array only, no other text: [{"handle":"@reporter","tag":"recruiting|coaching|rankings|awards|transfer|nil","text":"post text here","time":"Xm ago"},...]  Use these handles: ${REPORTERS.map(r=>r.handle).join(', ')}. Time values should vary from "2m ago" to "4h ago".`;
+
+  if (GEMINI_KEY === 'YOUR_GEMINI_KEY_HERE') {
+    // Fallback to procedural if no key set
+    allArticles = generateProceduralFeed(school, conf, phase, week, year);
+    renderFeed();
+    return;
+  }
+
+  try {
+    const res = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{parts:[{text: prompt}]}],
+        generationConfig:{temperature:0.9, maxOutputTokens:1500}
+      })
+    });
+    const data = await res.json();
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+    const cleaned = raw.replace(/```json|```/g,'').trim();
+    allArticles = JSON.parse(cleaned);
+    renderFeed();
+  } catch(e) {
+    allArticles = generateProceduralFeed(school, conf, phase, week, year);
+    renderFeed();
+  }
+}
+
+function generateProceduralFeed(school, conf, phase, week, year) {
+  const schools = ['Alabama','Georgia','Ohio State','Texas','Michigan','LSU','Notre Dame','Oregon','Clemson','Penn State'];
+  const rand = (arr) => arr[Math.floor(Math.random()*arr.length)];
+  const rival = rand(schools.filter(s=>s!==school));
+  const rival2 = rand(schools.filter(s=>s!==school&&s!==rival));
+  const stars = ['5-star','4-star','3-star'];
+  const positions = ['QB','WR','EDGE','OT','CB','RB','LB','S','DL','TE'];
+  const names = ['Malik Johnson','Darius Williams','Jordan Thomas','Marcus Davis','Tyrese Brown','Cameron Wilson','Isaiah Moore','Elijah Taylor'];
+  const coaches = ['Brian Kelly','Nick Saban Jr.','Dabo Swinney','Ryan Day','Lincoln Riley'];
+
+  return [
+    {handle:'@RecruitingBeat', tag:'recruiting', time:'12m ago',
+     text:`BREAKING: ${rand(stars)} ${rand(positions)} ${rand(names)} has dropped ${school} from his top schools. Sources say NIL gap was a factor. #Recruiting #${conf}`},
+    {handle:'@CoachingCarousel', tag:'coaching', time:'34m ago',
+     text:`Hearing ${rand(coaches)} is drawing interest from ${rival2} as their search heats up. Could shake up the ${conf} landscape heading into ${year+1}. #CoachingCarousel`},
+    {handle:'@RankingsDesk', tag:'rankings', time:'1h ago',
+     text:`New AP Poll drops Tuesday. ${rival} expected to move up after dominant win. ${school} situation worth monitoring with ${phase} upcoming. #CFBRankings`},
+    {handle:'@HeimanWatch', tag:'awards', time:'1h ago',
+     text:`Heisman frontrunners through Week ${week}: Three QBs and a RB from ${rival} leading the conversation. Race is wide open. Who's your pick? #Heisman ${year}`},
+    {handle:'@TransferWire', tag:'transfer', time:'2h ago',
+     text:`Portal watch: ${rand(stars)} ${rand(positions)} from ${rival2} has entered the portal. ${school} among programs expected to show interest. #TransferPortal #${conf}`},
+    {handle:'@NILReport', tag:'nil', time:'2h ago',
+     text:`NIL collectives at ${rival} and ${rival2} reportedly expanding their war chests ahead of the ${phase}. Arms race continues. #NIL #CollegeFootball`},
+    {handle:'@CFBInsider', tag:'coaching', time:'3h ago',
+     text:`${school} making noise in the ${conf} this ${phase}. Staff hours and recruiting momentum building. Keep an eye on this program. #${conf.replace(/\s/g,'')} #CFB`},
+    {handle:'@ConfidentialCFB', tag:'recruiting', time:'4h ago',
+     text:`Source: ${rand(stars)} ${rand(positions)} ${rand(names)} naming a decision date soon. ${school}, ${rival}, and ${rival2} all in the mix. Big one coming. #Recruiting`},
+  ];
+}
+
+function renderFeed() {
+  const el = document.getElementById('feed-list');
+  const filtered = feedTab === 'all' ? allArticles : allArticles.filter(a=>a.tag===feedTab);
+  if (!filtered.length) {
+    el.innerHTML = '<div class="feed-loading">No posts in this category</div>';
+    return;
+  }
+  el.innerHTML = filtered.map(a=>`
+    <div class="feed-item">
+      <div class="feed-item-header">
+        <span class="feed-handle">${a.handle}</span>
+        <span class="feed-tag ${FEED_TAGS[a.tag]||'ftag-coaching'}">${a.tag}</span>
+        <span class="feed-time">${a.time}</span>
+      </div>
+      <div class="feed-text">${a.text}</div>
+    </div>`).join('');
+}
+
+function switchFeedTab(tab) {
+  feedTab = tab.dataset.tab;
+  document.querySelectorAll('.feed-tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  renderFeed();
+}
+
+// ═══════════════════════════════════════════
+// COMING SOON
+// ═══════════════════════════════════════════
+function comingSoon(name) {
+  // Placeholder until sub-screens are built
+  alert(`${name} — Coming soon! This section is under construction.`);
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+updateTopBar();
+updateCalendar();
+updateTasks();
+updateHoursBreakdown();
+updateGreeting();
+loadFeed();
+</script>
+</body>
+</html>
