@@ -7,235 +7,203 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e8e8e8; min-height: 100vh; }
-
-/* HEADER */
 header { background: #1a1d27; border-bottom: 2px solid #c9a84c33; padding: 0.85rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
 header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.08em; color: #c9a84c; }
-.step-indicator { display: flex; gap: 0.5rem; align-items: center; }
+.step-indicator { display: flex; gap: 0.6rem; align-items: center; }
 .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #2a2d3a; transition: all 0.2s; }
-.step-dot.active { background: #c9a84c; }
+.step-dot.active { background: #c9a84c; transform: scale(1.3); }
 .step-dot.done { background: #5bc47a; }
-
-/* LAYOUT */
-.page { display: none; max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+.step-label { font-size: 0.7rem; color: #555; }
+.page { display: none; max-width: 920px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 .page.active { display: block; }
 .page-title { font-size: 1.4rem; font-weight: 700; color: #e8e8e8; margin-bottom: 0.3rem; }
-.page-sub { font-size: 0.85rem; color: #666; margin-bottom: 2rem; }
-
-/* CARDS */
-.card-grid { display: grid; gap: 1rem; }
-.card-grid-2 { grid-template-columns: 1fr 1fr; }
-.card-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-.card { background: #1a1d27; border: 2px solid #2a2d3a; border-radius: 10px; padding: 1.25rem; cursor: pointer; transition: all 0.15s; }
-.card:hover { border-color: #c9a84c55; background: #1e2130; }
-.card.selected { border-color: #c9a84c; background: #1e2130; }
-.card-title { font-size: 0.95rem; font-weight: 700; color: #e8e8e8; margin-bottom: 0.3rem; }
-.card-sub { font-size: 0.78rem; color: #666; line-height: 1.5; }
-.card-icon { font-size: 1.8rem; margin-bottom: 0.6rem; }
-.card-tag { display: inline-block; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 3px; margin-bottom: 0.5rem; }
-.tag-gold { background: #c9a84c22; color: #c9a84c; border: 1px solid #c9a84c44; }
-.tag-green { background: #1e3a2a; color: #5bc47a; border: 1px solid #2a5a3a; }
-.tag-locked { background: #2a1e1e; color: #c47a5b; border: 1px solid #4a2e2e; }
-.tag-blue { background: #1e2a3a; color: #5ba3e0; border: 1px solid #2a3a5a; }
-
-/* FORM FIELDS */
+.page-sub { font-size: 0.84rem; color: #666; margin-bottom: 2rem; line-height: 1.5; }
 .field { margin-bottom: 1.25rem; }
-.field label { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #666; margin-bottom: 0.4rem; }
-.field input, .field select { width: 100%; background: #12151f; border: 1px solid #2a2d3a; border-radius: 6px; color: #e8e8e8; padding: 0.6rem 0.8rem; font-size: 0.9rem; outline: none; }
+.field label { display: block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #666; margin-bottom: 0.4rem; }
+.field input, .field select { width: 100%; background: #12151f; border: 1px solid #2a2d3a; border-radius: 6px; color: #e8e8e8; padding: 0.6rem 0.8rem; font-size: 0.9rem; outline: none; transition: border-color 0.12s; }
 .field input:focus, .field select:focus { border-color: #c9a84c; }
-.field-note { font-size: 0.72rem; color: #555; margin-top: 0.3rem; }
-
+.field-note { font-size: 0.7rem; color: #444; margin-top: 0.3rem; }
+.section-title { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #555; margin-bottom: 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid #2a2d3a; }
 /* SCHEME GRID */
-.scheme-section { margin-bottom: 1.5rem; }
-.scheme-section-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #666; margin-bottom: 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid #2a2d3a; }
-.scheme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.6rem; }
-.scheme-card { background: #12151f; border: 1px solid #2a2d3a; border-radius: 7px; padding: 0.75rem; cursor: pointer; transition: all 0.12s; }
-.scheme-card:hover { border-color: #c9a84c55; }
-.scheme-card.selected { border-color: #c9a84c; background: #1a1d27; }
-.scheme-card.selected-def { border-color: #5ba3e0; background: #1a1d27; }
-.scheme-name { font-size: 0.82rem; font-weight: 700; color: #e8e8e8; }
-.scheme-desc { font-size: 0.68rem; color: #666; margin-top: 0.2rem; line-height: 1.4; }
-
+.scheme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.6rem; margin-bottom: 1.75rem; }
+.scheme-card { background: #12151f; border: 2px solid #2a2d3a; border-radius: 8px; padding: 0.85rem; cursor: pointer; transition: all 0.12s; }
+.scheme-card:hover { border-color: #c9a84c44; background: #1a1d27; }
+.scheme-card.sel-off { border-color: #c9a84c; background: #1a1d27; }
+.scheme-card.sel-def { border-color: #5ba3e0; background: #1a1d27; }
+.scheme-name { font-size: 0.85rem; font-weight: 700; color: #e8e8e8; margin-bottom: 0.2rem; }
+.scheme-tags { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0.35rem; }
+.stag { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.1rem 0.35rem; border-radius: 2px; }
+.stag-run { background: #1e3a2a; color: #5bc47a; }
+.stag-pass { background: #1e2a3a; color: #5ba3e0; }
+.stag-bal { background: #2a2a1e; color: #c4b45b; }
+.stag-opt { background: #2a1e2a; color: #c07ad4; }
+.stag-press { background: #2a1e1e; color: #c47a5b; }
+.stag-zone { background: #1e2a2a; color: #5bc4c4; }
+.stag-hybrid { background: #1a1a2a; color: #9090d0; }
+.scheme-desc { font-size: 0.7rem; color: #666; line-height: 1.45; }
+/* ROLE CARDS */
+.role-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+.role-card { background: #1a1d27; border: 2px solid #2a2d3a; border-radius: 10px; padding: 1.25rem; cursor: pointer; transition: all 0.15s; }
+.role-card:hover { border-color: #c9a84c55; background: #1e2130; }
+.role-card.selected { border-color: #c9a84c; background: #1e2130; }
+.role-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.role-title { font-size: 1rem; font-weight: 700; color: #e8e8e8; margin-bottom: 0.4rem; }
+.role-tag { display: inline-block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 3px; margin-bottom: 0.5rem; }
+.tag-gold { background: #c9a84c22; color: #c9a84c; border: 1px solid #c9a84c44; }
+.tag-blue { background: #1e2a3a; color: #5ba3e0; border: 1px solid #2a3a5a; }
+.role-desc { font-size: 0.76rem; color: #666; line-height: 1.5; }
 /* TREE CARDS */
-.tree-card { background: #1a1d27; border: 2px solid #2a2d3a; border-radius: 10px; padding: 1.25rem; cursor: pointer; transition: all 0.15s; position: relative; }
+.tree-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.tree-card { background: #1a1d27; border: 2px solid #2a2d3a; border-radius: 10px; padding: 1.1rem; cursor: pointer; transition: all 0.15s; }
 .tree-card:hover { border-color: #c9a84c55; }
 .tree-card.selected { border-color: #c9a84c; }
-.tree-card.locked { opacity: 0.5; cursor: not-allowed; }
-.tree-nodes { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.75rem; }
-.tree-node { font-size: 0.62rem; background: #0f1117; border: 1px solid #2a2d3a; border-radius: 3px; padding: 0.1rem 0.35rem; color: #666; }
-.tree-node.available { color: #5bc47a; border-color: #2a4a2a; }
-
+.tree-card.locked { opacity: 0.45; cursor: not-allowed; }
+.tree-icon { font-size: 1.6rem; margin-bottom: 0.4rem; }
+.tree-status { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.tree-title { font-size: 0.92rem; font-weight: 700; color: #e8e8e8; margin-bottom: 0.3rem; }
+.tree-desc { font-size: 0.72rem; color: #666; line-height: 1.45; margin-bottom: 0.65rem; }
+.tree-nodes { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+.tnode { font-size: 0.6rem; background: #0f1117; border: 1px solid #2a2d3a; border-radius: 3px; padding: 0.08rem 0.3rem; color: #555; }
+.tnode.first { color: #5bc47a; border-color: #2a4a2a; }
 /* SCHOOL SELECTION */
 .school-filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
-.school-filters select { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 6px; color: #e8e8e8; padding: 0.4rem 0.7rem; font-size: 0.8rem; outline: none; flex: 1; min-width: 140px; }
+.school-filters select { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 6px; color: #e8e8e8; padding: 0.4rem 0.65rem; font-size: 0.8rem; outline: none; flex: 1; min-width: 140px; }
 .school-filters select:focus { border-color: #c9a84c; }
-.school-list { display: grid; gap: 0.5rem; max-height: 480px; overflow-y: auto; padding-right: 0.25rem; }
-.school-card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 0.85rem 1rem; cursor: pointer; transition: all 0.12s; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1rem; }
+.school-list { display: grid; gap: 0.45rem; max-height: 440px; overflow-y: auto; padding-right: 0.2rem; }
+.school-card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 0.8rem 1rem; cursor: pointer; transition: all 0.12s; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1rem; }
 .school-card:hover { border-color: #c9a84c44; background: #1e2130; }
 .school-card.selected { border-color: #c9a84c; background: #1e2130; }
-.school-name { font-size: 0.95rem; font-weight: 700; color: #e8e8e8; }
-.school-meta { font-size: 0.72rem; color: #666; margin-top: 0.15rem; }
-.school-grades { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem; }
-.grade-chip { font-size: 0.62rem; padding: 0.12rem 0.4rem; border-radius: 3px; font-weight: 600; }
-.grade-A { background: #1e3a2a; color: #5bc47a; }
-.grade-B { background: #1e2a3a; color: #5ba3e0; }
-.grade-C { background: #2a2a1e; color: #c4b45b; }
-.grade-D { background: #2a1e1e; color: #c47a5b; }
-.school-tier-stars { color: #c9a84c; font-size: 0.9rem; letter-spacing: -1px; }
-
-/* SCHOOL DETAIL PANEL */
-.school-detail { background: #1a1d27; border: 1px solid #c9a84c44; border-radius: 10px; padding: 1.25rem; margin-top: 1rem; display: none; }
-.school-detail.visible { display: block; }
-.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem; }
-.detail-grade-row { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; border-bottom: 1px solid #1e2130; font-size: 0.8rem; }
-.detail-grade-label { color: #888; }
-.grade-bar { width: 80px; height: 5px; background: #2a2d3a; border-radius: 3px; overflow: hidden; }
-.grade-bar-fill { height: 100%; border-radius: 3px; }
-
-/* NAVIGATION */
-.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #2a2d3a; }
-.btn { padding: 0.65rem 1.5rem; border-radius: 7px; font-size: 0.85rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; letter-spacing: 0.03em; }
-.btn-primary { background: #c9a84c; color: #0f1117; }
-.btn-primary:hover { background: #d4b45c; }
-.btn-primary:disabled { background: #2a2d3a; color: #555; cursor: not-allowed; }
-.btn-secondary { background: #1a1d27; color: #888; border: 1px solid #2a2d3a; }
-.btn-secondary:hover { border-color: #888; color: #e8e8e8; }
-.summary-bar { background: #12151f; border: 1px solid #2a2d3a; border-radius: 7px; padding: 0.6rem 1rem; font-size: 0.78rem; color: #666; display: flex; gap: 1.5rem; flex-wrap: wrap; }
-.summary-item { display: flex; flex-direction: column; gap: 0.1rem; }
-.summary-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: #444; }
-.summary-val { color: #c9a84c; font-weight: 600; }
-
-::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 2px; }
+.school-name { font-size: 0.92rem; font-weight: 700; color: #e8e8e8; }
+.school-meta { font-size: 0.7rem; color: #555; margin-top: 0.12rem; }
+.school-grades { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.45rem; }
+.gchip { font-size: 0.6rem; padding: 0.1rem 0.35rem; border-radius: 3px; font-weight: 600; }
+.gA { background:#1e3a2a;color:#5bc47a; } .gB { background:#1e2a3a;color:#5ba3e0; }
+.gC { background:#2a2a1e;color:#c4b45b; } .gD { background:#2a1e1e;color:#c47a5b; }
+.tier-stars { color:#c9a84c; font-size:0.85rem; letter-spacing:-1px; }
+.school-detail { background:#1a1d27; border:1px solid #c9a84c44; border-radius:10px; padding:1.25rem; margin-top:0.75rem; display:none; }
+.school-detail.visible { display:block; }
+.grade-rows { display:grid; grid-template-columns:1fr 1fr; gap:0.2rem 1.5rem; margin-top:0.65rem; }
+.grade-row { display:flex; justify-content:space-between; align-items:center; padding:0.22rem 0; border-bottom:1px solid #1a1d27; font-size:0.77rem; }
+.grade-row-label { color:#777; }
+.gbar { width:72px; height:4px; background:#2a2d3a; border-radius:2px; overflow:hidden; display:inline-block; vertical-align:middle; margin-right:6px; }
+.gbar-fill { height:100%; border-radius:2px; }
+/* NAV */
+.nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:2rem; padding-top:1.5rem; border-top:1px solid #2a2d3a; }
+.btn { padding:0.6rem 1.4rem; border-radius:7px; font-size:0.85rem; font-weight:700; cursor:pointer; border:none; transition:all 0.15s; letter-spacing:0.03em; }
+.btn-primary { background:#c9a84c; color:#0f1117; }
+.btn-primary:hover { background:#d4b45c; }
+.btn-secondary { background:#1a1d27; color:#777; border:1px solid #2a2d3a; }
+.btn-secondary:hover { border-color:#888; color:#e8e8e8; }
+.summary-bar { background:#12151f; border:1px solid #2a2d3a; border-radius:7px; padding:0.55rem 1rem; font-size:0.75rem; color:#666; display:flex; gap:1.5rem; flex-wrap:wrap; margin-bottom:1.25rem; }
+.si-label { font-size:0.58rem; text-transform:uppercase; letter-spacing:0.08em; color:#444; display:block; }
+.si-val { color:#c9a84c; font-weight:600; }
+::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:#2a2d3a;border-radius:2px;}
 </style>
 </head>
 <body>
 <header>
   <h1>THE DYNASTY</h1>
-  <div class="step-indicator">
-    <div class="step-dot active" id="dot-1"></div>
-    <div class="step-dot" id="dot-2"></div>
-    <div class="step-dot" id="dot-3"></div>
-    <div class="step-dot" id="dot-4"></div>
-    <div class="step-dot" id="dot-5"></div>
+  <div style="display:flex;align-items:center;gap:0.75rem;">
+    <div class="step-indicator">
+      <div class="step-dot active" id="dot-1"></div>
+      <div class="step-dot" id="dot-2"></div>
+      <div class="step-dot" id="dot-3"></div>
+      <div class="step-dot" id="dot-4"></div>
+    </div>
+    <span class="step-label" id="step-label">Step 1 of 4</span>
   </div>
 </header>
 
-<!-- STEP 1: COACH CREATION -->
+<!-- ═══ STEP 1: COACH + SCHEMES ═══ -->
 <div class="page active" id="step-1">
   <div class="page-title">Create Your Coach</div>
-  <div class="page-sub">You'll carry this identity through your entire career.</div>
+  <div class="page-sub">Name your coach, pick an alma mater if you have one, then lock in your offensive and defensive identity. Both schemes are saved now — your offensive scheme activates when you call offense, defensive when you call defense, both when you're a head coach.</div>
 
-  <div class="field">
-    <label>Coach Name</label>
-    <input type="text" id="coach-name" placeholder="Enter your name…" maxlength="40">
-  </div>
-
-  <div class="field">
-    <label>Alma Mater <span style="color:#444;font-weight:400;">(optional)</span></label>
-    <select id="alma-mater">
-      <option value="">None — I'll build my own legacy</option>
-    </select>
-    <div class="field-note">Gives a small recruiting interest boost at your alma mater. Purely flavor — not required.</div>
-  </div>
-
-  <div class="field">
-    <label>Play Calling Preference</label>
-    <div class="card-grid card-grid-3" style="margin-top:0.5rem;">
-      <div class="card" data-pcp="Offense" onclick="selectPCP(this)">
-        <div class="card-icon">⚔️</div>
-        <div class="card-title">Offense</div>
-        <div class="card-sub">You call plays on offense. As OC you control the offense. As HC you can call either side or delegate.</div>
-      </div>
-      <div class="card" data-pcp="Defense" onclick="selectPCP(this)">
-        <div class="card-icon">🛡️</div>
-        <div class="card-title">Defense</div>
-        <div class="card-sub">You call plays on defense. As DC you control the defense. As HC you can call either side or delegate.</div>
-      </div>
-      <div class="card" data-pcp="Neither" onclick="selectPCP(this)">
-        <div class="card-icon">📋</div>
-        <div class="card-title">Neither</div>
-        <div class="card-sub">You delegate play calling entirely to your coordinators. Focus on program building, recruiting, and management.</div>
-      </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+    <div class="field" style="margin-bottom:0;">
+      <label>Coach Name</label>
+      <input type="text" id="coach-name" placeholder="Enter your name…" maxlength="40">
+    </div>
+    <div class="field" style="margin-bottom:0;">
+      <label>Alma Mater <span style="color:#333;font-weight:400;">(optional)</span></label>
+      <select id="alma-mater">
+        <option value="">None — build your own legacy</option>
+      </select>
     </div>
   </div>
+
+  <div class="section-title">⚔️ Offensive Scheme</div>
+  <div class="scheme-grid" id="off-grid"></div>
+
+  <div class="section-title">🛡️ Defensive Scheme</div>
+  <div class="scheme-grid" id="def-grid"></div>
 
   <div class="nav-row">
     <div></div>
-    <button class="btn btn-primary" onclick="goStep(2)" id="btn-step1">Next →</button>
+    <button class="btn btn-primary" onclick="goStep(2)">Next →</button>
   </div>
 </div>
 
-<!-- STEP 2: ROLE SELECTION -->
+<!-- ═══ STEP 2: ROLE ═══ -->
 <div class="page" id="step-2">
   <div class="page-title">Starting Role</div>
-  <div class="page-sub">Where do you begin your career? You'll eventually become a Head Coach regardless of where you start.</div>
+  <div class="page-sub">Where does your career begin? You'll grow toward Head Coach regardless of your starting point. Coordinators get a lower-pressure environment to develop their identity before taking the reins of a full program.</div>
 
-  <div class="card-grid card-grid-3">
-    <div class="card" data-role="HC" onclick="selectRole(this)">
-      <div class="card-tag tag-gold">Head Coach</div>
-      <div class="card-title">Head Coach</div>
-      <div class="card-sub">Full program control from day one. You manage everything — recruiting, staff, NIL, game planning. Higher expectations, more pressure, but the full experience immediately.</div>
+  <div id="step2-summary" class="summary-bar"></div>
+
+  <div class="role-grid">
+    <div class="role-card" data-role="HC" onclick="selectRole(this)">
+      <div class="role-icon">🏟️</div>
+      <div class="role-tag tag-gold">Head Coach</div>
+      <div class="role-title">Head Coach</div>
+      <div class="role-desc">Full control from day one. You manage recruiting, staff, NIL, and game planning. You can call offense, defense, both, or neither — your choice on any given game. Higher expectations and more pressure, but the complete experience immediately.</div>
     </div>
-    <div class="card" data-role="OC" onclick="selectRole(this)">
-      <div class="card-tag tag-blue">Coordinator</div>
-      <div class="card-title">Offensive Coordinator</div>
-      <div class="card-sub">Build your coaching reputation on offense first. Lower pressure, develop your play calling identity. The OC decision tree leads toward HC. You will call offense regardless of play calling preference.</div>
+    <div class="role-card" data-role="OC" onclick="selectRole(this)">
+      <div class="role-icon">⚔️</div>
+      <div class="role-tag tag-blue">Coordinator</div>
+      <div class="role-title">Offensive Coordinator</div>
+      <div class="role-desc">Build your reputation on offense. Lower pressure, develop your play calling identity. The OC decision tree unlocks paths toward becoming a head coach. You call the offense every game regardless of your eventual play calling preference.</div>
     </div>
-    <div class="card" data-role="DC" onclick="selectRole(this)">
-      <div class="card-tag tag-blue">Coordinator</div>
-      <div class="card-title">Defensive Coordinator</div>
-      <div class="card-sub">Build your reputation on defense. The DC decision tree leads toward HC. You will call defense regardless of play calling preference.</div>
+    <div class="role-card" data-role="DC" onclick="selectRole(this)">
+      <div class="role-icon">🛡️</div>
+      <div class="role-tag tag-blue">Coordinator</div>
+      <div class="role-title">Defensive Coordinator</div>
+      <div class="role-desc">Build your reputation on defense. The DC decision tree leads toward HC. You call the defense every game. A strong defensive identity here becomes your calling card as you move up the coaching ladder.</div>
     </div>
   </div>
 
   <div class="nav-row">
     <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
-    <button class="btn btn-primary" onclick="goStep(3)" id="btn-step2">Next →</button>
+    <button class="btn btn-primary" onclick="goStep(3)">Next →</button>
   </div>
 </div>
 
-<!-- STEP 3: SCHEME SELECTION -->
+<!-- ═══ STEP 3: SKILL TREE ═══ -->
 <div class="page" id="step-3">
-  <div class="page-title">Your Schemes</div>
-  <div class="page-sub">Select your offensive and defensive identities. Both are stored now and activate fully when you become Head Coach.</div>
+  <div class="page-title">Starting Skill Tree</div>
+  <div class="page-sub">Pick one area to specialize in at the start of your career. You'll unlock all trees over time — this gives you a meaningful head start in one direction. The Championship and NIL trees unlock through career achievements.</div>
 
-  <div class="scheme-section">
-    <div class="scheme-section-title">⚔️ Offensive Scheme</div>
-    <div class="scheme-grid" id="off-scheme-grid"></div>
-  </div>
+  <div id="step3-summary" class="summary-bar"></div>
 
-  <div class="scheme-section">
-    <div class="scheme-section-title">🛡️ Defensive Scheme</div>
-    <div class="scheme-grid" id="def-scheme-grid"></div>
+  <div class="tree-grid" id="tree-grid"></div>
+
+  <div style="padding:0.75rem 1rem;background:#12151f;border-radius:7px;font-size:0.73rem;color:#444;margin-top:0.5rem;">
+    🏆 <strong style="color:#555;">Championship Coach</strong> — unlocks after winning your first conference championship. &nbsp;&nbsp;
+    💰 <strong style="color:#555;">NIL & Collective</strong> — unlocks after reaching a strong collective relationship level.
   </div>
 
   <div class="nav-row">
     <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
-    <button class="btn btn-primary" onclick="goStep(4)" id="btn-step3">Next →</button>
+    <button class="btn btn-primary" onclick="goStep(4)">Next →</button>
   </div>
 </div>
 
-<!-- STEP 4: SKILL TREE -->
+<!-- ═══ STEP 4: SCHOOL ═══ -->
 <div class="page" id="step-4">
-  <div class="page-title">Starting Skill Tree</div>
-  <div class="page-sub">Choose one area to specialize in at the start of your career. You'll unlock all trees over time — this just gives you a head start.</div>
-
-  <div class="card-grid card-grid-3" id="tree-grid"></div>
-
-  <div style="margin-top:1rem;padding:0.75rem 1rem;background:#12151f;border-radius:7px;font-size:0.75rem;color:#555;">
-    <strong style="color:#666;">Championship Coach</strong> and <strong style="color:#666;">NIL & Collective</strong> trees unlock through achievements during your career and cannot be selected at start.
-  </div>
-
-  <div class="nav-row">
-    <button class="btn btn-secondary" onclick="goStep(3)">← Back</button>
-    <button class="btn btn-primary" onclick="goStep(5)" id="btn-step4">Next →</button>
-  </div>
-</div>
-
-<!-- STEP 5: SCHOOL SELECTION -->
-<div class="page" id="step-5">
   <div class="page-title">Choose Your Program</div>
-  <div class="page-sub" id="school-sub">Select the program where your career begins.</div>
+  <div class="page-sub" id="school-sub">Select the program where your career begins. The existing coach enters the coaching pool.</div>
+
+  <div id="step4-summary" class="summary-bar"></div>
 
   <div class="school-filters">
     <select id="conf-filter" onchange="renderSchools()">
@@ -256,17 +224,16 @@ header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.08em; color: 
       <option value="tier">Sort: Program Tier</option>
       <option value="nil">Sort: NIL Budget</option>
       <option value="tradition">Sort: Tradition</option>
-      <option value="name">Sort: Name A-Z</option>
+      <option value="name">Sort: Name A–Z</option>
     </select>
   </div>
 
   <div class="school-list" id="school-list"></div>
-
   <div class="school-detail" id="school-detail"></div>
 
   <div class="nav-row">
-    <button class="btn btn-secondary" onclick="goStep(4)">← Back</button>
-    <button class="btn btn-primary" onclick="startCareer()" id="btn-start">Begin Career →</button>
+    <button class="btn btn-secondary" onclick="goStep(3)">← Back</button>
+    <button class="btn btn-primary" onclick="startCareer()">Begin Career →</button>
   </div>
 </div>
 
@@ -274,185 +241,175 @@ header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.08em; color: 
 // ═══════════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════════
-
 const OFF_SCHEMES = [
-  {name:'Spread RPO', desc:'Read-option run-pass system. Mobile QB, spread formations, stress the defense horizontally.'},
-  {name:'Air Raid', desc:'Four-wide passing attack. Spacing, quick game, and volume passing. Minimal run game.'},
-  {name:'Pro Style', desc:'Multiple formations, balanced attack. Best versatility. NFL-style preparation.'},
-  {name:'Power Run', desc:'Physical, downhill running. Dominant OL and FB. Grind the clock, control field position.'},
-  {name:'Triple Option', desc:'Wishbone or flexbone. Rarely pass. The offense is a system — every player must fit.'},
-  {name:'West Coast', desc:'Short, precise passing as an extension of the run game. Route timing, receiver yards after catch.'},
-  {name:'Run-and-Shoot', desc:'Four-wide receivers, no huddle, route variations. Pass heavy, spread the field.'},
-  {name:'Pistol', desc:'QB depth between shotgun and under center. Hybrid run/pass. Flexible play action.'},
+  {name:'Spread RPO', tags:['bal','opt'], desc:'Read-option run-pass system. Mobile QB, spread formations, horizontal stress on the defense. Best with athletic QBs and perimeter threats.'},
+  {name:'Air Raid', tags:['pass'], desc:'Four-wide passing attack focused on spacing and volume. Minimal run game. Elite for developing WRs and passing QBs. Struggles vs heavy blitz packages.'},
+  {name:'Pro Style', tags:['bal'], desc:'Multiple formations, balanced run and pass. Best versatility and NFL-style preparation. Suits a wide range of personnel. The most flexible scheme.'},
+  {name:'Power Run', tags:['run'], desc:'Physical, downhill running behind a dominant OL and FB. Grind the clock and control field position. Punishing in close games and bad weather.'},
+  {name:'Triple Option', tags:['run','opt'], desc:'Wishbone or flexbone. Rarely throws. Every player must fit the system. Impossible to prepare for in limited practice time. Unique recruiting profile required.'},
+  {name:'West Coast', tags:['pass','bal'], desc:'Short, precise passing as extension of the run game. Route timing, receiver YAC, and play action. Strong for developing smart QBs and receiving backs.'},
+  {name:'Run-and-Shoot', tags:['pass'], desc:'Four wideouts, no huddle, route variation. Pass heavy, spread the field. Puts up points but demands elite WR depth. Vulnerable to turnovers.'},
+  {name:'Pistol', tags:['bal','opt'], desc:'QB depth between shotgun and under center. Hybrid run-pass. Flexible play action and option game. Good scheme for versatile QBs.'},
 ];
 
 const DEF_SCHEMES = [
-  {name:'4-3 Base', desc:'Four down linemen, three linebackers. Balanced against run and pass. Most common base.'},
-  {name:'3-4 Base', desc:'Three down linemen, four linebackers. Versatile fronts, unpredictable blitz packages.'},
-  {name:'Nickel Base', desc:'Five defensive backs as base. Modern pass defense. Sacrifices some run stopping.'},
-  {name:'Cover 2 Tampa', desc:'Two deep safeties, aggressive corners. Forces underneath routes. Weak against seams.'},
-  {name:'Cover 3 Zone', desc:'Three deep, four underneath. Great vs deep ball. Vulnerable to crossing routes.'},
-  {name:'Bear Front', desc:'Heavy box, eight in the run fit. Stops the run cold. Vulnerable to passing attacks.'},
-  {name:'3-3-5 Stack', desc:'Three linemen, three linebackers, five DBs. Modern spread stopper. Athletic LBs required.'},
-  {name:'46 Defense', desc:'Eight in the box, heavy pressure. Aggressive and attacking. High risk, high reward.'},
+  {name:'4-3 Base', tags:['bal'], desc:'Four down linemen, three linebackers. Balanced against run and pass. The most common base defense. Suits a wide range of DL and LB personnel.'},
+  {name:'3-4 Base', tags:['hybrid'], desc:'Three down linemen, four linebackers. Versatile fronts, unpredictable blitz packages. Demands elite interior DL to hold blocks and free the linebackers.'},
+  {name:'Nickel Base', tags:['pass','zone'], desc:'Five defensive backs as your base package. Modern pass defense built for spread offenses. Sacrifices some run stopping for coverage versatility.'},
+  {name:'Cover 2 Tampa', tags:['zone'], desc:'Two deep safeties, aggressive corners taking flats. Forces short underneath routes. The seam routes between the safeties are the weakness to exploit.'},
+  {name:'Cover 3 Zone', tags:['zone'], desc:'Three deep, four underneath. Great against the deep ball. Vulnerable to crossing routes and the middle of the field. Requires smart, rangy safeties.'},
+  {name:'Bear Front', tags:['run','press'], desc:'Eight defenders in or near the box. Stops the run cold. Aggressive and attacking. Leaves the back end vulnerable — best with elite corners who can hold up in man.'},
+  {name:'3-3-5 Stack', tags:['hybrid','pass'], desc:'Three linemen, three linebackers, five DBs. Modern spread stopper. Requires athletic, coverage-capable linebackers. Creates confusion in the run fit.'},
+  {name:'46 Defense', tags:['press','hybrid'], desc:'Eight in the box with heavy pressure concepts. Attacking and aggressive. High risk, high reward. Forces the offense to block perfectly or give up big plays.'},
 ];
 
-const SKILL_TREES = [
-  {
-    id:'playcaller',
-    name:'Play Caller',
-    icon:'📡',
-    desc:'Master the art of in-game decision making. Unlock playbook bonuses, situational calling advantages, and gameday player boosts.',
-    nodes:['Scheme Installer','3rd Down Specialist','Red Zone Master','2-Minute Drill','Tendency Disguise'],
-    available: true,
-  },
-  {
-    id:'developer',
-    name:'Developer',
-    icon:'📈',
-    desc:'Accelerate player growth toward their ceiling. Unlock faster OVR progression, position conversion efficiency, and player retention bonuses.',
-    nodes:['Fast Riser','Ceiling Pusher','Position Converter','Culture Builder','Walk-On Whisperer'],
-    available: true,
-  },
-  {
-    id:'recruiter',
-    name:'Recruiter',
-    icon:'🎯',
-    desc:'Maximize recruiting efficiency. More staff hours, faster scouting, better zone pipelines, and higher initial interest from recruits.',
-    nodes:['Extra Hours','Zone Pioneer','Speed Scout','NIL Negotiator','Pipeline Builder'],
-    available: true,
-  },
-  {
-    id:'champion',
-    name:'Championship Coach',
-    icon:'🏆',
-    desc:'Unlocked after winning your first conference championship. Builds dynasty prestige, collective influence, and winning culture bonuses.',
-    nodes:['Prestige Boost','Dynasty Builder','Benefactor Magnet','Culture of Winning','Legacy Recruiter'],
-    available: false,
-  },
-  {
-    id:'nil',
-    name:'NIL & Collective',
-    icon:'💰',
-    desc:'Unlocked after reaching Strong collective relationship. Budget efficiency, donor management, NIL retention, and Benefactor attraction.',
-    nodes:['Budget Stretcher','Donor Whisperer','NIL Retention','Booster Network','Benefactor Ready'],
-    available: false,
-  },
+const TAG_META = {
+  run:{label:'Run',cls:'stag-run'}, pass:{label:'Pass',cls:'stag-pass'},
+  bal:{label:'Balanced',cls:'stag-bal'}, opt:{label:'Option',cls:'stag-opt'},
+  press:{label:'Press',cls:'stag-press'}, zone:{label:'Zone',cls:'stag-zone'},
+  hybrid:{label:'Hybrid',cls:'stag-hybrid'}
+};
+
+const TREES = [
+  {id:'playcaller',icon:'📡',name:'Play Caller',avail:true,
+   desc:'Master in-game decision making. Unlock scheme bonuses, situational advantages, and gameday player effectiveness boosts.',
+   nodes:['Scheme Installer','3rd Down Specialist','Red Zone Master','2-Min Drill','Tendency Disguise']},
+  {id:'developer',icon:'📈',name:'Developer',avail:true,
+   desc:'Accelerate player growth toward their ceiling. Faster OVR progression, better position conversions, and player retention bonuses.',
+   nodes:['Fast Riser','Ceiling Pusher','Position Converter','Culture Builder','Walk-On Whisperer']},
+  {id:'recruiter',icon:'🎯',name:'Recruiter',avail:true,
+   desc:'Maximize recruiting efficiency. More staff hours, faster scouting, stronger zone pipelines, and higher recruit interest.',
+   nodes:['Extra Hours','Zone Pioneer','Speed Scout','NIL Negotiator','Pipeline Builder']},
+  {id:'champion',icon:'🏆',name:'Championship Coach',avail:false,
+   desc:'Unlocked after winning your first conference championship.',
+   nodes:['Prestige Boost','Dynasty Builder','Benefactor Magnet','Culture of Winning','Legacy Recruiter']},
+  {id:'nil',icon:'💰',name:'NIL & Collective',avail:false,
+   desc:'Unlocked after reaching a strong collective relationship.',
+   nodes:['Budget Stretcher','Donor Whisperer','NIL Retention','Booster Network','Benefactor Ready']},
 ];
 
-const FBS_SCHOOLS = [
-  // SEC
+const GRADE_KEYS = ['tradition','nilBudget','facilities','brand','atmosphere','proProspects','academic','campusLife','playingTime','champContender','coachPrestige','confPrestige'];
+const GRADE_LABELS = {
+  tradition:'Program Tradition',nilBudget:'NIL Budget',facilities:'Athletic Facilities',
+  brand:'Brand Exposure',atmosphere:'Stadium Atmosphere',proProspects:'Pro Potential',
+  academic:'Academic Prestige',campusLife:'Campus Lifestyle',playingTime:'Playing Time',
+  champContender:'Championship Contender',coachPrestige:'Coach Prestige',confPrestige:'Conference Prestige'
+};
+
+const SCHOOLS = [
   {name:'Alabama',conf:'SEC',tradition:99,nilBudget:98,facilities:98,brand:99,atmosphere:99,proProspects:97,academic:72,campusLife:78,playingTime:40,champContender:99,coachPrestige:99,confPrestige:98},
   {name:'Georgia',conf:'SEC',tradition:95,nilBudget:96,facilities:97,brand:96,atmosphere:97,proProspects:95,academic:78,campusLife:80,playingTime:42,champContender:97,coachPrestige:97,confPrestige:98},
-  {name:'LSU',conf:'SEC',tradition:92,nilBudget:94,facilities:95,brand:94,atmosphere:99,proProspects:93,academic:68,campusLife:90,playingTime:45,champContender:90,coachPrestige:92,confPrestige:98},
+  {name:'Ohio State',conf:'Big Ten',tradition:97,nilBudget:96,facilities:98,brand:97,atmosphere:98,proProspects:96,academic:84,campusLife:82,playingTime:40,champContender:96,coachPrestige:97,confPrestige:96},
   {name:'Texas',conf:'SEC',tradition:90,nilBudget:99,facilities:97,brand:97,atmosphere:95,proProspects:91,academic:80,campusLife:85,playingTime:44,champContender:88,coachPrestige:90,confPrestige:98},
+  {name:'Notre Dame',conf:'Ind',tradition:96,nilBudget:90,facilities:92,brand:98,atmosphere:96,proProspects:90,academic:94,campusLife:74,playingTime:42,champContender:88,coachPrestige:92,confPrestige:94},
+  {name:'Michigan',conf:'Big Ten',tradition:95,nilBudget:92,facilities:95,brand:95,atmosphere:96,proProspects:92,academic:92,campusLife:80,playingTime:42,champContender:90,coachPrestige:93,confPrestige:96},
+  {name:'LSU',conf:'SEC',tradition:92,nilBudget:94,facilities:95,brand:94,atmosphere:99,proProspects:93,academic:68,campusLife:90,playingTime:45,champContender:90,coachPrestige:92,confPrestige:98},
   {name:'Oklahoma',conf:'SEC',tradition:93,nilBudget:91,facilities:92,brand:93,atmosphere:94,proProspects:90,academic:72,campusLife:80,playingTime:45,champContender:87,coachPrestige:91,confPrestige:98},
+  {name:'Penn State',conf:'Big Ten',tradition:90,nilBudget:88,facilities:90,brand:90,atmosphere:97,proProspects:88,academic:84,campusLife:78,playingTime:46,champContender:85,coachPrestige:88,confPrestige:96},
+  {name:'Clemson',conf:'ACC',tradition:85,nilBudget:80,facilities:88,brand:85,atmosphere:90,proProspects:84,academic:78,campusLife:72,playingTime:46,champContender:84,coachPrestige:86,confPrestige:88},
   {name:'Florida',conf:'SEC',tradition:91,nilBudget:88,facilities:91,brand:90,atmosphere:93,proProspects:91,academic:82,campusLife:88,playingTime:48,champContender:82,coachPrestige:85,confPrestige:98},
   {name:'Tennessee',conf:'SEC',tradition:88,nilBudget:90,facilities:92,brand:89,atmosphere:96,proProspects:88,academic:74,campusLife:82,playingTime:50,champContender:82,coachPrestige:85,confPrestige:98},
-  {name:'Auburn',conf:'SEC',tradition:86,nilBudget:85,facilities:88,brand:85,atmosphere:93,proProspects:85,academic:74,campusLife:78,playingTime:52,champContender:78,coachPrestige:80,confPrestige:98},
-  {name:'Texas A&M',conf:'SEC',tradition:84,nilBudget:95,facilities:94,brand:88,atmosphere:94,proProspects:86,academic:78,campusLife:80,playingTime:50,champContender:80,coachPrestige:82,confPrestige:98},
-  {name:'Arkansas',conf:'SEC',tradition:80,nilBudget:78,facilities:82,brand:78,atmosphere:86,proProspects:78,academic:70,campusLife:72,playingTime:58,champContender:68,coachPrestige:72,confPrestige:98},
-  {name:'Mississippi',conf:'SEC',tradition:78,nilBudget:82,facilities:80,brand:76,atmosphere:84,proProspects:78,academic:68,campusLife:75,playingTime:60,champContender:70,coachPrestige:74,confPrestige:98},
-  {name:'Mississippi State',conf:'SEC',tradition:72,nilBudget:70,facilities:74,brand:68,atmosphere:78,proProspects:70,academic:68,campusLife:65,playingTime:62,champContender:60,coachPrestige:65,confPrestige:98},
-  {name:'Missouri',conf:'SEC',tradition:74,nilBudget:72,facilities:76,brand:70,atmosphere:78,proProspects:72,academic:74,campusLife:72,playingTime:60,champContender:62,coachPrestige:66,confPrestige:98},
-  {name:'South Carolina',conf:'SEC',tradition:72,nilBudget:70,facilities:74,brand:68,atmosphere:80,proProspects:70,academic:72,campusLife:78,playingTime:62,champContender:60,coachPrestige:64,confPrestige:98},
-  {name:'Kentucky',conf:'SEC',tradition:68,nilBudget:68,facilities:72,brand:64,atmosphere:74,proProspects:66,academic:76,campusLife:72,playingTime:64,champContender:55,coachPrestige:60,confPrestige:98},
-  {name:'Vanderbilt',conf:'SEC',tradition:55,nilBudget:62,facilities:70,brand:58,atmosphere:58,proProspects:60,academic:98,campusLife:70,playingTime:75,champContender:40,coachPrestige:48,confPrestige:98},
-  // Big Ten
-  {name:'Ohio State',conf:'Big Ten',tradition:97,nilBudget:96,facilities:98,brand:97,atmosphere:98,proProspects:96,academic:84,campusLife:82,playingTime:40,champContender:96,coachPrestige:97,confPrestige:96},
-  {name:'Michigan',conf:'Big Ten',tradition:95,nilBudget:92,facilities:95,brand:95,atmosphere:96,proProspects:92,academic:92,campusLife:80,playingTime:42,champContender:90,coachPrestige:93,confPrestige:96},
-  {name:'Penn State',conf:'Big Ten',tradition:90,nilBudget:88,facilities:90,brand:90,atmosphere:97,proProspects:88,academic:84,campusLife:78,playingTime:46,champContender:85,coachPrestige:88,confPrestige:96},
   {name:'Oregon',conf:'Big Ten',tradition:82,nilBudget:90,facilities:95,brand:88,atmosphere:88,proProspects:85,academic:80,campusLife:82,playingTime:48,champContender:84,coachPrestige:85,confPrestige:96},
   {name:'USC',conf:'Big Ten',tradition:88,nilBudget:88,facilities:90,brand:92,atmosphere:86,proProspects:88,academic:84,campusLife:90,playingTime:48,champContender:80,coachPrestige:84,confPrestige:96},
+  {name:'Texas A&M',conf:'SEC',tradition:84,nilBudget:95,facilities:94,brand:88,atmosphere:94,proProspects:86,academic:78,campusLife:80,playingTime:50,champContender:80,coachPrestige:82,confPrestige:98},
+  {name:'Auburn',conf:'SEC',tradition:86,nilBudget:85,facilities:88,brand:85,atmosphere:93,proProspects:85,academic:74,campusLife:78,playingTime:52,champContender:78,coachPrestige:80,confPrestige:98},
+  {name:'Miami',conf:'ACC',tradition:88,nilBudget:86,facilities:85,brand:90,atmosphere:85,proProspects:86,academic:82,campusLife:90,playingTime:48,champContender:76,coachPrestige:78,confPrestige:88},
+  {name:'Florida State',conf:'ACC',tradition:84,nilBudget:76,facilities:82,brand:82,atmosphere:84,proProspects:82,academic:76,campusLife:80,playingTime:50,champContender:72,coachPrestige:74,confPrestige:88},
   {name:'Nebraska',conf:'Big Ten',tradition:88,nilBudget:80,facilities:85,brand:85,atmosphere:97,proProspects:78,academic:76,campusLife:72,playingTime:52,champContender:68,coachPrestige:72,confPrestige:96},
   {name:'Wisconsin',conf:'Big Ten',tradition:82,nilBudget:78,facilities:84,brand:80,atmosphere:84,proProspects:80,academic:84,campusLife:74,playingTime:52,champContender:72,coachPrestige:76,confPrestige:96},
+  {name:'Oklahoma State',conf:'Big 12',tradition:72,nilBudget:74,facilities:78,brand:70,atmosphere:74,proProspects:68,academic:72,campusLife:70,playingTime:58,champContender:65,coachPrestige:68,confPrestige:82},
+  {name:'TCU',conf:'Big 12',tradition:72,nilBudget:72,facilities:78,brand:70,atmosphere:76,proProspects:70,academic:80,campusLife:78,playingTime:58,champContender:65,coachPrestige:68,confPrestige:82},
+  {name:'Arkansas',conf:'SEC',tradition:80,nilBudget:78,facilities:82,brand:78,atmosphere:86,proProspects:78,academic:70,campusLife:72,playingTime:58,champContender:68,coachPrestige:72,confPrestige:98},
+  {name:'Mississippi',conf:'SEC',tradition:78,nilBudget:82,facilities:80,brand:76,atmosphere:84,proProspects:78,academic:68,campusLife:75,playingTime:60,champContender:70,coachPrestige:74,confPrestige:98},
   {name:'Iowa',conf:'Big Ten',tradition:78,nilBudget:72,facilities:78,brand:74,atmosphere:82,proProspects:76,academic:82,campusLife:68,playingTime:54,champContender:65,coachPrestige:70,confPrestige:96},
-  {name:'Michigan State',conf:'Big Ten',tradition:78,nilBudget:70,facilities:76,brand:72,atmosphere:80,proProspects:74,academic:80,campusLife:68,playingTime:56,champContender:62,coachPrestige,confPrestige:96},
-  {name:'Minnesota',conf:'Big Ten',tradition:70,nilBudget:68,facilities:74,brand,atmosphere:76,proProspects:68,academic:86,campusLife:75,playingTime:60,champContender:55,coachPrestige:60,confPrestige:96},
-  {name:'Maryland',conf:'Big Ten',tradition:62,nilBudget:68,facilities:72,brand:66,atmosphere:64,proProspects:66,academic:82,campusLife:72,playingTime:65,champContender:50,coachPrestige:55,confPrestige:96},
+  {name:'Utah',conf:'Big 12',tradition:68,nilBudget:66,facilities:72,brand:66,atmosphere:76,proProspects:66,academic:76,campusLife:76,playingTime:60,champContender:62,coachPrestige:65,confPrestige:82},
+  {name:'Washington',conf:'Big Ten',tradition:72,nilBudget:74,facilities:80,brand:74,atmosphere:76,proProspects:72,academic:88,campusLife:82,playingTime:58,champContender:62,coachPrestige:66,confPrestige:96},
+  {name:'UCLA',conf:'Big Ten',tradition:72,nilBudget:78,facilities:82,brand:80,atmosphere:70,proProspects:75,academic:92,campusLife:92,playingTime:58,champContender:62,coachPrestige:66,confPrestige:96},
+  {name:'Stanford',conf:'ACC',tradition:72,nilBudget:80,facilities:82,brand:80,atmosphere:70,proProspects:74,academic:99,campusLife:82,playingTime:58,champContender:60,coachPrestige:65,confPrestige:88},
+  {name:'Baylor',conf:'Big 12',tradition:68,nilBudget:70,facilities:76,brand:66,atmosphere:72,proProspects:66,academic:78,campusLife:72,playingTime:60,champContender:60,coachPrestige:64,confPrestige:82},
+  {name:'Kansas State',conf:'Big 12',tradition:68,nilBudget:62,facilities:72,brand:64,atmosphere:72,proProspects:64,academic:72,campusLife:65,playingTime:60,champContender:60,coachPrestige:64,confPrestige:82},
+  {name:'Texas Tech',conf:'Big 12',tradition:68,nilBudget:75,facilities:74,brand:66,atmosphere:74,proProspects:65,academic:70,campusLife:68,playingTime:60,champContender:58,coachPrestige:62,confPrestige:82},
+  {name:'Virginia Tech',conf:'ACC',tradition:74,nilBudget:66,facilities:72,brand:70,atmosphere:78,proProspects:70,academic:78,campusLife:68,playingTime:58,champContender:58,coachPrestige:62,confPrestige:88},
+  {name:'Michigan State',conf:'Big Ten',tradition:78,nilBudget:70,facilities:76,brand:72,atmosphere:80,proProspects:74,academic:80,campusLife:68,playingTime:56,champContender:62,coachPrestige:66,confPrestige:96},
+  {name:'Missouri',conf:'SEC',tradition:74,nilBudget:72,facilities:76,brand:70,atmosphere:78,proProspects:72,academic:74,campusLife:72,playingTime:60,champContender:62,coachPrestige:66,confPrestige:98},
+  {name:'Mississippi State',conf:'SEC',tradition:72,nilBudget:70,facilities:74,brand:68,atmosphere:78,proProspects:70,academic:68,campusLife:65,playingTime:62,champContender:60,coachPrestige:65,confPrestige:98},
+  {name:'South Carolina',conf:'SEC',tradition:72,nilBudget:70,facilities:74,brand:68,atmosphere:80,proProspects:70,academic:72,campusLife:78,playingTime:62,champContender:60,coachPrestige:64,confPrestige:98},
+  {name:'Kentucky',conf:'SEC',tradition:68,nilBudget:68,facilities:72,brand:64,atmosphere:74,proProspects:66,academic:76,campusLife:72,playingTime:64,champContender:55,coachPrestige:60,confPrestige:98},
+  {name:'North Carolina',conf:'ACC',tradition:68,nilBudget:70,facilities:74,brand:70,atmosphere:70,proProspects:68,academic:88,campusLife:80,playingTime:60,champContender:58,coachPrestige:62,confPrestige:88},
+  {name:'Pittsburgh',conf:'ACC',tradition:68,nilBudget:62,facilities:68,brand:64,atmosphere:68,proProspects:66,academic:80,campusLife:75,playingTime:62,champContender:52,coachPrestige:56,confPrestige:88},
+  {name:'West Virginia',conf:'Big 12',tradition:68,nilBudget:62,facilities:68,brand:62,atmosphere:76,proProspects:62,academic:70,campusLife:65,playingTime:62,champContender:52,coachPrestige:56,confPrestige:82},
+  {name:'Iowa State',conf:'Big 12',tradition:62,nilBudget:62,facilities:68,brand:58,atmosphere:70,proProspects:60,academic:76,campusLife:65,playingTime:64,champContender:52,coachPrestige:56,confPrestige:82},
+  {name:'Georgia Tech',conf:'ACC',tradition:68,nilBudget:64,facilities:70,brand:65,atmosphere:68,proProspects:66,academic:94,campusLife:68,playingTime:62,champContender:50,coachPrestige:55,confPrestige:88},
+  {name:'Louisville',conf:'ACC',tradition:65,nilBudget:60,facilities:68,brand:62,atmosphere:70,proProspects:64,academic:72,campusLife:72,playingTime:64,champContender:50,coachPrestige:55,confPrestige:88},
+  {name:'NC State',conf:'ACC',tradition:64,nilBudget:60,facilities:66,brand:60,atmosphere:66,proProspects:62,academic:80,campusLife:68,playingTime:64,champContender:48,coachPrestige:54,confPrestige:88},
+  {name:'Colorado',conf:'Big 12',tradition:60,nilBudget:70,facilities:68,brand:68,atmosphere:66,proProspects:60,academic:80,campusLife:80,playingTime:64,champContender:50,coachPrestige:54,confPrestige:82},
+  {name:'Minnesota',conf:'Big Ten',tradition:70,nilBudget:68,facilities:74,brand:64,atmosphere:76,proProspects:68,academic:86,campusLife:75,playingTime:60,champContender:55,coachPrestige:60,confPrestige:96},
   {name:'Indiana',conf:'Big Ten',tradition:55,nilBudget:72,facilities:74,brand:60,atmosphere:62,proProspects:58,academic:84,campusLife:74,playingTime:68,champContender:48,coachPrestige:50,confPrestige:96},
+  {name:'Maryland',conf:'Big Ten',tradition:62,nilBudget:68,facilities:72,brand:66,atmosphere:64,proProspects:66,academic:82,campusLife:72,playingTime:65,champContender:50,coachPrestige:55,confPrestige:96},
+  {name:'Arizona State',conf:'Big 12',tradition:65,nilBudget:66,facilities:70,brand:65,atmosphere:70,proProspects:62,academic:76,campusLife:82,playingTime:62,champContender:52,coachPrestige:55,confPrestige:82},
+  {name:'Arizona',conf:'Big 12',tradition:60,nilBudget:60,facilities:66,brand:58,atmosphere:64,proProspects:58,academic:78,campusLife:80,playingTime:65,champContender:46,coachPrestige:50,confPrestige:82},
+  {name:'BYU',conf:'Big 12',tradition:68,nilBudget:60,facilities:68,brand:65,atmosphere:76,proProspects:60,academic:78,campusLife:65,playingTime:60,champContender:55,coachPrestige:58,confPrestige:82},
+  {name:'Houston',conf:'Big 12',tradition:62,nilBudget:62,facilities:65,brand:60,atmosphere:66,proProspects:60,academic:72,campusLife:70,playingTime:64,champContender:48,coachPrestige:52,confPrestige:82},
+  {name:'Cincinnati',conf:'Big 12',tradition:62,nilBudget:58,facilities:64,brand:60,atmosphere:68,proProspects:60,academic:72,campusLife:68,playingTime:64,champContender:50,coachPrestige:54,confPrestige:82},
+  {name:'UCF',conf:'Big 12',tradition:55,nilBudget:58,facilities:64,brand:58,atmosphere:64,proProspects:55,academic:72,campusLife:75,playingTime:66,champContender:46,coachPrestige:50,confPrestige:82},
   {name:'Purdue',conf:'Big Ten',tradition:62,nilBudget:62,facilities:68,brand:60,atmosphere:66,proProspects:62,academic:88,campusLife:62,playingTime:66,champContender:48,coachPrestige:54,confPrestige:96},
   {name:'Northwestern',conf:'Big Ten',tradition:60,nilBudget:65,facilities:70,brand:62,atmosphere:62,proProspects:60,academic:98,campusLife:70,playingTime:68,champContender:45,coachPrestige:52,confPrestige:96},
   {name:'Illinois',conf:'Big Ten',tradition:60,nilBudget:60,facilities:66,brand:58,atmosphere:60,proProspects:58,academic:84,campusLife:65,playingTime:68,champContender:42,coachPrestige:50,confPrestige:96},
   {name:'Rutgers',conf:'Big Ten',tradition:48,nilBudget:60,facilities:65,brand:55,atmosphere:55,proProspects:55,academic:78,campusLife:68,playingTime:70,champContender:38,coachPrestige:42,confPrestige:96},
-  {name:'UCLA',conf:'Big Ten',tradition:72,nilBudget:78,facilities:82,brand:80,atmosphere:70,proProspects:75,academic:92,campusLife:92,playingTime:58,champContender:62,coachPrestige:66,confPrestige:96},
-  {name:'Washington',conf:'Big Ten',tradition:72,nilBudget:74,facilities:80,brand:74,atmosphere:76,proProspects:72,academic:88,campusLife:82,playingTime:58,champContender:62,coachPrestige:66,confPrestige:96},
-  // Big 12
-  {name:'Clemson',conf:'ACC',tradition:85,nilBudget:80,facilities:88,brand:85,atmosphere:90,proProspects:84,academic:78,campusLife:72,playingTime:46,champContender:84,coachPrestige:86,confPrestige:88},
-  {name:'Miami',conf:'ACC',tradition:88,nilBudget:86,facilities:85,brand:90,atmosphere:85,proProspects:86,academic:82,campusLife:90,playingTime:48,champContender:76,coachPrestige:78,confPrestige:88},
-  {name:'Florida State',conf:'ACC',tradition:84,nilBudget:76,facilities:82,brand:82,atmosphere:84,proProspects:82,academic:76,campusLife:80,playingTime:50,champContender:72,coachPrestige:74,confPrestige:88},
-  {name:'North Carolina',conf:'ACC',tradition:68,nilBudget:70,facilities:74,brand:70,atmosphere:70,proProspects:68,academic:88,campusLife:80,playingTime:60,champContender:58,coachPrestige:62,confPrestige:88},
-  {name:'Virginia Tech',conf:'ACC',tradition:74,nilBudget:66,facilities:72,brand:70,atmosphere:78,proProspects:70,academic:78,campusLife:68,playingTime:58,champContender:58,coachPrestige:62,confPrestige:88},
-  {name:'Pittsburgh',conf:'ACC',tradition:68,nilBudget:62,facilities:68,brand:64,atmosphere:68,proProspects:66,academic:80,campusLife:75,playingTime:62,champContender:52,coachPrestige:56,confPrestige:88},
-  {name:'Georgia Tech',conf:'ACC',tradition:68,nilBudget:64,facilities:70,brand,atmosphere:68,proProspects:66,academic:94,campusLife:68,playingTime:62,champContender:50,coachPrestige:55,confPrestige:88},
-  {name:'Louisville',conf:'ACC',tradition:65,nilBudget:60,facilities:68,brand:62,atmosphere:70,proProspects:64,academic:72,campusLife:72,playingTime:64,champContender:50,coachPrestige:55,confPrestige:88},
-  {name:'NC State',conf:'ACC',tradition:64,nilBudget:60,facilities:66,brand:60,atmosphere:66,proProspects:62,academic:80,campusLife:68,playingTime:64,champContender:48,coachPrestige:54,confPrestige:88},
+  {name:'Kansas',conf:'Big 12',tradition:48,nilBudget:60,facilities:65,brand:50,atmosphere:55,proProspects:50,academic:80,campusLife:65,playingTime:72,champContender:36,coachPrestige:40,confPrestige:82},
   {name:'Syracuse',conf:'ACC',tradition:60,nilBudget:55,facilities:62,brand:58,atmosphere:62,proProspects:58,academic:78,campusLife:70,playingTime:66,champContender:42,coachPrestige:48,confPrestige:88},
-  {name:'Wake Forest',conf:'ACC',tradition:52,nilBudget:52,facilities,atmosphere:56,proProspects:54,academic:90,campusLife:68,playingTime:70,champContender:38,coachPrestige:44,confPrestige:88},
+  {name:'Wake Forest',conf:'ACC',tradition:52,nilBudget:52,facilities:60,brand:50,atmosphere:56,proProspects:54,academic:90,campusLife:68,playingTime:70,champContender:38,coachPrestige:44,confPrestige:88},
   {name:'Duke',conf:'ACC',tradition:50,nilBudget:55,facilities:65,brand:58,atmosphere:54,proProspects:55,academic:98,campusLife:72,playingTime:72,champContender:38,coachPrestige:44,confPrestige:88},
   {name:'Boston College',conf:'ACC',tradition:58,nilBudget:52,facilities:62,brand:55,atmosphere:58,proProspects:56,academic:90,campusLife:72,playingTime:68,champContender:40,coachPrestige:46,confPrestige:88},
   {name:'Virginia',conf:'ACC',tradition:54,nilBudget:54,facilities:64,brand:54,atmosphere:56,proProspects:54,academic:92,campusLife:74,playingTime:70,champContender:38,coachPrestige:44,confPrestige:88},
-  {name:'Stanford',conf:'ACC',tradition:72,nilBudget:80,facilities:82,brand:80,atmosphere:70,proProspects:74,academic:99,campusLife:82,playingTime:58,champContender:60,coachPrestige:65,confPrestige:88},
   {name:'California',conf:'ACC',tradition:60,nilBudget:68,facilities:70,brand:65,atmosphere:60,proProspects:62,academic:94,campusLife:88,playingTime:66,champContender:45,coachPrestige:50,confPrestige:88},
   {name:'SMU',conf:'ACC',tradition:55,nilBudget:70,facilities:72,brand:60,atmosphere:60,proProspects:58,academic:82,campusLife:82,playingTime:68,champContender:48,coachPrestige:52,confPrestige:88},
-  // Big 12
-  {name:'TCU',conf:'Big 12',tradition:72,nilBudget:72,facilities:78,brand:70,atmosphere:76,proProspects:70,academic:80,campusLife:78,playingTime:58,champContender:65,coachPrestige:68,confPrestige:82},
-  {name:'Baylor',conf:'Big 12',tradition:68,nilBudget:70,facilities:76,brand:66,atmosphere:72,proProspects:66,academic:78,campusLife:72,playingTime:60,champContender:60,coachPrestige:64,confPrestige:82},
-  {name:'Oklahoma State',conf:'Big 12',tradition:72,nilBudget:74,facilities:78,brand:70,atmosphere:74,proProspects:68,academic:72,campusLife:70,playingTime:58,champContender:65,coachPrestige:68,confPrestige:82},
-  {name:'Kansas State',conf:'Big 12',tradition:68,nilBudget,facilities:72,brand:64,atmosphere:72,proProspects:64,academic:72,campusLife:65,playingTime:60,champContender:60,coachPrestige:64,confPrestige:82},
-  {name:'Iowa State',conf:'Big 12',tradition:62,nilBudget:62,facilities:68,brand:58,atmosphere:70,proProspects:60,academic:76,campusLife:65,playingTime:64,champContender:52,coachPrestige:56,confPrestige:82},
-  {name:'Texas Tech',conf:'Big 12',tradition:68,nilBudget:75,facilities:74,brand:66,atmosphere:74,proProspects:65,academic:70,campusLife:68,playingTime:60,champContender:58,coachPrestige:62,confPrestige:82},
-  {name:'West Virginia',conf:'Big 12',tradition:68,nilBudget:62,facilities:68,brand:62,atmosphere:76,proProspects:62,academic:70,campusLife:65,playingTime:62,champContender:52,coachPrestige:56,confPrestige:82},
-  {name:'Utah',conf:'Big 12',tradition:68,nilBudget:66,facilities:72,brand:66,atmosphere:76,proProspects:66,academic:76,campusLife:76,playingTime:60,champContender:62,coachPrestige:65,confPrestige:82},
-  {name:'Arizona State',conf:'Big 12',tradition:65,nilBudget:66,facilities:70,brand:65,atmosphere:70,proProspects:62,academic:76,campusLife:82,playingTime:62,champContender:52,coachPrestige:55,confPrestige:82},
-  {name:'Arizona',conf:'Big 12',tradition:60,nilBudget:60,facilities:66,brand:58,atmosphere:64,proProspects:58,academic:78,campusLife:80,playingTime:65,champContender:46,coachPrestige:50,confPrestige:82},
-  {name:'Colorado',conf:'Big 12',tradition:60,nilBudget:70,facilities:68,brand:68,atmosphere:66,proProspects:60,academic:80,campusLife:80,playingTime:64,champContender:50,coachPrestige:54,confPrestige:82},
-  {name:'Houston',conf:'Big 12',tradition:62,nilBudget:62,facilities,atmosphere:66,proProspects:60,academic:72,campusLife:70,playingTime:64,champContender:48,coachPrestige:52,confPrestige:82},
-  {name:'Cincinnati',conf:'Big 12',tradition:62,nilBudget:58,facilities:64,brand:60,atmosphere:68,proProspects:60,academic:72,campusLife:68,playingTime:64,champContender:50,coachPrestige:54,confPrestige:82},
-  {name:'UCF',conf:'Big 12',tradition:55,nilBudget:58,facilities:64,brand:58,atmosphere:64,proProspects:55,academic:72,campusLife:75,playingTime:66,champContender:46,coachPrestige:50,confPrestige:82},
-  {name:'BYU',conf:'Big 12',tradition:68,nilBudget:60,facilities:68,brand:65,atmosphere:76,proProspects:60,academic:78,campusLife:65,playingTime:60,champContender:55,coachPrestige:58,confPrestige:82},
-  {name:'Kansas',conf:'Big 12',tradition:48,nilBudget:60,facilities:65,brand:50,atmosphere:55,proProspects:50,academic:80,campusLife:65,playingTime:72,champContender:36,coachPrestige:40,confPrestige:82},
-  // AAC
+  {name:'Vanderbilt',conf:'SEC',tradition:55,nilBudget:62,facilities:70,brand:58,atmosphere:58,proProspects:60,academic:98,campusLife:70,playingTime:75,champContender:40,coachPrestige:48,confPrestige:98},
+  {name:'Boise State',conf:'MWC',tradition:65,nilBudget:52,facilities:60,brand:60,atmosphere:72,proProspects:55,academic:66,campusLife:60,playingTime:58,champContender:58,coachPrestige:62,confPrestige:55},
   {name:'Tulane',conf:'AAC',tradition:52,nilBudget:48,facilities:55,brand:48,atmosphere:52,proProspects:48,academic:86,campusLife:82,playingTime:70,champContender:42,coachPrestige:46,confPrestige:58},
   {name:'Memphis',conf:'AAC',tradition:50,nilBudget:46,facilities:52,brand:46,atmosphere:55,proProspects:46,academic:68,campusLife:68,playingTime:72,champContender:40,coachPrestige:44,confPrestige:58},
-  {name:'UTSA',conf:'AAC',tradition:38,nilBudget:40,facilities:46,brand:38,atmosphere:46,proProspects:38,academic:66,campusLife:66,playingTime:78,champContender:32,coachPrestige:36,confPrestige:58},
-  {name:'South Florida',conf:'AAC',tradition:40,nilBudget:42,facilities:48,brand:40,atmosphere:46,proProspects:40,academic:68,campusLife:72,playingTime:76,champContender:34,coachPrestige:38,confPrestige:58},
-  {name:'East Carolina',conf:'AAC',tradition:45,nilBudget:40,facilities:46,brand:40,atmosphere:55,proProspects:40,academic:66,campusLife:62,playingTime:74,champContender:35,coachPrestige:38,confPrestige:58},
-  {name:'Navy',conf:'AAC',tradition:58,nilBudget:38,facilities:50,brand:48,atmosphere:58,proProspects:38,academic:86,campusLife:55,playingTime:68,champContender:35,coachPrestige:42,confPrestige:58},
-  {name:'Rice',conf:'AAC',tradition:45,nilBudget:42,facilities:48,brand:40,atmosphere:44,proProspects:40,academic:92,campusLife:70,playingTime:75,champContender:32,coachPrestige:36,confPrestige:58},
-  {name:'Tulsa',conf:'AAC',tradition:48,nilBudget:38,facilities:44,brand:38,atmosphere:48,proProspects:38,academic:70,campusLife:60,playingTime:74,champContender:34,coachPrestige:38,confPrestige:58},
-  // Sun Belt
   {name:'App State',conf:'Sun Belt',tradition:52,nilBudget:36,facilities:44,brand:40,atmosphere:52,proProspects:38,academic:66,campusLife:62,playingTime:70,champContender:42,coachPrestige:44,confPrestige:50},
+  {name:'Navy',conf:'AAC',tradition:58,nilBudget:38,facilities:50,brand:48,atmosphere:58,proProspects:38,academic:86,campusLife:55,playingTime:68,champContender:35,coachPrestige:42,confPrestige:58},
+  {name:'Army',conf:'Ind',tradition:60,nilBudget:36,facilities:50,brand:52,atmosphere:56,proProspects:30,academic:88,campusLife:50,playingTime:62,champContender:35,coachPrestige:40,confPrestige:50},
+  {name:'Fresno State',conf:'MWC',tradition:55,nilBudget:42,facilities:48,brand:46,atmosphere:60,proProspects:46,academic:64,campusLife:60,playingTime:64,champContender:46,coachPrestige:48,confPrestige:55},
+  {name:'Western Kentucky',conf:'C-USA',tradition:42,nilBudget:30,facilities:38,brand:32,atmosphere:44,proProspects:30,academic:62,campusLife:56,playingTime:72,champContender:32,coachPrestige:34,confPrestige:45},
   {name:'Louisiana',conf:'Sun Belt',tradition:48,nilBudget:34,facilities:42,brand:36,atmosphere:50,proProspects:36,academic:64,campusLife:60,playingTime:72,champContender:38,coachPrestige:40,confPrestige:50},
   {name:'Troy',conf:'Sun Belt',tradition:48,nilBudget:32,facilities:40,brand:34,atmosphere:46,proProspects:34,academic:64,campusLife:58,playingTime:72,champContender:36,coachPrestige:38,confPrestige:50},
+  {name:'Miami (OH)',conf:'MAC',tradition:48,nilBudget:28,facilities:34,brand:30,atmosphere:40,proProspects:28,academic:74,campusLife:64,playingTime:68,champContender:36,coachPrestige:38,confPrestige:42},
+  {name:'Toledo',conf:'MAC',tradition:45,nilBudget:28,facilities:34,brand:28,atmosphere:42,proProspects:26,academic:68,campusLife:60,playingTime:70,champContender:34,coachPrestige:36,confPrestige:42},
+  {name:'Liberty',conf:'C-USA',tradition:35,nilBudget:32,facilities:40,brand:32,atmosphere:44,proProspects:28,academic:70,campusLife:58,playingTime:74,champContender:28,coachPrestige:30,confPrestige:45},
+  {name:'UNLV',conf:'MWC',tradition:42,nilBudget:46,facilities:52,brand:46,atmosphere:48,proProspects:40,academic:62,campusLife:80,playingTime:70,champContender:36,coachPrestige:40,confPrestige:55},
+  {name:'San Diego State',conf:'MWC',tradition:52,nilBudget:42,facilities:50,brand:48,atmosphere:54,proProspects:44,academic:68,campusLife:78,playingTime:66,champContender:42,coachPrestige:44,confPrestige:55},
+  {name:'Air Force',conf:'MWC',tradition:52,nilBudget:36,facilities:46,brand:44,atmosphere:52,proProspects:36,academic:84,campusLife:50,playingTime:64,champContender:38,coachPrestige:42,confPrestige:55},
   {name:'Georgia Southern',conf:'Sun Belt',tradition:50,nilBudget:32,facilities:40,brand:36,atmosphere:50,proProspects:34,academic:64,campusLife:60,playingTime:70,champContender:38,coachPrestige:40,confPrestige:50},
+  {name:'Marshall',conf:'Sun Belt',tradition:45,nilBudget:30,facilities:38,brand:34,atmosphere:46,proProspects:32,academic:64,campusLife:58,playingTime:72,champContender:34,coachPrestige:36,confPrestige:50},
+  {name:'James Madison',conf:'Sun Belt',tradition:38,nilBudget:30,facilities:38,brand:32,atmosphere:44,proProspects:30,academic:68,campusLife:62,playingTime:76,champContender:30,coachPrestige:32,confPrestige:50},
+  {name:'UAB',conf:'C-USA',tradition:35,nilBudget:28,facilities:36,brand:28,atmosphere:38,proProspects:26,academic:66,campusLife:60,playingTime:76,champContender:26,coachPrestige:28,confPrestige:45},
+  {name:'Florida Atlantic',conf:'C-USA',tradition:38,nilBudget:30,facilities:38,brand:30,atmosphere:42,proProspects:30,academic:66,campusLife:70,playingTime:74,champContender:28,coachPrestige:30,confPrestige:45},
+  {name:'Middle Tennessee',conf:'C-USA',tradition:38,nilBudget:26,facilities:34,brand:26,atmosphere:38,proProspects:26,academic:64,campusLife:58,playingTime:74,champContender:26,coachPrestige:28,confPrestige:45},
+  {name:'North Texas',conf:'C-USA',tradition:35,nilBudget:26,facilities:34,brand:26,atmosphere:36,proProspects:24,academic:64,campusLife:60,playingTime:76,champContender:24,coachPrestige:26,confPrestige:45},
+  {name:'UTEP',conf:'C-USA',tradition:38,nilBudget:26,facilities:34,brand:28,atmosphere:40,proProspects:26,academic:62,campusLife:58,playingTime:76,champContender:26,coachPrestige:28,confPrestige:45},
   {name:'South Alabama',conf:'Sun Belt',tradition:35,nilBudget:32,facilities:40,brand:32,atmosphere:42,proProspects:32,academic:64,campusLife:62,playingTime:76,champContender:28,coachPrestige:32,confPrestige:50},
   {name:'Arkansas State',conf:'Sun Belt',tradition:42,nilBudget:30,facilities:38,brand:32,atmosphere:44,proProspects:32,academic:62,campusLife:56,playingTime:74,champContender:32,coachPrestige:36,confPrestige:50},
-  {name:'Marshall',conf:'Sun Belt',tradition:45,nilBudget:30,facilities:38,brand:34,atmosphere:46,proProspects:32,academic:64,campusLife:58,playingTime:72,champContender:34,coachPrestige:36,confPrestige:50},
+  {name:'Colorado State',conf:'MWC',tradition:45,nilBudget:36,facilities:44,brand:38,atmosphere:48,proProspects:36,academic:70,campusLife:66,playingTime:68,champContender:34,coachPrestige:36,confPrestige:55},
+  {name:'Wyoming',conf:'MWC',tradition:45,nilBudget:30,facilities:38,brand:32,atmosphere:48,proProspects:30,academic:66,campusLife:52,playingTime:70,champContender:30,coachPrestige:32,confPrestige:55},
+  {name:'Utah State',conf:'MWC',tradition:42,nilBudget:28,facilities:36,brand:30,atmosphere:44,proProspects:28,academic:66,campusLife:55,playingTime:70,champContender:30,coachPrestige:32,confPrestige:55},
+  {name:'Nevada',conf:'MWC',tradition:40,nilBudget:30,facilities:38,brand:32,atmosphere:42,proProspects:28,academic:64,campusLife:65,playingTime:72,champContender:28,coachPrestige:30,confPrestige:55},
+  {name:'New Mexico',conf:'MWC',tradition:35,nilBudget:24,facilities:32,brand:24,atmosphere:36,proProspects:22,academic:62,campusLife:55,playingTime:74,champContender:22,coachPrestige:24,confPrestige:55},
+  {name:'San Jose State',conf:'MWC',tradition:35,nilBudget:28,facilities:34,brand:30,atmosphere:36,proProspects:24,academic:76,campusLife:78,playingTime:74,champContender:22,coachPrestige:24,confPrestige:55},
+  {name:'Hawaii',conf:'MWC',tradition:38,nilBudget:26,facilities:32,brand:30,atmosphere:42,proProspects:24,academic:66,campusLife:88,playingTime:72,champContender:24,coachPrestige:26,confPrestige:55},
+  {name:'South Florida',conf:'AAC',tradition:40,nilBudget:42,facilities:48,brand:40,atmosphere:46,proProspects:40,academic:68,campusLife:72,playingTime:76,champContender:34,coachPrestige:38,confPrestige:58},
+  {name:'East Carolina',conf:'AAC',tradition:45,nilBudget:40,facilities:46,brand:40,atmosphere:55,proProspects:40,academic:66,campusLife:62,playingTime:74,champContender:35,coachPrestige:38,confPrestige:58},
+  {name:'Rice',conf:'AAC',tradition:45,nilBudget:42,facilities:48,brand:40,atmosphere:44,proProspects:40,academic:92,campusLife:70,playingTime:75,champContender:32,coachPrestige:36,confPrestige:58},
+  {name:'Tulsa',conf:'AAC',tradition:48,nilBudget:38,facilities:44,brand:38,atmosphere:48,proProspects:38,academic:70,campusLife:60,playingTime:74,champContender:34,coachPrestige:38,confPrestige:58},
+  {name:'UTSA',conf:'AAC',tradition:38,nilBudget:40,facilities:46,brand:38,atmosphere:46,proProspects:38,academic:66,campusLife:66,playingTime:78,champContender:32,coachPrestige:36,confPrestige:58},
   {name:'Georgia State',conf:'Sun Belt',tradition:30,nilBudget:30,facilities:38,brand:30,atmosphere:38,proProspects:30,academic:66,campusLife:70,playingTime:78,champContender:24,coachPrestige:28,confPrestige:50},
-  {name:'James Madison',conf:'Sun Belt',tradition:38,nilBudget:30,facilities:38,brand:32,atmosphere:44,proProspects:30,academic:68,campusLife:62,playingTime:76,champContender:30,coachPrestige:32,confPrestige:50},
   {name:'Old Dominion',conf:'Sun Belt',tradition:30,nilBudget:28,facilities:36,brand:28,atmosphere:36,proProspects:28,academic:64,campusLife:60,playingTime:78,champContender:22,coachPrestige:26,confPrestige:50},
-  {name:'Texas State',conf:'Sun Belt',tradition:32,nilBudget:28,facilities:36,brand:28,atmosphere:38,proProspects:28,academic:62,campusLife,playingTime:78,champContender:22,coachPrestige:26,confPrestige:50},
+  {name:'Texas State',conf:'Sun Belt',tradition:32,nilBudget:28,facilities:36,brand:28,atmosphere:38,proProspects:28,academic:62,campusLife:62,playingTime:78,champContender:22,coachPrestige:26,confPrestige:50},
   {name:'Southern Miss',conf:'Sun Belt',tradition:42,nilBudget:28,facilities:36,brand:30,atmosphere:42,proProspects:30,academic:62,campusLife:56,playingTime:74,champContender:30,coachPrestige:32,confPrestige:50},
   {name:'Louisiana Monroe',conf:'Sun Belt',tradition:28,nilBudget:24,facilities:30,brand:24,atmosphere:32,proProspects:24,academic:60,campusLife:52,playingTime:80,champContender:18,coachPrestige:22,confPrestige:50},
-  // C-USA
-  {name:'Western Kentucky',conf:'C-USA',tradition:42,nilBudget:30,facilities:38,brand:32,atmosphere:44,proProspects:30,academic:62,campusLife:56,playingTime:72,champContender:32,coachPrestige:34,confPrestige:45},
-  {name:'UTEP',conf:'C-USA',tradition:38,nilBudget:26,facilities:34,brand:28,atmosphere:40,proProspects:26,academic:62,campusLife:58,playingTime:76,champContender:26,coachPrestige:28,confPrestige:45},
-  {name:'Florida Atlantic',conf:'C-USA',tradition:38,nilBudget:30,facilities:38,brand:30,atmosphere:42,proProspects:30,academic:66,campusLife:70,playingTime:74,champContender:28,coachPrestige:30,confPrestige:45},
-  {name:'UAB',conf:'C-USA',tradition:35,nilBudget:28,facilities:36,brand:28,atmosphere:38,proProspects:26,academic:66,campusLife:60,playingTime:76,champContender:26,coachPrestige:28,confPrestige:45},
-  {name:'North Texas',conf:'C-USA',tradition:35,nilBudget:26,facilities:34,brand:26,atmosphere:36,proProspects:24,academic:64,campusLife:60,playingTime:76,champContender:24,coachPrestige:26,confPrestige:45},
-  {name:'Middle Tennessee',conf:'C-USA',tradition:38,nilBudget:26,facilities:34,brand:26,atmosphere:38,proProspects:26,academic:64,campusLife:58,playingTime:74,champContender:26,coachPrestige:28,confPrestige:45},
-  {name:'Liberty',conf:'C-USA',tradition:35,nilBudget:32,facilities:40,brand:32,atmosphere:44,proProspects:28,academic:70,campusLife:58,playingTime:74,champContender:28,coachPrestige:30,confPrestige:45},
-  {name:'Charlotte',conf:'C-USA',tradition:28,nilBudget:26,facilities:32,brand:26,atmosphere:32,proProspects:24,academic:64,campusLife:65,playingTime:78,champContender:20,coachPrestige:22,confPrestige:45},
-  {name:'Florida International',conf:'C-USA',tradition:28,nilBudget:26,facilities:32,brand:26,atmosphere:32,proProspects:24,academic:64,campusLife:68,playingTime:78,champContender:18,coachPrestige:20,confPrestige:45},
-  {name:'Sam Houston',conf:'C-USA',tradition:30,nilBudget:22,facilities:28,brand:22,atmosphere:32,proProspects:20,academic:60,campusLife:52,playingTime:80,champContender:18,coachPrestige:20,confPrestige:45},
-  {name:'Jacksonville State',conf:'C-USA',tradition:28,nilBudget:20,facilities:26,brand:20,atmosphere:30,proProspects:18,academic:58,campusLife:50,playingTime:80,champContender:16,coachPrestige:18,confPrestige:45},
-  {name:'Kennesaw State',conf:'C-USA',tradition:22,nilBudget:20,facilities:28,brand:20,atmosphere:28,proProspects:16,academic:60,campusLife:55,playingTime:82,champContender:14,coachPrestige:16,confPrestige:45},
-  // MAC
-  {name:'Miami (OH)',conf:'MAC',tradition:48,nilBudget:28,facilities:34,brand:30,atmosphere:40,proProspects:28,academic:74,campusLife:64,playingTime:68,champContender:36,coachPrestige:38,confPrestige:42},
-  {name:'Toledo',conf:'MAC',tradition:45,nilBudget:28,facilities:34,brand:28,atmosphere:42,proProspects:26,academic,campusLife:60,playingTime:70,champContender:34,coachPrestige:36,confPrestige:42},
-  {name:'Ohio',conf:'MAC',tradition:42,nilBudget:26,facilities:32,brand:26,atmosphere:38,proProspects:24,academic:70,campusLife:60,playingTime:70,champContender:32,coachPrestige:34,confPrestige:42},
   {name:'Northern Illinois',conf:'MAC',tradition:45,nilBudget:26,facilities:32,brand:26,atmosphere:38,proProspects:24,academic:68,campusLife:58,playingTime:70,champContender:32,coachPrestige:34,confPrestige:42},
+  {name:'Ohio',conf:'MAC',tradition:42,nilBudget:26,facilities:32,brand:26,atmosphere:38,proProspects:24,academic:70,campusLife:60,playingTime:70,champContender:32,coachPrestige:34,confPrestige:42},
   {name:'Western Michigan',conf:'MAC',tradition:40,nilBudget:24,facilities:30,brand:24,atmosphere:36,proProspects:22,academic:68,campusLife:58,playingTime:72,champContender:28,coachPrestige:30,confPrestige:42},
   {name:'Central Michigan',conf:'MAC',tradition:40,nilBudget:24,facilities:30,brand:24,atmosphere:36,proProspects:22,academic:68,campusLife:58,playingTime:72,champContender:28,coachPrestige:30,confPrestige:42},
   {name:'Ball State',conf:'MAC',tradition:35,nilBudget:22,facilities:28,brand:22,atmosphere:32,proProspects:20,academic:66,campusLife:56,playingTime:74,champContender:24,coachPrestige:26,confPrestige:42},
@@ -461,134 +418,99 @@ const FBS_SCHOOLS = [
   {name:'Kent State',conf:'MAC',tradition:28,nilBudget:18,facilities:24,brand:18,atmosphere:26,proProspects:16,academic:66,campusLife:54,playingTime:78,champContender:16,coachPrestige:18,confPrestige:42},
   {name:'Akron',conf:'MAC',tradition:26,nilBudget:18,facilities:24,brand:18,atmosphere:26,proProspects:14,academic:64,campusLife:52,playingTime:78,champContender:14,coachPrestige:16,confPrestige:42},
   {name:'Bowling Green',conf:'MAC',tradition:28,nilBudget:18,facilities:24,brand:18,atmosphere:28,proProspects:14,academic:64,campusLife:52,playingTime:78,champContender:14,coachPrestige:16,confPrestige:42},
-  // MWC
-  {name:'Boise State',conf:'MWC',tradition:65,nilBudget:52,facilities:60,brand:60,atmosphere:72,proProspects:55,academic:66,campusLife:60,playingTime:58,champContender:58,coachPrestige:62,confPrestige:55},
-  {name:'Fresno State',conf:'MWC',tradition:55,nilBudget:42,facilities:48,brand:46,atmosphere:60,proProspects:46,academic:64,campusLife:60,playingTime:64,champContender:46,coachPrestige:48,confPrestige:55},
-  {name:'San Diego State',conf:'MWC',tradition:52,nilBudget:42,facilities:50,brand:48,atmosphere:54,proProspects:44,academic:68,campusLife:78,playingTime:66,champContender:42,coachPrestige:44,confPrestige:55},
-  {name:'UNLV',conf:'MWC',tradition:42,nilBudget:46,facilities:52,brand:46,atmosphere:48,proProspects:40,academic:62,campusLife:80,playingTime:70,champContender:36,coachPrestige:40,confPrestige:55},
-  {name:'Air Force',conf:'MWC',tradition:52,nilBudget:36,facilities:46,brand:44,atmosphere:52,proProspects:36,academic:84,campusLife:50,playingTime:64,champContender:38,coachPrestige:42,confPrestige:55},
-  {name:'Colorado State',conf:'MWC',tradition:45,nilBudget:36,facilities:44,brand:38,atmosphere:48,proProspects:36,academic:70,campusLife:66,playingTime:68,champContender:34,coachPrestige:36,confPrestige:55},
-  {name:'Wyoming',conf:'MWC',tradition:45,nilBudget:30,facilities:38,brand:32,atmosphere:48,proProspects:30,academic:66,campusLife:52,playingTime:70,champContender:30,coachPrestige:32,confPrestige:55},
-  {name:'Utah State',conf:'MWC',tradition:42,nilBudget:28,facilities:36,brand:30,atmosphere:44,proProspects:28,academic:66,campusLife:55,playingTime:70,champContender:30,coachPrestige:32,confPrestige:55},
-  {name:'Nevada',conf:'MWC',tradition:40,nilBudget:30,facilities:38,brand:32,atmosphere:42,proProspects:28,academic:64,campusLife:65,playingTime:72,champContender:28,coachPrestige:30,confPrestige:55},
-  {name:'New Mexico',conf:'MWC',tradition:35,nilBudget:24,facilities:32,brand:24,atmosphere:36,proProspects:22,academic:62,campusLife:55,playingTime:74,champContender:22,coachPrestige:24,confPrestige:55},
-  {name:'San Jose State',conf:'MWC',tradition:35,nilBudget:28,facilities:34,brand:30,atmosphere:36,proProspects:24,academic,campusLife:78,playingTime:74,champContender:22,coachPrestige:24,confPrestige:55},
-  {name:'Hawaii',conf:'MWC',tradition:38,nilBudget:26,facilities:32,brand:30,atmosphere:42,proProspects:24,academic:66,campusLife:88,playingTime:72,champContender:24,coachPrestige:26,confPrestige:55},
-  // Ind
-  {name:'Notre Dame',conf:'Ind',tradition:96,nilBudget:90,facilities:92,brand:98,atmosphere:96,proProspects:90,academic:94,campusLife:74,playingTime:42,champContender:88,coachPrestige:92,confPrestige:94},
-  {name:'Army',conf:'Ind',tradition:60,nilBudget:36,facilities:50,brand:52,atmosphere:56,proProspects:30,academic:88,campusLife:50,playingTime:62,champContender:35,coachPrestige:40,confPrestige:50},
+  {name:'Charlotte',conf:'C-USA',tradition:28,nilBudget:26,facilities:32,brand:26,atmosphere:32,proProspects:24,academic:64,campusLife:65,playingTime:78,champContender:20,coachPrestige:22,confPrestige:45},
+  {name:'Florida International',conf:'C-USA',tradition:28,nilBudget:26,facilities:32,brand:26,atmosphere:32,proProspects:24,academic:64,campusLife:68,playingTime:78,champContender:18,coachPrestige:20,confPrestige:45},
+  {name:'Sam Houston',conf:'C-USA',tradition:30,nilBudget:22,facilities:28,brand:22,atmosphere:32,proProspects:20,academic:60,campusLife:52,playingTime:80,champContender:18,coachPrestige:20,confPrestige:45},
+  {name:'Jacksonville State',conf:'C-USA',tradition:28,nilBudget:20,facilities:26,brand:20,atmosphere:30,proProspects:18,academic:58,campusLife:50,playingTime:80,champContender:16,coachPrestige:18,confPrestige:45},
+  {name:'Kennesaw State',conf:'C-USA',tradition:22,nilBudget:20,facilities:28,brand:20,atmosphere:28,proProspects:16,academic:60,campusLife:55,playingTime:82,champContender:14,coachPrestige:16,confPrestige:45},
   {name:'New Mexico State',conf:'Ind',tradition:25,nilBudget:18,facilities:24,brand:18,atmosphere:28,proProspects:14,academic:58,campusLife:50,playingTime:82,champContender:12,coachPrestige:14,confPrestige:40},
 ];
 
 // ═══════════════════════════════════════════════════════════════
-// GRADE CALCULATIONS
+// HELPERS
 // ═══════════════════════════════════════════════════════════════
-
-const GRADE_KEYS = ['tradition','nilBudget','facilities','brand','atmosphere','proProspects','academic','campusLife','playingTime','champContender','coachPrestige','confPrestige'];
-
-function calcTierScore(school) {
-  const vals = GRADE_KEYS.map(k => school[k] || 50);
-  return vals.reduce((a,b)=>a+b,0) / vals.length;
-}
-
-function getTierStars(score) {
-  if(score>=88) return 5;
-  if(score>=76) return 4;
-  if(score>=64) return 3;
-  if(score>=52) return 2;
-  return 1;
-}
-
-function gradeLabel(val) {
-  if(val>=90) return {l:'A+',cls:'grade-A'};
-  if(val>=80) return {l:'A',cls:'grade-A'};
-  if(val>=70) return {l:'B+',cls:'grade-B'};
-  if(val>=60) return {l:'B',cls:'grade-B'};
-  if(val>=50) return {l:'C+',cls:'grade-C'};
-  if(val>=40) return {l:'C',cls:'grade-C'};
-  if(val>=30) return {l:'D',cls:'grade-D'};
-  return {l:'F',cls:'grade-D'};
-}
-
-function gradeColor(val) {
-  if(val>=80) return '#5bc47a';
-  if(val>=60) return '#c9a84c';
-  if(val>=40) return '#c47a5b';
-  return '#c45b5b';
-}
-
-const GRADE_LABELS = {
-  tradition:'Program Tradition', nilBudget:'NIL Budget', facilities:'Athletic Facilities',
-  brand:'Brand Exposure', atmosphere:'Stadium Atmosphere', proProspects:'Pro Potential',
-  academic:'Academic Prestige', campusLife:'Campus Lifestyle', playingTime:'Playing Time',
-  champContender:'Championship Contender', coachPrestige:'Coach Prestige', confPrestige:'Conference Prestige'
-};
+function tierScore(s){ return GRADE_KEYS.reduce((a,k)=>a+(s[k]||50),0)/GRADE_KEYS.length; }
+function tierStars(score){ return score>=88?5:score>=76?4:score>=64?3:score>=52?2:1; }
+function gradeLabel(v){ return v>=90?{l:'A+',cls:'gA'}:v>=80?{l:'A',cls:'gA'}:v>=70?{l:'B+',cls:'gB'}:v>=60?{l:'B',cls:'gB'}:v>=50?{l:'C+',cls:'gC'}:v>=40?{l:'C',cls:'gC'}:v>=30?{l:'D',cls:'gD'}:{l:'F',cls:'gD'}; }
+function gradeColor(v){ return v>=80?'#5bc47a':v>=60?'#c9a84c':v>=40?'#c47a5b':'#c45b5b'; }
+function nilLabel(v){ return v>=90?'$10M+':v>=80?'$6-10M':v>=70?'$4-6M':v>=60?'$2-4M':v>=50?'$1-2M':'<$1M'; }
 
 // ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
-let state = {
-  coachName: '',
-  almaMater: '',
-  pcp: '',
-  role: '',
-  offScheme: '',
-  defScheme: '',
-  startTree: '',
-  school: null,
-};
+const state = { coachName:'', almaMater:'', offScheme:'', defScheme:'', role:'', startTree:'', school:null };
+let currentStep = 1;
 
 // ═══════════════════════════════════════════════════════════════
-// STEP NAVIGATION
+// NAVIGATION
 // ═══════════════════════════════════════════════════════════════
 function goStep(n) {
-  if(n===2 && !validateStep1()) return;
-  if(n===3 && !validateStep2()) return;
-  if(n===4 && !validateStep3()) return;
-  if(n===5 && !validateStep4()) return;
-
+  if(!validate(currentStep)) return;
+  currentStep = n;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('step-'+n).classList.add('active');
-
-  for(let i=1;i<=5;i++) {
-    const dot=document.getElementById('dot-'+i);
-    dot.classList.remove('active','done');
-    if(i<n) dot.classList.add('done');
-    else if(i===n) dot.classList.add('active');
+  for(let i=1;i<=4;i++){
+    const d=document.getElementById('dot-'+i);
+    d.classList.remove('active','done');
+    if(i<n) d.classList.add('done');
+    else if(i===n) d.classList.add('active');
   }
-
-  if(n===5) renderSchools();
+  document.getElementById('step-label').textContent=`Step ${n} of 4`;
+  window.scrollTo(0,0);
+  if(n===2) buildSummary('step2-summary');
+  if(n===3) buildSummary('step3-summary');
+  if(n===4){ buildSummary('step4-summary'); renderSchools(); }
 }
 
-function validateStep1() {
-  const name = document.getElementById('coach-name').value.trim();
-  if(!name) { alert('Please enter your coach name.'); return false; }
-  if(!state.pcp) { alert('Please select a play calling preference.'); return false; }
-  state.coachName = name;
-  state.almaMater = document.getElementById('alma-mater').value;
+function validate(step) {
+  if(step===1){
+    const name=document.getElementById('coach-name').value.trim();
+    if(!name){ alert('Please enter your coach name.'); return false; }
+    if(!state.offScheme){ alert('Please select an offensive scheme.'); return false; }
+    if(!state.defScheme){ alert('Please select a defensive scheme.'); return false; }
+    state.coachName=name;
+    state.almaMater=document.getElementById('alma-mater').value;
+    return true;
+  }
+  if(step===2){ if(!state.role){ alert('Please select a starting role.'); return false; } return true; }
+  if(step===3){ if(!state.startTree){ alert('Please select a starting skill tree.'); return false; } return true; }
   return true;
 }
-function validateStep2() {
-  if(!state.role) { alert('Please select a starting role.'); return false; }
-  return true;
-}
-function validateStep3() {
-  if(!state.offScheme) { alert('Please select an offensive scheme.'); return false; }
-  if(!state.defScheme) { alert('Please select a defensive scheme.'); return false; }
-  return true;
-}
-function validateStep4() {
-  if(!state.startTree) { alert('Please select a starting skill tree.'); return false; }
-  return true;
+
+function buildSummary(id) {
+  const el=document.getElementById(id);
+  if(!el) return;
+  const items=[
+    {label:'Coach',val:state.coachName||'—'},
+    {label:'Off Scheme',val:state.offScheme||'—'},
+    {label:'Def Scheme',val:state.defScheme||'—'},
+    state.role?{label:'Role',val:state.role}:null,
+    state.startTree?{label:'Tree',val:TREES.find(t=>t.id===state.startTree)?.name||'—'}:null,
+    state.school?{label:'School',val:state.school.name}:null,
+  ].filter(Boolean);
+  el.innerHTML=items.map(i=>`<div class="summary-item"><span class="si-label">${i.label}</span><span class="si-val">${i.val}</span></div>`).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════
-// STEP 1 — PCP
+// STEP 1 — SCHEMES
 // ═══════════════════════════════════════════════════════════════
-function selectPCP(card) {
-  document.querySelectorAll('[data-pcp]').forEach(c=>c.classList.remove('selected'));
-  card.classList.add('selected');
-  state.pcp = card.dataset.pcp;
+function buildSchemeGrid(schemes, containerId, side) {
+  document.getElementById(containerId).innerHTML = schemes.map(s=>{
+    const tags=s.tags.map(t=>`<span class="stag ${TAG_META[t].cls}">${TAG_META[t].label}</span>`).join('');
+    return `<div class="scheme-card" data-scheme="${s.name}" data-side="${side}" onclick="selectScheme(this)">
+      <div class="scheme-name">${s.name}</div>
+      <div class="scheme-tags">${tags}</div>
+      <div class="scheme-desc">${s.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectScheme(card) {
+  const side=card.dataset.side;
+  document.querySelectorAll(`[data-side="${side}"]`).forEach(c=>c.classList.remove('sel-off','sel-def'));
+  card.classList.add(side==='off'?'sel-off':'sel-def');
+  if(side==='off') state.offScheme=card.dataset.scheme;
+  else state.defScheme=card.dataset.scheme;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -597,194 +519,139 @@ function selectPCP(card) {
 function selectRole(card) {
   document.querySelectorAll('[data-role]').forEach(c=>c.classList.remove('selected'));
   card.classList.add('selected');
-  state.role = card.dataset.role;
+  state.role=card.dataset.role;
+  const sub=document.getElementById('school-sub');
+  if(sub) sub.textContent=`Select the program where you'll begin as ${state.role==='HC'?'Head Coach':state.role==='OC'?'Offensive Coordinator':'Defensive Coordinator'}. The existing ${state.role} enters the coaching pool.`;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// STEP 3 — SCHEMES
-// ═══════════════════════════════════════════════════════════════
-function buildSchemeGrids() {
-  const offGrid = document.getElementById('off-scheme-grid');
-  const defGrid = document.getElementById('def-scheme-grid');
-
-  offGrid.innerHTML = OFF_SCHEMES.map(s=>`
-    <div class="scheme-card" data-scheme="${s.name}" data-side="off" onclick="selectScheme(this,'off')">
-      <div class="scheme-name">${s.name}</div>
-      <div class="scheme-desc">${s.desc}</div>
-    </div>`).join('');
-
-  defGrid.innerHTML = DEF_SCHEMES.map(s=>`
-    <div class="scheme-card" data-scheme="${s.name}" data-side="def" onclick="selectScheme(this,'def')">
-      <div class="scheme-name">${s.name}</div>
-      <div class="scheme-desc">${s.desc}</div>
-    </div>`).join('');
-}
-
-function selectScheme(card, side) {
-  document.querySelectorAll(`[data-side="${side}"]`).forEach(c=>c.classList.remove('selected','selected-def'));
-  card.classList.add(side==='off'?'selected':'selected-def');
-  if(side==='off') state.offScheme = card.dataset.scheme;
-  else state.defScheme = card.dataset.scheme;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// STEP 4 — SKILL TREES
+// STEP 3 — TREE
 // ═══════════════════════════════════════════════════════════════
 function buildTreeGrid() {
-  const grid = document.getElementById('tree-grid');
-  grid.innerHTML = SKILL_TREES.map(t=>`
-    <div class="tree-card ${t.available?'':'locked'}" data-tree="${t.id}" onclick="${t.available?`selectTree(this)`:''}">
-      <div style="font-size:1.6rem;margin-bottom:0.4rem;">${t.icon}</div>
-      <div style="font-size:0.62rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.3rem;color:${t.available?'#c9a84c':'#555'};">${t.available?'Available':'Locked'}</div>
-      <div class="card-title">${t.name}</div>
-      <div class="card-sub" style="margin-top:0.3rem;">${t.desc}</div>
-      <div class="tree-nodes">
-        ${t.nodes.map((n,i)=>`<span class="tree-node ${i===0&&t.available?'available':''}">${n}</span>`).join('')}
-      </div>
+  document.getElementById('tree-grid').innerHTML=TREES.map(t=>`
+    <div class="tree-card ${t.avail?'':'locked'}" data-tree="${t.id}" onclick="${t.avail?'selectTree(this)':''}">
+      <div class="tree-icon">${t.icon}</div>
+      <div class="tree-status" style="color:${t.avail?'#c9a84c':'#444'};">${t.avail?'Available':'Locked'}</div>
+      <div class="tree-title">${t.name}</div>
+      <div class="tree-desc">${t.desc}</div>
+      <div class="tree-nodes">${t.nodes.map((n,i)=>`<span class="tnode ${i===0&&t.avail?'first':''}">${n}</span>`).join('')}</div>
     </div>`).join('');
 }
 
 function selectTree(card) {
   document.querySelectorAll('.tree-card').forEach(c=>c.classList.remove('selected'));
   card.classList.add('selected');
-  state.startTree = card.dataset.tree;
+  state.startTree=card.dataset.tree;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// STEP 5 — SCHOOL SELECTION
+// STEP 4 — SCHOOLS
 // ═══════════════════════════════════════════════════════════════
-let selectedSchool = null;
+let selectedSchool=null;
 
 function renderSchools() {
-  const confF = document.getElementById('conf-filter').value;
-  const tierF = document.getElementById('tier-filter').value;
-  const sortF = document.getElementById('sort-schools').value;
+  const confF=document.getElementById('conf-filter').value;
+  const tierF=document.getElementById('tier-filter').value;
+  const sortF=document.getElementById('sort-schools').value;
+  const roleLabel=state.role==='HC'?'Head Coach':state.role==='OC'?'Offensive Coordinator':'Defensive Coordinator';
 
-  // Update subtitle based on role
-  const roleLabel = state.role==='HC'?'Head Coach':state.role==='OC'?'Offensive Coordinator':'Defensive Coordinator';
-  document.getElementById('school-sub').textContent =
-    `Select the program where you'll begin as ${roleLabel}. The existing ${state.role} will enter the coaching pool.`;
+  let schools=SCHOOLS.map(s=>({...s,_score:tierScore(s),_stars:tierStars(tierScore(s))}));
+  if(confF) schools=schools.filter(s=>s.conf===confF);
+  if(tierF) schools=schools.filter(s=>s._stars===parseInt(tierF));
+  schools.sort((a,b)=>
+    sortF==='tier'?b._score-a._score:
+    sortF==='nil'?(b.nilBudget||0)-(a.nilBudget||0):
+    sortF==='tradition'?(b.tradition||0)-(a.tradition||0):
+    a.name.localeCompare(b.name)
+  );
 
-  let schools = FBS_SCHOOLS.map(s=>({
-    ...s,
-    tierScore: calcTierScore(s),
-    tierStars: getTierStars(calcTierScore(s))
-  }));
-
-  if(confF) schools = schools.filter(s=>s.conf===confF);
-  if(tierF) schools = schools.filter(s=>s.tierStars===parseInt(tierF));
-
-  schools.sort((a,b)=>{
-    if(sortF==='tier') return b.tierScore-a.tierScore;
-    if(sortF==='nil') return (b.nilBudget||0)-(a.nilBudget||0);
-    if(sortF==='tradition') return (b.tradition||0)-(a.tradition||0);
-    if(sortF==='name') return a.name.localeCompare(b.name);
-    return b.tierScore-a.tierScore;
-  });
-
-  const list = document.getElementById('school-list');
-  list.innerHTML = schools.map(s=>{
-    const keyGrades = ['tradition','nilBudget','facilities','brand','champContender'].map(k=>{
+  document.getElementById('school-list').innerHTML=schools.map(s=>{
+    const keyGrades=['tradition','nilBudget','facilities','champContender','coachPrestige'].map(k=>{
       const g=gradeLabel(s[k]||50);
-      return `<span class="grade-chip ${g.cls}">${GRADE_LABELS[k].split(' ')[0]} ${g.l}</span>`;
+      return `<span class="gchip ${g.cls}">${GRADE_LABELS[k].split(' ')[0]} ${g.l}</span>`;
     }).join('');
-    const stars='★'.repeat(s.tierStars)+'<span style="color:#333;">'+'★'.repeat(5-s.tierStars)+'</span>';
-    return `<div class="school-card ${selectedSchool?.name===s.name?'selected':''}" onclick="selectSchool('${s.name}')">
+    const stars='★'.repeat(s._stars)+'<span style="color:#222;">'+'★'.repeat(5-s._stars)+'</span>';
+    return `<div class="school-card ${selectedSchool?.name===s.name?'selected':''}" onclick="selectSchool('${s.name.replace(/'/g,"\\'")}')">
       <div>
         <div class="school-name">${s.name}</div>
         <div class="school-meta">${s.conf} · ${roleLabel} opening</div>
         <div class="school-grades">${keyGrades}</div>
       </div>
       <div style="text-align:right;">
-        <div class="school-tier-stars">${stars}</div>
-        <div style="font-size:0.65rem;color:#555;margin-top:0.2rem;">${s.tierScore.toFixed(0)} pts</div>
+        <div class="tier-stars">${stars}</div>
+        <div style="font-size:0.62rem;color:#444;margin-top:0.2rem;">${s._score.toFixed(0)} pts</div>
       </div>
     </div>`;
   }).join('');
 }
 
 function selectSchool(name) {
-  selectedSchool = FBS_SCHOOLS.find(s=>s.name===name);
-  state.school = selectedSchool;
+  selectedSchool=SCHOOLS.find(s=>s.name===name);
+  state.school=selectedSchool;
   renderSchools();
-  renderSchoolDetail();
+  renderDetail();
 }
 
-function renderSchoolDetail() {
-  const el = document.getElementById('school-detail');
+function renderDetail() {
+  const el=document.getElementById('school-detail');
   if(!selectedSchool){el.classList.remove('visible');return;}
+  const s=selectedSchool;
+  const ts=tierScore(s);
+  const stars=tierStars(ts);
   el.classList.add('visible');
 
-  const s = {...selectedSchool, tierScore:calcTierScore(selectedSchool)};
-
-  const gradeRows = GRADE_KEYS.map(k=>{
-    const val=s[k]||50;
-    const g=gradeLabel(val);
-    const color=gradeColor(val);
-    return `<div class="detail-grade-row">
-      <span class="detail-grade-label">${GRADE_LABELS[k]}</span>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div class="grade-bar"><div class="grade-bar-fill" style="width:${val}%;background:${color};"></div></div>
-        <span class="grade-chip ${g.cls}" style="min-width:28px;text-align:center;">${g.l}</span>
+  const rows=GRADE_KEYS.map(k=>{
+    const v=s[k]||50;
+    const g=gradeLabel(v);
+    return `<div class="grade-row">
+      <span class="grade-row-label">${GRADE_LABELS[k]}</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="gbar"><div class="gbar-fill" style="width:${v}%;background:${gradeColor(v)};"></div></div>
+        <span class="gchip ${g.cls}" style="min-width:26px;text-align:center;">${g.l}</span>
       </div>
     </div>`;
   }).join('');
 
-  const nilDisplay = s.nilBudget>=85?'$8M+':s.nilBudget>=70?'$4-8M':s.nilBudget>=55?'$2-4M':s.nilBudget>=40?'$1-2M':'<$1M';
-  const collStrength = s.nilBudget>=85?'Elite Collective':s.nilBudget>=70?'Strong Collective':s.nilBudget>=55?'Developing Collective':'Emerging Collective';
-  const tierStars = getTierStars(s.tierScore);
-
-  el.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;">
       <div>
-        <div style="font-size:1.1rem;font-weight:700;color:#e8e8e8;">${s.name}</div>
-        <div style="font-size:0.75rem;color:#666;margin-top:0.15rem;">${s.conf} · Program Tier ${'★'.repeat(tierStars)}</div>
+        <div style="font-size:1.05rem;font-weight:700;color:#e8e8e8;">${s.name}</div>
+        <div style="font-size:0.72rem;color:#555;margin-top:0.1rem;">${s.conf} · Tier ${'★'.repeat(stars)}</div>
       </div>
       <div style="text-align:right;">
-        <div style="font-size:0.72rem;color:#888;">NIL Budget</div>
-        <div style="font-size:1rem;font-weight:700;color:#c9a84c;">${nilDisplay}</div>
-        <div style="font-size:0.68rem;color:#666;">${collStrength}</div>
+        <div style="font-size:0.65rem;color:#777;">NIL Budget</div>
+        <div style="font-size:1rem;font-weight:700;color:#c9a84c;">${nilLabel(s.nilBudget||50)}</div>
       </div>
     </div>
-    <div class="detail-grid">${gradeRows}</div>`;
+    <div class="grade-rows">${rows}</div>`;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// START CAREER
+// START
 // ═══════════════════════════════════════════════════════════════
 function startCareer() {
-  if(!state.school) { alert('Please select a program.'); return; }
-
-  // Save career state to sessionStorage for recruiting board to read
-  const career = {
-    coachName: state.coachName,
-    almaMater: state.almaMater,
-    pcp: state.pcp,
-    role: state.role,
-    offScheme: state.offScheme,
-    defScheme: state.defScheme,
-    startTree: state.startTree,
-    school: state.school,
-    year: 2026,
-    season: 1,
-  };
-  sessionStorage.setItem('dynastyCareer', JSON.stringify(career));
-  window.location.href = 'recruiting.html';
+  if(!validate(3)) return;
+  if(!state.school){ alert('Please select a program.'); return; }
+  sessionStorage.setItem('dynastyCareer', JSON.stringify({
+    coachName:state.coachName, almaMater:state.almaMater,
+    offScheme:state.offScheme, defScheme:state.defScheme,
+    role:state.role, startTree:state.startTree,
+    school:state.school, year:2026, season:1,
+  }));
+  window.location.href='recruiting.html';
 }
 
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
-
-// Populate alma mater dropdown
-const almaSelect = document.getElementById('alma-mater');
-FBS_SCHOOLS.sort((a,b)=>a.name.localeCompare(b.name)).forEach(s=>{
+const almaSelect=document.getElementById('alma-mater');
+[...SCHOOLS].sort((a,b)=>a.name.localeCompare(b.name)).forEach(s=>{
   const o=document.createElement('option');
   o.value=s.name; o.textContent=s.name;
   almaSelect.appendChild(o);
 });
-
-buildSchemeGrids();
+buildSchemeGrid(OFF_SCHEMES,'off-grid','off');
+buildSchemeGrid(DEF_SCHEMES,'def-grid','def');
 buildTreeGrid();
 </script>
 </body>
