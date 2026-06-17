@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dynasty — Goals</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.goals-layout { display: grid; grid-template-columns: 220px 1fr; height: calc(100vh - 48px); }
+.goals-nav { background: var(--surface-1); border-right: 1px solid var(--border-1); overflow-y: auto; }
+.goals-nav-item { padding: 11px 16px; font-size: 0.875rem; font-weight: 500; color: var(--text-3); cursor: pointer; border-bottom: 1px solid var(--border-1); transition: all 0.12s; border-left: 3px solid transparent; }
+.goals-nav-item:hover { background: var(--surface-2); color: var(--text-1); }
+.goals-nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-light); font-weight: 600; }
+.goals-nav-label { font-family: var(--font-mono); font-size: 0.5rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-5); padding: 10px 16px 4px; }
+.goals-main { background: var(--bg); overflow-y: auto; padding: 24px; }
+.page-title { font-size: 1.125rem; font-weight: 700; color: var(--text-1); letter-spacing: -0.01em; margin-bottom: 3px; }
+.page-sub { font-size: 0.8125rem; color: var(--text-3); margin-bottom: 20px; }
+
+/* GOAL CARDS */
+.goals-grid { display: grid; gap: 10px; }
+.goal-card { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); padding: 14px 16px; transition: all 0.12s; }
+.goal-card.active-goal { border-color: var(--accent); }
+.goal-card.completed { border-color: var(--green); background: var(--green-bg); opacity: 0.85; }
+.goal-card.failed { border-color: var(--border-2); opacity: 0.6; }
+.goal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.goal-title { font-size: 0.9375rem; font-weight: 700; color: var(--text-1); }
+.goal-deadline { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); flex-shrink: 0; margin-top: 3px; }
+.goal-desc { font-size: 0.8125rem; color: var(--text-3); line-height: 1.5; margin-bottom: 10px; }
+.goal-progress { margin-bottom: 10px; }
+.goal-progress-label { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.goal-progress-text { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); }
+.goal-progress-val { font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 500; color: var(--accent); }
+.goal-reward { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--accent-light); border: 1px solid var(--accent-mid); border-radius: var(--r-md); margin-top: 8px; }
+.goal-reward-label { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); }
+.goal-reward-val { font-size: 0.75rem; font-weight: 600; color: var(--accent); }
+.goal-consequence { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--red-bg); border: 1px solid #FCA5A5; border-radius: var(--r-md); margin-top: 4px; }
+.goal-consequence-label { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); }
+.goal-consequence-val { font-size: 0.75rem; font-weight: 600; color: var(--red); }
+.goal-status-chip { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 6px; border-radius: var(--r-sm); flex-shrink: 0; }
+.status-active { background: var(--blue-bg); color: var(--blue); }
+.status-completed { background: var(--green-bg); color: var(--green); }
+.status-failed { background: var(--border-1); color: var(--text-4); }
+.status-locked { background: var(--surface-1); color: var(--text-5); border: 1px solid var(--border-1); }
+
+/* EVENTS (EU4-style) */
+.event-card { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); padding: 16px; margin-bottom: 10px; }
+.event-card.claimed { border-color: var(--accent); background: var(--accent-light); }
+.event-card.locked { opacity: 0.5; }
+.event-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.event-icon { font-size: 1.25rem; flex-shrink: 0; }
+.event-title { font-size: 0.9375rem; font-weight: 700; color: var(--text-1); margin-bottom: 2px; }
+.event-subtitle { font-size: 0.75rem; color: var(--text-4); }
+.event-desc { font-size: 0.8125rem; color: var(--text-3); line-height: 1.55; margin-bottom: 12px; }
+.event-branches { display: grid; gap: 6px; }
+.event-branch { background: var(--surface-1); border: 1px solid var(--border-1); border-radius: var(--r-md); padding: 10px 12px; cursor: pointer; transition: all 0.12s; }
+.event-branch:hover { border-color: var(--accent); background: var(--accent-light); }
+.event-branch.selected { border-color: var(--accent); background: var(--accent-light); }
+.event-branch.excluded { opacity: 0.4; cursor: not-allowed; }
+.event-branch-title { font-size: 0.875rem; font-weight: 600; color: var(--text-1); margin-bottom: 3px; }
+.event-branch-desc { font-size: 0.75rem; color: var(--text-3); line-height: 1.45; }
+.event-world-change { font-size: 0.6875rem; color: var(--amber); margin-top: 4px; font-style: italic; }
+.event-prereq { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-5); margin-bottom: 6px; }
+.claim-btn { margin-top: 10px; }
+.event-locked-msg { font-size: 0.75rem; color: var(--text-5); font-style: italic; padding: 4px 0; }
+
+/* BENEFACTOR */
+.benefactor-locked { background: var(--surface-2); border: 1px dashed var(--border-2); border-radius: var(--r-lg); padding: 24px; text-align: center; }
+.benefactor-locked-title { font-size: 0.875rem; font-weight: 600; color: var(--text-3); margin-bottom: 6px; }
+.benefactor-locked-sub { font-size: 0.8125rem; color: var(--text-5); line-height: 1.5; }
+
+/* COLLECTIVE METER */
+.collective-meter { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); padding: 14px 16px; margin-bottom: 16px; }
+.meter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.meter-label { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); }
+.meter-val { font-family: var(--font-mono); font-size: 1rem; font-weight: 500; }
+.meter-track { height: 8px; background: var(--border-1); border-radius: 4px; overflow: hidden; }
+.meter-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-logo">The Dynasty</span>
+  <div class="topbar-sep"></div>
+  <span class="topbar-school" id="tb-school">Goals</span>
+  <div class="topbar-spacer"></div>
+  <a href="hub.html" class="btn btn-ghost btn-sm">Hub</a>
+</div>
+
+<div class="goals-layout">
+
+<div class="goals-nav">
+  <div class="goals-nav-label">Goals</div>
+  <div class="goals-nav-item active" data-tab="school" onclick="switchTab('school',this)">School Goals</div>
+  <div class="goals-nav-item" data-tab="collective" onclick="switchTab('collective',this)">Collective Goals</div>
+  <div class="goals-nav-label" style="margin-top:8px;">Events</div>
+  <div class="goals-nav-item" data-tab="events" onclick="switchTab('events',this)">Program Events</div>
+  <div class="goals-nav-label" style="margin-top:8px;">Special</div>
+  <div class="goals-nav-item" data-tab="benefactor" onclick="switchTab('benefactor',this)">Benefactor</div>
+</div>
+
+<div class="goals-main">
+
+  <!-- SCHOOL GOALS -->
+  <div id="tab-school">
+    <div class="page-title" id="school-goals-title">School Goals</div>
+    <div class="page-sub" id="school-goals-sub">Active objectives set by the program. These drive coach evaluations and contract decisions.</div>
+    <div class="goals-grid" id="school-goals-list"></div>
+  </div>
+
+  <!-- COLLECTIVE GOALS -->
+  <div id="tab-collective" style="display:none;">
+    <div class="page-title">Collective Goals</div>
+    <div class="page-sub">Your collective's expectations. Meeting these increases NIL funding. Missing them dips collective happiness.</div>
+
+    <div class="collective-meter">
+      <div class="meter-header">
+        <span class="meter-label">Collective Happiness</span>
+        <span class="meter-val" id="coll-happiness-val" style="color:var(--green);">72%</span>
+      </div>
+      <div class="meter-track">
+        <div class="meter-fill" id="coll-happiness-bar" style="width:72%;background:var(--green);"></div>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-4);margin-top:6px;" id="coll-happiness-label">Collective is satisfied with program direction.</div>
+    </div>
+
+    <div class="goals-grid" id="collective-goals-list"></div>
+  </div>
+
+  <!-- EVENTS -->
+  <div id="tab-events" style="display:none;">
+    <div class="page-title">Program Events</div>
+    <div class="page-sub">Branching narrative decisions unique to your program. Claiming an event changes the college football landscape. CPU programs cannot trigger their own events.</div>
+    <div id="events-list"></div>
+  </div>
+
+  <!-- BENEFACTOR -->
+  <div id="tab-benefactor" style="display:none;">
+    <div class="page-title">Benefactor</div>
+    <div class="page-sub">A significant outside interest in the program. When a benefactor emerges, their goals and funding appear here.</div>
+    <div id="benefactor-content"></div>
+  </div>
+
+</div>
+</div>
+
+<script src="schools.js"></script>
+<script>
+const careerRaw = sessionStorage.getItem('dynastyCareer');
+const career = careerRaw ? JSON.parse(careerRaw) : null;
+if(!career) { window.location.href='setup.html'; }
+
+const mySchool = career.school;
+const myConf = mySchool?.conf;
+const myTier = career.school ? getTierStars(calcTierScore(career.school)) : 3;
+const wins = career.seasonRecord?.w || 0;
+const losses = career.seasonRecord?.l || 0;
+const year = career.year || 2026;
+
+function applyColors(school) {
+  if(!school?.primary) return;
+  const hex=school.primary;
+  document.documentElement.style.setProperty('--accent',hex);
+  const rv=parseInt(hex.slice(1,3),16)||26,gv=parseInt(hex.slice(3,5),16)||23,bv=parseInt(hex.slice(5,7),16)||20;
+  document.documentElement.style.setProperty('--accent-mid',`rgba(${rv},${gv},${bv},0.15)`);
+  document.documentElement.style.setProperty('--accent-light',`rgba(${rv},${gv},${bv},0.06)`);
+}
+applyColors(mySchool);
+document.getElementById('tb-school').textContent = mySchool?.name||'Goals';
+
+// ═══ GOAL GENERATION ═══
+// Goals are procedurally generated based on school tier, recent performance, and contract length
+// 3 school goals, 3-5 collective goals active at a time
+
+function genSchoolGoals(school, tier, contractYears, currentRecord) {
+  const goals = [];
+  const winTarget = tier>=5?10:tier>=4?9:tier>=3?7:tier>=2?6:5;
+  const confTarget = tier>=5?'Win SEC/Big Ten/ACC/Big 12 Championship':tier>=4?'Win Conference Championship':tier>=3?'Finish Top 3 in Conference':'Win 4 Conference Games';
+
+  // Goal 1: Win total — always present, scales with tier
+  goals.push({
+    id:'wins_season',
+    title:`Win ${winTarget}+ Games`,
+    desc:`Finish the regular season with at least ${winTarget} wins. ${tier>=4?'Anything less will draw scrutiny.':'A winning season is the foundation.'}`,
+    type:'wins',
+    target: winTarget,
+    current: currentRecord.w || 0,
+    deadline: `${year} Season`,
+    reward: tier>=4?'Contract extension offer':'+$500K Collective contribution',
+    consequence: tier>=5?'Coach evaluation meeting':tier>=4?'Public pressure from collective':'Reduced recruiting budget',
+    consequenceSeverity: tier>=4?'high':'low',
+    status:'active',
+    progress: Math.min(100, ((currentRecord.w||0)/winTarget)*100),
+  });
+
+  // Goal 2: Conference goal
+  goals.push({
+    id:'conf_goal',
+    title: tier>=4?'Conference Championship':'Top Half of Conference',
+    desc: tier>=4?`Compete for the ${myConf} Championship. Elite programs are expected to contend annually.`:`Finish in the top half of the ${myConf} standings. Prove the program is moving in the right direction.`,
+    type:'conference',
+    target: tier>=4?1:Math.floor((DYNASTY_SCHOOLS?.filter(s=>s.conf===myConf).length||8)/2),
+    current: 0,
+    deadline: `${year} Season End`,
+    reward: tier>=4?'+$1M Collective contribution, Prestige boost':'Recruiting class boost',
+    consequence: tier>=5?'AD meeting — job security concern':tier>=4?'Collective pressure':'Reduced NIL budget',
+    consequenceSeverity: tier>=5?'high':tier>=4?'medium':'low',
+    status:'active',
+    progress: 0,
+  });
+
+  // Goal 3: Recruiting goal (scoped to contract length)
+  const classTarget = tier>=5?'Top 5 class':tier>=4?'Top 15 class':tier>=3?'Top 30 class':'Top 60 class';
+  goals.push({
+    id:'recruiting_class',
+    title:`Sign a ${classTarget}`,
+    desc:`Build a recruiting class that ranks in the ${classTarget} nationally. Elite talent is the foundation of sustained success.`,
+    type:'recruiting',
+    target: tier>=5?5:tier>=4?15:tier>=3?30:60,
+    current: 0,
+    deadline: `${year+1} Signing Day`,
+    reward: '+Recruiting pipeline bonus, Collective satisfaction',
+    consequence: tier>=4?'Recruiting coordinator review':'Slight collective unhappiness',
+    consequenceSeverity: tier>=4?'medium':'low',
+    status:'active',
+    progress: 0,
+  });
+
+  return goals;
+}
+
+function genCollectiveGoals(school, tier) {
+  const goals = [];
+
+  // Always: retain star player
+  goals.push({
+    id:'retain_star',
+    title:'Retain Star Player',
+    desc:'Keep your highest-rated player from entering the transfer portal this season.',
+    reward: '+$300K collective contribution',
+    deadline:`${year} Season`,
+    status:'active', progress:100, // starts at 100, drops if they leave
+  });
+
+  // Win threshold
+  const winThreshold = tier>=5?9:tier>=4?8:tier>=3?6:5;
+  goals.push({
+    id:'coll_wins',
+    title:`${winThreshold}+ Win Season`,
+    desc:`The collective wants results. Win at least ${winThreshold} games this season to maintain funding levels.`,
+    reward: tier>=4?'+$500K contribution':'Maintained funding level',
+    deadline:`${year} Season`,
+    status:'active',
+    progress: Math.min(100, ((wins||0)/winThreshold)*100),
+  });
+
+  // NIL efficiency
+  goals.push({
+    id:'nil_efficiency',
+    title:'NIL Contract Renewals',
+    desc:'Successfully renegotiate player NIL contracts before the portal window opens. Keep your core intact.',
+    reward: '+$200K bonus contribution',
+    deadline:`Week 45 — Portal Opens`,
+    status:'active', progress:0,
+  });
+
+  // Tier 4+ additional goals
+  if(tier>=4) {
+    goals.push({
+      id:'bowl_appearance',
+      title:'Bowl / Playoff Appearance',
+      desc:'Reach a bowl game or the CFP. The collective expects postseason appearances annually.',
+      reward: '+$750K contribution, Regional prestige boost',
+      deadline:`${year} Postseason`,
+      status:'active', progress:0,
+    });
+  }
+
+  // Tier 5 extra goal
+  if(tier>=5) {
+    goals.push({
+      id:'cfp_run',
+      title:'CFP Semifinal or Better',
+      desc:'The collective at this level expects legitimate national championship contention. Make a deep CFP run.',
+      reward: '+$2M contribution, Benefactor interest potential',
+      deadline:`${year} Postseason`,
+      status:'active', progress:0,
+    });
+  }
+
+  return goals;
+}
+
+// ═══ SCHOOL-SPECIFIC EVENTS ═══
+// Hand-crafted per school — branching narrative paths
+const SCHOOL_EVENTS = {
+  'Georgia Tech': [
+    {
+      id:'gt_rivalry',
+      title:'Upset the Neighborhood',
+      icon:'🏈',
+      subtitle:'The Georgia Rivalry',
+      desc:'Beat UGA in back-to-back seasons. Atlanta belongs to someone — prove it\'s the Yellow Jackets.',
+      prereq:'Beat Georgia 2 years in a row',
+      prereqMet: false,
+      claimed: false,
+      branches:[
+        {
+          id:'gt_instate',
+          title:'In-State Authority',
+          desc:'Claim permanent in-state recruiting dominance. Georgia Tech becomes Atlanta\'s program.',
+          worldChange:'Georgia Tech gets +8 in-state recruiting bonus. UGA coach faces public pressure.',
+          unlocks:'The Border War',
+        },
+        {
+          id:'gt_acc_power',
+          title:'ACC Anchor',
+          desc:'Shift focus to conference dominance. Win 3 ACC titles in 5 years and reshape the conference.',
+          worldChange:'Georgia Tech collective funding increases. ACC media deal favors Atlanta market.',
+          unlocks:'The Invitation',
+        },
+      ],
+    },
+    {
+      id:'gt_sec_invite',
+      title:'The Invitation',
+      icon:'📋',
+      subtitle:'Conference Realignment Path',
+      desc:'Following sustained success, the SEC approaches Georgia Tech about membership. This changes everything.',
+      prereq:'Win 3 ACC Championships — claim The Border War first',
+      prereqMet: false,
+      claimed: false,
+      locked: true,
+      branches:[
+        {
+          id:'gt_join_sec',
+          title:'Accept the Invitation',
+          desc:'Georgia Tech joins the SEC. Atlanta becomes an SEC market. In-state rivalry with Georgia intensifies.',
+          worldChange:'Conference realignment triggers. ACC must find replacement. Georgia Tech joins SEC.',
+          unlocks:null,
+        },
+        {
+          id:'gt_stay_acc',
+          title:'Decline — Lead the ACC',
+          desc:'Turn down the SEC and become the ACC\'s premier program. Massive collective investment follows.',
+          worldChange:'Georgia Tech receives $5M collective boost. ACC restructures around Atlanta market.',
+          unlocks:null,
+        },
+      ],
+    },
+  ],
+  'Army': [
+    {
+      id:'army_option',
+      title:'The Option Lives',
+      icon:'⚔️',
+      subtitle:'Triple Option Legacy',
+      desc:'Run the triple option to perfection. Win 10+ games three seasons in a row with a historic ground attack.',
+      prereq:'Win 10+ games 3 straight seasons',
+      prereqMet: false,
+      claimed: false,
+      branches:[
+        {
+          id:'army_power',
+          title:'Service Academy Power',
+          desc:'Army becomes a legitimate mid-major power. Recruits embrace the unique culture.',
+          worldChange:'Army gets permanent +10 recruiting bonus for triple option specialists. Air Force and Navy\'s recruiting suffers.',
+          unlocks:'The West Point Effect',
+        },
+        {
+          id:'army_conf',
+          title:'Conference Pursuit',
+          desc:'Army\'s success attracts conference interest. Pursue membership in a Group of 5 conference.',
+          worldChange:'Army joins AAC or Sun Belt. Schedule strengthens. Recruiting widens.',
+          unlocks:null,
+        },
+      ],
+    },
+  ],
+  'Boise State': [
+    {
+      id:'boise_blue',
+      title:'The Blue Turf Effect',
+      icon:'💙',
+      subtitle:'Identity as Power',
+      desc:'Win 11+ games four seasons in a row. Boise State becomes undeniable — the Group of 5\'s most dangerous program.',
+      prereq:'Win 11+ games 4 straight seasons',
+      prereqMet: false,
+      claimed: false,
+      branches:[
+        {
+          id:'boise_p4',
+          title:'Power Conference Bid',
+          desc:'Sustained dominance earns Boise State a Power 4 invitation.',
+          worldChange:'Boise State joins Big 12 or ACC. MWC weakens. Recruiting upgrades dramatically.',
+          unlocks:null,
+        },
+        {
+          id:'boise_dynasty',
+          title:'G5 Dynasty',
+          desc:'Stay in the MWC and build the greatest Group of 5 dynasty in history.',
+          worldChange:'MWC gets automatic CFP bid. Boise State collective triples. Rivals struggle to recruit.',
+          unlocks:'The Boise Standard',
+        },
+      ],
+    },
+  ],
+};
+
+// Generic events available to all schools
+const GENERIC_EVENTS = [
+  {
+    id:'rival_domination',
+    title:'Establish the Rivalry',
+    icon:'🏆',
+    subtitle:'3 Straight Rivalry Wins',
+    desc:'Win your biggest rivalry game 3 years in a row. The narrative shifts. Recruiting in the region follows.',
+    prereq:'Win rivalry game 3 consecutive years',
+    prereqMet: false,
+    claimed: false,
+    branches:[
+      {
+        id:'rival_recruit',
+        title:'Pipeline Control',
+        desc:'Your dominance translates to recruiting. Own the region.',
+        worldChange:'Regional recruiting bonus +6. Rival\'s recruiting in shared states weakens.',
+        unlocks:null,
+      },
+      {
+        id:'rival_pressure',
+        title:'Pressure the Rival',
+        desc:'Your consistent wins put the rival\'s coach on the hot seat.',
+        worldChange:'50% chance rival coach gets fired. Their collective happiness drops 20 points.',
+        unlocks:null,
+      },
+    ],
+  },
+];
+
+// ═══ RENDER FUNCTIONS ═══
+function renderSchoolGoals() {
+  const goals = genSchoolGoals(mySchool, myTier, career.contractYears||3, {w:wins,l:losses});
+  document.getElementById('school-goals-title').textContent = `${mySchool?.name} — School Goals`;
+  document.getElementById('school-goals-sub').textContent = `3 active goals · ${year} season · Contract year ${career.contractYear||1} of ${career.contractYears||3}`;
+
+  document.getElementById('school-goals-list').innerHTML = goals.map(g=>`
+    <div class="goal-card ${g.status==='completed'?'completed':g.status==='failed'?'failed':'active-goal'}">
+      <div class="goal-header">
+        <div class="goal-title">${g.title}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <span class="goal-status-chip ${g.status==='completed'?'status-completed':g.status==='failed'?'status-failed':'status-active'}">${g.status}</span>
+          <span class="goal-deadline">${g.deadline}</span>
+        </div>
+      </div>
+      <div class="goal-desc">${g.desc}</div>
+      <div class="goal-progress">
+        <div class="goal-progress-label">
+          <span class="goal-progress-text">Progress</span>
+          <span class="goal-progress-val">${Math.round(g.progress)}%</span>
+        </div>
+        <div class="progress-track" style="height:6px;">
+          <div class="progress-fill ${g.progress>=100?'green':g.progress>=50?'':'amber'}" style="width:${g.progress}%;${g.progress>=100?'background:var(--green)':g.progress>=50?'background:var(--accent)':'background:var(--amber)'};"></div>
+        </div>
+      </div>
+      <div class="goal-reward">
+        <span class="goal-reward-label">Reward</span>
+        <span class="goal-reward-val">${g.reward}</span>
+      </div>
+      ${g.consequence?`<div class="goal-consequence">
+        <span class="goal-consequence-label">If missed</span>
+        <span class="goal-consequence-val">${g.consequence}</span>
+      </div>`:''}
+    </div>`).join('');
+}
+
+function renderCollectiveGoals() {
+  const goals = genCollectiveGoals(mySchool, myTier);
+  const happiness = career.collectiveHappiness || 72;
+  const happinessColor = happiness>=70?'var(--green)':happiness>=50?'var(--amber)':'var(--red)';
+  const happinessLabel = happiness>=80?'Collective is very happy with program direction.':happiness>=60?'Collective is satisfied with program direction.':happiness>=40?'Collective has concerns about program trajectory.':'Collective is frustrated. Funding is at risk.';
+
+  document.getElementById('coll-happiness-val').textContent = happiness+'%';
+  document.getElementById('coll-happiness-val').style.color = happinessColor;
+  document.getElementById('coll-happiness-bar').style.width = happiness+'%';
+  document.getElementById('coll-happiness-bar').style.background = happinessColor;
+  document.getElementById('coll-happiness-label').textContent = happinessLabel;
+
+  document.getElementById('collective-goals-list').innerHTML = goals.map(g=>`
+    <div class="goal-card active-goal">
+      <div class="goal-header">
+        <div class="goal-title">${g.title}</div>
+        <span class="goal-deadline">${g.deadline}</span>
+      </div>
+      <div class="goal-desc">${g.desc}</div>
+      <div class="goal-progress">
+        <div class="goal-progress-label">
+          <span class="goal-progress-text">Progress</span>
+          <span class="goal-progress-val">${Math.round(g.progress)}%</span>
+        </div>
+        <div class="progress-track" style="height:5px;">
+          <div class="progress-fill" style="width:${g.progress}%;background:${g.progress>=100?'var(--green)':g.progress>=50?'var(--accent)':'var(--amber)'};"></div>
+        </div>
+      </div>
+      <div class="goal-reward">
+        <span class="goal-reward-label">Reward</span>
+        <span class="goal-reward-val">${g.reward}</span>
+      </div>
+    </div>`).join('');
+}
+
+function renderEvents() {
+  const schoolEvents = SCHOOL_EVENTS[mySchool?.name] || [];
+  const allEvents = [...schoolEvents, ...GENERIC_EVENTS];
+  const claimedEvents = career.claimedEvents || {};
+
+  if(allEvents.length===0) {
+    document.getElementById('events-list').innerHTML = `<div style="font-size:0.8125rem;color:var(--text-4);padding:16px 0;">No events currently available for ${mySchool?.name}. Events unlock as your program achieves milestones.</div>`;
+    return;
+  }
+
+  document.getElementById('events-list').innerHTML = allEvents.map(ev=>{
+    const isClaimed = claimedEvents[ev.id];
+    const isLocked = ev.locked && !isClaimed;
+    const claimedBranch = isClaimed?.branchId;
+
+    return `<div class="event-card ${isClaimed?'claimed':''} ${isLocked?'locked':''}">
+      <div class="event-header">
+        <div style="font-size:1.4rem;">${ev.icon}</div>
+        <div>
+          <div class="event-title">${ev.title}</div>
+          <div class="event-subtitle">${ev.subtitle}</div>
+        </div>
+        ${isClaimed?`<span class="goal-status-chip status-completed" style="margin-left:auto;">Claimed</span>`:''}
+        ${isLocked?`<span class="goal-status-chip status-locked" style="margin-left:auto;">Locked</span>`:''}
+      </div>
+      <div class="event-desc">${ev.desc}</div>
+      ${ev.prereq?`<div class="event-prereq">Prerequisite: ${ev.prereq}</div>`:''}
+
+      ${isLocked?`<div class="event-locked-msg">Complete prerequisite events to unlock this path.</div>`:`
+        <div class="event-branches">
+          ${ev.branches.map(b=>`
+            <div class="event-branch ${isClaimed&&claimedBranch===b.id?'selected':isClaimed?'excluded':''}">
+              <div class="event-branch-title">${b.title}</div>
+              <div class="event-branch-desc">${b.desc}</div>
+              <div class="event-world-change">World change: ${b.worldChange}</div>
+              ${b.unlocks?`<div style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-top:4px;">Unlocks: ${b.unlocks}</div>`:''}
+            </div>`).join('')}
+        </div>
+        ${!isClaimed&&ev.prereqMet?`<button class="btn btn-primary btn-sm claim-btn" onclick="claimEvent('${ev.id}')">Claim This Event</button>`:
+          !isClaimed?`<div style="font-size:0.75rem;color:var(--text-5);margin-top:8px;font-style:italic;">Prerequisite not yet met.</div>`:''}
+      `}
+    </div>`;
+  }).join('');
+}
+
+function renderBenefactor() {
+  const benefactor = career.benefactor;
+  const el = document.getElementById('benefactor-content');
+
+  if(!benefactor) {
+    el.innerHTML = `<div class="benefactor-locked">
+      <div style="font-size:2rem;margin-bottom:8px;">?</div>
+      <div class="benefactor-locked-title">No Active Benefactor</div>
+      <div class="benefactor-locked-sub">A significant outside interest in this program has not yet emerged. Benefactors appear when programs show upward momentum at the right moment. Some school events can trigger a benefactor directly.</div>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div style="background:var(--surface-2);border:2px solid var(--accent);border-radius:var(--r-lg);padding:16px;margin-bottom:16px;">
+      <div style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-4);margin-bottom:4px;">Active Benefactor</div>
+      <div style="font-size:1.125rem;font-weight:700;color:var(--text-1);">${benefactor.name}</div>
+      <div style="font-size:0.8125rem;color:var(--text-3);margin-top:2px;">${benefactor.background}</div>
+      <div style="display:flex;gap:16px;margin-top:10px;">
+        <div><div class="meter-label">NIL Contribution</div><div style="font-family:var(--font-mono);font-size:1rem;font-weight:500;color:var(--green);">+${benefactor.nilBoost}</div></div>
+        <div><div class="meter-label">Satisfaction</div><div style="font-family:var(--font-mono);font-size:1rem;font-weight:500;color:var(--accent);">${benefactor.satisfaction}%</div></div>
+      </div>
+    </div>
+    <div class="goals-grid">
+      ${(benefactor.goals||[]).map(g=>`
+        <div class="goal-card active-goal">
+          <div class="goal-header"><div class="goal-title">${g.title}</div><span class="goal-deadline">${g.deadline}</span></div>
+          <div class="goal-desc">${g.desc}</div>
+          <div class="goal-progress">
+            <div class="goal-progress-label"><span class="goal-progress-text">Progress</span><span class="goal-progress-val">${g.progress}%</span></div>
+            <div class="progress-track" style="height:5px;"><div class="progress-fill" style="width:${g.progress}%;background:var(--accent);"></div></div>
+          </div>
+          <div class="goal-reward"><span class="goal-reward-label">If completed</span><span class="goal-reward-val">${g.reward}</span></div>
+          <div class="goal-consequence"><span class="goal-consequence-label">If failed</span><span class="goal-consequence-val">${g.consequence}</span></div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function claimEvent(eventId) {
+  if(!career.claimedEvents) career.claimedEvents = {};
+  // Show branch selection
+  const allEvents = [...(SCHOOL_EVENTS[mySchool?.name]||[]), ...GENERIC_EVENTS];
+  const ev = allEvents.find(e=>e.id===eventId);
+  if(!ev) return;
+
+  const choice = prompt(`Choose your path:\n${ev.branches.map((b,i)=>`${i+1}. ${b.title} — ${b.desc}`).join('\n\nOR\n\n')}\n\nEnter 1 or 2:`);
+  const idx = parseInt(choice)-1;
+  if(idx<0||idx>=ev.branches.length) return;
+
+  career.claimedEvents[eventId] = {branchId: ev.branches[idx].id, claimedYear: year};
+  sessionStorage.setItem('dynastyCareer', JSON.stringify(career));
+  alert(`Event claimed: ${ev.branches[idx].title}\n\nWorld change: ${ev.branches[idx].worldChange}`);
+  renderEvents();
+}
+
+// ═══ TAB SWITCHING ═══
+function switchTab(tab, el) {
+  ['school','collective','events','benefactor'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===tab?'block':'none';
+  });
+  document.querySelectorAll('.goals-nav-item').forEach(e=>e.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(tab==='school') renderSchoolGoals();
+  if(tab==='collective') renderCollectiveGoals();
+  if(tab==='events') renderEvents();
+  if(tab==='benefactor') renderBenefactor();
+}
+
+// ═══ INIT ═══
+renderSchoolGoals();
+</script>
+</body>
+</html>
