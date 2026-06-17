@@ -67,10 +67,11 @@
       <input class="input" type="text" id="coach-name" placeholder="Enter your name" maxlength="40">
     </div>
     <div class="field" style="margin-bottom:0;">
-      <label class="label">Alma Mater <span style="color:var(--text-5);font-weight:400;">(optional)</span></label>
+      <label class="label">Alma Mater</label>
       <select class="select" id="alma-mater">
-        <option value="">None — build your own legacy</option>
+        <option value="">Select your alma mater...</option>
       </select>
+      <div class="field-note">Affects job applications, school interest in hiring you, and your own interest in returning home.</div>
     </div>
   </div>
 
@@ -95,17 +96,14 @@
     <div class="role-card" data-role="HC" onclick="selectRole(this)">
       <div class="tag tag-available" style="margin-bottom:10px;">Head Coach</div>
       <div class="role-title">Head Coach</div>
-      <div class="role-desc">Full program control from day one. Manage recruiting, staff, NIL, and game planning. Call offense, defense, both, or neither — your choice each game.</div>
     </div>
     <div class="role-card" data-role="OC" onclick="selectRole(this)">
       <div class="tag tag-offense" style="margin-bottom:10px;">Offensive Coordinator</div>
       <div class="role-title">Offensive Coordinator</div>
-      <div class="role-desc">Build your reputation on offense. Lower pressure, develop your play calling identity. The OC decision tree leads toward HC.</div>
     </div>
     <div class="role-card" data-role="DC" onclick="selectRole(this)">
       <div class="tag tag-defense" style="margin-bottom:10px;">Defensive Coordinator</div>
       <div class="role-title">Defensive Coordinator</div>
-      <div class="role-desc">Build your reputation on defense. The DC path leads toward HC. A strong defensive identity becomes your calling card up the ladder.</div>
     </div>
   </div>
   <div class="nav-row">
@@ -258,6 +256,7 @@ function validate(step) {
   if(step===1){
     const name=document.getElementById('coach-name').value.trim();
     if(!name){alert('Please enter your coach name.');return false;}
+    if(!document.getElementById('alma-mater').value){alert('Please select your alma mater.');return false;}
     if(!state.offScheme){alert('Please select an offensive scheme.');return false;}
     if(!state.defScheme){alert('Please select a defensive scheme.');return false;}
     state.coachName=name;
