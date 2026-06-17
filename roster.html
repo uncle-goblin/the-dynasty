@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dynasty — Roster</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.roster-layout { display: grid; grid-template-columns: 200px 1fr; height: calc(100vh - 48px); }
+.roster-nav { background: var(--surface-1); border-right: 1px solid var(--border-1); display: flex; flex-direction: column; overflow-y: auto; }
+.roster-nav-item { padding: 12px 16px; font-size: 0.875rem; font-weight: 500; color: var(--text-3); cursor: pointer; border-bottom: 1px solid var(--border-1); transition: all 0.12s; border-left: 3px solid transparent; }
+.roster-nav-item:hover { background: var(--surface-2); color: var(--text-1); }
+.roster-nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-light); font-weight: 600; }
+.roster-nav-label { font-family: var(--font-mono); font-size: 0.5625rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-5); padding: 10px 16px 4px; }
+.roster-main { background: var(--bg); overflow-y: auto; }
+.roster-content { padding: 20px; }
+
+/* DEPTH CHART */
+.dc-scheme-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 10px 14px; background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); }
+.dc-scheme-label { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); }
+.dc-scheme-val { font-size: 0.875rem; font-weight: 600; color: var(--accent); }
+.dc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.dc-unit { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); overflow: hidden; }
+.dc-unit-head { padding: 8px 14px; border-bottom: 1px solid var(--border-1); display: flex; align-items: center; justify-content: space-between; }
+.dc-unit-title { font-family: var(--font-mono); font-size: 0.5625rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); }
+.dc-pos-row { display: grid; grid-template-columns: 56px 1fr 1fr 40px; gap: 8px; align-items: center; padding: 6px 14px; border-bottom: 1px solid var(--border-1); }
+.dc-pos-row:last-child { border-bottom: none; }
+.dc-pos-label { font-family: var(--font-mono); font-size: 0.5625rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); }
+.dc-player { display: flex; align-items: center; gap: 6px; }
+.dc-player-name { font-size: 0.8125rem; font-weight: 500; color: var(--text-1); }
+.dc-player-year { font-family: var(--font-mono); font-size: 0.5625rem; color: var(--text-4); }
+.dc-ovr { font-family: var(--font-mono); font-size: 0.8125rem; font-weight: 500; color: var(--accent); text-align: right; }
+.dc-empty { font-size: 0.75rem; color: var(--text-5); font-style: italic; }
+.dc-backup { opacity: 0.7; }
+
+/* ROSTER TABLE */
+.roster-filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.roster-filters .select { max-width: 160px; font-size: 0.8125rem; }
+.roster-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+.roster-table thead th { background: var(--surface-2); font-family: var(--font-mono); font-size: 0.5rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--border-1); position: sticky; top: 0; z-index: 2; cursor: pointer; white-space: nowrap; }
+.roster-table thead th:hover { color: var(--accent); }
+.roster-table tbody tr { border-bottom: 1px solid var(--border-1); transition: background 0.08s; }
+.roster-table tbody tr:hover { background: var(--surface-2); }
+.roster-table td { padding: 6px 10px; vertical-align: middle; }
+.ovr-bar { width: 48px; height: 3px; background: var(--border-1); border-radius: 2px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px; }
+.ovr-fill { height: 100%; border-radius: 2px; }
+.yr-badge { font-family: var(--font-mono); font-size: 0.5625rem; font-weight: 500; letter-spacing: 0.04em; padding: 2px 5px; border-radius: var(--r-sm); }
+.yr-FR { background: var(--green-bg); color: var(--green); }
+.yr-SO { background: var(--blue-bg); color: var(--blue); }
+.yr-JR { background: var(--amber-bg); color: var(--amber); }
+.yr-SR { background: var(--red-bg); color: var(--red); }
+.yr-RS { background: #F3E8FF; color: #6B21A8; }
+
+/* MANAGEMENT */
+.mgmt-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.mgmt-card { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); padding: 14px; }
+.mgmt-card-num { font-family: var(--font-mono); font-size: 1.75rem; font-weight: 500; color: var(--accent); line-height: 1; }
+.mgmt-card-label { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); margin-top: 3px; }
+.mgmt-card-sub { font-size: 0.6875rem; color: var(--text-3); margin-top: 4px; }
+.class-breakdown { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+.class-card { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); padding: 12px; text-align: center; }
+.class-num { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 500; color: var(--text-1); }
+.class-label { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); margin-top: 2px; }
+.redshirt-list { display: grid; gap: 6px; }
+.redshirt-row { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-md); padding: 8px 14px; display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 12px; font-size: 0.8125rem; }
+.rs-toggle { font-family: var(--font-mono); font-size: 0.625rem; font-weight: 500; letter-spacing: 0.04em; padding: 3px 8px; border-radius: var(--r-sm); cursor: pointer; border: 1px solid var(--border-1); background: var(--surface-1); color: var(--text-3); transition: all 0.12s; }
+.rs-toggle.active { background: #F3E8FF; color: #6B21A8; border-color: #D8B4FE; }
+.section-title { font-size: 1rem; font-weight: 700; color: var(--text-1); letter-spacing: -0.01em; margin-bottom: 4px; }
+.section-sub { font-size: 0.8125rem; color: var(--text-3); margin-bottom: 16px; }
+.import-zone { border: 1px dashed var(--border-2); border-radius: var(--r-lg); padding: 24px; text-align: center; margin-bottom: 20px; cursor: pointer; transition: all 0.12s; }
+.import-zone:hover { border-color: var(--accent); background: var(--accent-light); }
+.import-zone-label { font-size: 0.875rem; font-weight: 600; color: var(--text-3); margin-bottom: 4px; }
+.import-zone-sub { font-size: 0.75rem; color: var(--text-5); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-logo">The Dynasty</span>
+  <div class="topbar-sep"></div>
+  <span class="topbar-school" id="tb-school">Roster</span>
+  <div class="topbar-sep"></div>
+  <span id="tb-season" style="font-family:var(--font-mono);font-size:0.8125rem;color:var(--text-3);">2026 Season</span>
+  <div class="topbar-spacer"></div>
+  <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-3);" id="tb-scholarship">0 / 85 scholarships</div>
+  <div class="topbar-sep"></div>
+  <a href="hub.html" class="btn btn-ghost btn-sm">Hub</a>
+</div>
+
+<div class="roster-layout">
+
+<!-- LEFT NAV -->
+<div class="roster-nav">
+  <div class="roster-nav-label">Roster</div>
+  <div class="roster-nav-item active" data-tab="depth" onclick="switchTab('depth',this)">Depth Chart</div>
+  <div class="roster-nav-item" data-tab="roster" onclick="switchTab('roster',this)">Roster Overview</div>
+  <div class="roster-nav-item" data-tab="mgmt" onclick="switchTab('mgmt',this)">Roster Management</div>
+  <div class="roster-nav-label" style="margin-top:8px;">Position Groups</div>
+  <div class="roster-nav-item" data-filter="OFF" onclick="filterGroup('OFF',this)" style="font-size:0.8rem;">Offense</div>
+  <div class="roster-nav-item" data-filter="DEF" onclick="filterGroup('DEF',this)" style="font-size:0.8rem;">Defense</div>
+  <div class="roster-nav-item" data-filter="ST" onclick="filterGroup('ST',this)" style="font-size:0.8rem;">Special Teams</div>
+  <div class="roster-nav-label" style="margin-top:8px;">Quick Jump</div>
+  <div class="roster-nav-item" data-pos="QB" onclick="jumpPos('QB')" style="font-size:0.75rem;">QB</div>
+  <div class="roster-nav-item" data-pos="RB" onclick="jumpPos('RB')" style="font-size:0.75rem;">RB</div>
+  <div class="roster-nav-item" data-pos="WR" onclick="jumpPos('WR')" style="font-size:0.75rem;">WR</div>
+  <div class="roster-nav-item" data-pos="TE" onclick="jumpPos('TE')" style="font-size:0.75rem;">TE</div>
+  <div class="roster-nav-item" data-pos="OL" onclick="jumpPos('OL')" style="font-size:0.75rem;">OL</div>
+  <div class="roster-nav-item" data-pos="EDGE" onclick="jumpPos('EDGE')" style="font-size:0.75rem;">EDGE</div>
+  <div class="roster-nav-item" data-pos="DL" onclick="jumpPos('DL')" style="font-size:0.75rem;">DL</div>
+  <div class="roster-nav-item" data-pos="LB" onclick="jumpPos('LB')" style="font-size:0.75rem;">LB</div>
+  <div class="roster-nav-item" data-pos="CB" onclick="jumpPos('CB')" style="font-size:0.75rem;">CB</div>
+  <div class="roster-nav-item" data-pos="S" onclick="jumpPos('S')" style="font-size:0.75rem;">S</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="roster-main">
+
+  <!-- DEPTH CHART TAB -->
+  <div id="tab-depth" class="roster-content">
+    <div class="section-title" id="dc-title">Depth Chart</div>
+    <div class="section-sub" id="dc-sub">Spread RPO Offense · 4-3 Base Defense</div>
+
+    <div class="dc-scheme-bar">
+      <div>
+        <div class="dc-scheme-label">Offense</div>
+        <div class="dc-scheme-val" id="dc-off-scheme">Spread RPO</div>
+      </div>
+      <div class="topbar-sep"></div>
+      <div>
+        <div class="dc-scheme-label">Defense</div>
+        <div class="dc-scheme-val" id="dc-def-scheme">4-3 Base</div>
+      </div>
+      <div class="topbar-sep"></div>
+      <div>
+        <div class="dc-scheme-label">Role</div>
+        <div class="dc-scheme-val" id="dc-role">HC</div>
+      </div>
+    </div>
+
+    <div class="dc-grid" id="dc-grid"></div>
+  </div>
+
+  <!-- ROSTER OVERVIEW TAB -->
+  <div id="tab-roster" class="roster-content" style="display:none;">
+    <div class="section-title">Roster Overview</div>
+    <div class="section-sub" id="roster-count">Loading roster...</div>
+
+    <div class="roster-filters">
+      <select class="select" id="pos-filter" onchange="renderRosterTable()">
+        <option value="">All Positions</option>
+        <option>QB</option><option>RB</option><option>WR</option><option>TE</option>
+        <option>IOL</option><option>OT</option><option>EDGE</option><option>DL</option>
+        <option>LB</option><option>CB</option><option>S</option><option>ATH</option>
+        <option>K</option><option>P</option>
+      </select>
+      <select class="select" id="yr-filter" onchange="renderRosterTable()">
+        <option value="">All Years</option>
+        <option value="1">Freshman</option>
+        <option value="2">Sophomore</option>
+        <option value="3">Junior</option>
+        <option value="4">Senior</option>
+      </select>
+      <select class="select" id="sort-filter" onchange="renderRosterTable()">
+        <option value="ovr">Sort: OVR</option>
+        <option value="pos">Sort: Position</option>
+        <option value="year">Sort: Year</option>
+        <option value="name">Sort: Name</option>
+      </select>
+      <input type="text" class="input" id="search-filter" placeholder="Search name..." style="max-width:160px;font-size:0.8125rem;" oninput="renderRosterTable()">
+    </div>
+
+    <table class="roster-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Pos</th>
+          <th>Yr</th>
+          <th>OVR</th>
+          <th>Ceiling</th>
+          <th>Ht</th>
+          <th>Wt</th>
+          <th>Archetype</th>
+          <th>Contract</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="roster-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- ROSTER MANAGEMENT TAB -->
+  <div id="tab-mgmt" class="roster-content" style="display:none;">
+    <div class="section-title">Roster Management</div>
+    <div class="section-sub">Manage scholarships, redshirts, and roster composition.</div>
+
+    <!-- Class Breakdown -->
+    <div style="font-family:var(--font-mono);font-size:0.5625rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);margin-bottom:8px;">Class Breakdown</div>
+    <div class="class-breakdown">
+      <div class="class-card">
+        <div class="class-num yr-FR" id="count-fr" style="font-size:1.5rem;font-weight:500;color:var(--green);">0</div>
+        <div class="class-label">Freshmen</div>
+        <div style="font-size:0.625rem;color:var(--text-5);margin-top:2px;" id="count-fr-rs">0 redshirting</div>
+      </div>
+      <div class="class-card">
+        <div class="class-num" id="count-so" style="font-size:1.5rem;font-weight:500;color:var(--blue);">0</div>
+        <div class="class-label">Sophomores</div>
+        <div style="font-size:0.625rem;color:var(--text-5);margin-top:2px;" id="count-so-rs">0 redshirting</div>
+      </div>
+      <div class="class-card">
+        <div class="class-num" id="count-jr" style="font-size:1.5rem;font-weight:500;color:var(--amber);">0</div>
+        <div class="class-label">Juniors</div>
+        <div style="font-size:0.625rem;color:var(--text-5);margin-top:2px;">—</div>
+      </div>
+      <div class="class-card">
+        <div class="class-num" id="count-sr" style="font-size:1.5rem;font-weight:500;color:var(--red);">0</div>
+        <div class="class-label">Seniors</div>
+        <div style="font-size:0.625rem;color:var(--text-5);margin-top:2px;" id="count-sr-leaving">leaving after season</div>
+      </div>
+    </div>
+
+    <!-- Scholarship Overview -->
+    <div style="font-family:var(--font-mono);font-size:0.5625rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);margin-bottom:8px;margin-top:4px;">Scholarship Overview</div>
+    <div class="mgmt-grid">
+      <div class="mgmt-card">
+        <div class="mgmt-card-num" id="scholarship-used">0</div>
+        <div class="mgmt-card-label">Used</div>
+        <div class="mgmt-card-sub">of 85 scholarships</div>
+      </div>
+      <div class="mgmt-card">
+        <div class="mgmt-card-num" id="scholarship-open" style="color:var(--green);">85</div>
+        <div class="mgmt-card-label">Available</div>
+        <div class="mgmt-card-sub">can offer to recruits</div>
+      </div>
+      <div class="mgmt-card">
+        <div class="mgmt-card-num" id="scholarship-graduating" style="color:var(--red);">0</div>
+        <div class="mgmt-card-label">Opening Next Year</div>
+        <div class="mgmt-card-sub">seniors graduating</div>
+      </div>
+    </div>
+
+    <!-- Position Depth -->
+    <div style="font-family:var(--font-mono);font-size:0.5625rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);margin-bottom:8px;">Position Depth</div>
+    <div id="pos-depth-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:20px;"></div>
+
+    <!-- Redshirt Management -->
+    <div style="font-family:var(--font-mono);font-size:0.5625rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);margin-bottom:8px;">Redshirt Management</div>
+    <div style="font-size:0.75rem;color:var(--text-4);margin-bottom:10px;">Freshmen only. Redshirting preserves a year of eligibility. Players can appear in up to 4 games without burning their redshirt.</div>
+    <div class="redshirt-list" id="redshirt-list"></div>
+
+    <!-- Custom Roster Import -->
+    <div style="font-family:var(--font-mono);font-size:0.5625rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);margin-bottom:8px;margin-top:20px;">Import Custom Roster</div>
+    <div class="import-zone" onclick="document.getElementById('csv-upload').click()">
+      <div class="import-zone-label">Upload CSV Roster File</div>
+      <div class="import-zone-sub">Download template first · Format: Name, Pos, Year, OVR, Ceiling, Height, Weight</div>
+      <input type="file" id="csv-upload" accept=".csv" style="display:none;" onchange="importCSV(event)">
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="downloadTemplate()">Download CSV Template</button>
+  </div>
+
+</div>
+</div>
+
+<script src="schools.js"></script>
+<script src="simulation.js"></script>
+<script>
+// ═══ CAREER & SIM ═══
+const careerRaw = sessionStorage.getItem('dynastyCareer');
+const career = careerRaw ? JSON.parse(careerRaw) : null;
+const simRaw = sessionStorage.getItem('dynastySim');
+const simData = simRaw ? JSON.parse(simRaw) : null;
+
+if(!career) { window.location.href = 'setup.html'; }
+
+const mySchool = career.school;
+const myRole = career.role || 'HC';
+const offScheme = career.offScheme || 'Spread RPO';
+const defScheme = career.defScheme || '4-3 Base';
+
+// Apply school colors
+function applyColors(school) {
+  if(!school?.primary) return;
+  const hex = school.primary;
+  document.documentElement.style.setProperty('--accent', hex);
+  const rv=parseInt(hex.slice(1,3),16)||26,gv=parseInt(hex.slice(3,5),16)||23,bv=parseInt(hex.slice(5,7),16)||20;
+  document.documentElement.style.setProperty('--accent-mid',`rgba(${rv},${gv},${bv},0.15)`);
+  document.documentElement.style.setProperty('--accent-light',`rgba(${rv},${gv},${bv},0.06)`);
+}
+applyColors(mySchool);
+
+// ═══ ROSTER DATA ═══
+let roster = [];
+let redshirts = new Set(); // player ids
+
+function loadRoster() {
+  // Try to get from sim data first
+  if(simData?.rosters && simData.rosters[mySchool.name]) {
+    roster = simData.rosters[mySchool.name];
+    return;
+  }
+  // Generate fresh if not available
+  if(window.genRoster && window.DYNASTY_SCHOOLS) {
+    const school = window.DYNASTY_SCHOOLS.find(s=>s.name===mySchool.name) || mySchool;
+    const seed = hashStr(mySchool.name + (career.year||2026));
+    roster = genRoster(school, seed);
+  }
+  // Add physical/archetype data for display
+  roster = roster.map((p,i) => ({
+    ...p,
+    number: i+1,
+    height: getDefaultHeight(p.pos),
+    weight: getDefaultWeight(p.pos),
+    archetype: getDefaultArchetype(p.pos),
+    ceiling: p.devCeiling || Math.min(99, p.ovr + Math.floor(Math.random()*12)+4),
+    nilDemand: 0,
+    redshirted: false,
+  }));
+}
+
+function hashStr(str) {
+  let h=0;
+  for(let i=0;i<str.length;i++){h=(Math.imul(31,h)+str.charCodeAt(i))|0;}
+  return Math.abs(h);
+}
+
+function getDefaultHeight(pos) {
+  const h = {QB:75,RB:70,WR:73,TE:77,IOL:74,OT:78,EDGE:76,DL:74,LB:73,CB:71,S:72,ATH:73,K:70,P:71};
+  return h[pos]||73;
+}
+function getDefaultWeight(pos) {
+  const w = {QB:220,RB:210,WR:190,TE:245,IOL:305,OT:310,EDGE:255,DL:300,LB:235,CB:185,S:200,ATH:210,K:185,P:190};
+  return w[pos]||220;
+}
+function getDefaultArchetype(pos) {
+  const a = {QB:'Pocket Passer',RB:'Backfield Threat',WR:'Route Artist',TE:'Vertical Threat',IOL:'Pass Protector',OT:'Pass Protector',EDGE:'Speed Rusher',DL:'Gap Specialist',LB:'Signal Caller',CB:'Bump and Run',S:'Coverage Specialist',ATH:'Versatile',K:'Accurate',P:'Directional'};
+  return a[pos]||'Athlete';
+}
+function heightStr(inches) {
+  return Math.floor(inches/12)+"'"+(inches%12)+'"';
+}
+function yearLabel(y) {
+  return ['FR','SO','JR','SR'][y-1]||'SR';
+}
+function ovrColor(ovr) {
+  if(ovr>=82) return 'var(--green)';
+  if(ovr>=74) return 'var(--accent)';
+  if(ovr>=65) return 'var(--amber)';
+  return 'var(--red)';
+}
+
+// ═══ DEPTH CHART CONFIG ═══
+const DC_SCHEMES = {
+  // OFFENSE
+  'Spread RPO':   {side:'off', positions:['QB','RB','X WR','H WR','Z WR','OT','OT','IOL','IOL','IOL','TE']},
+  'Air Raid':     {side:'off', positions:['QB','RB','X WR','H WR','Y WR','Z WR','OT','OT','IOL','IOL','IOL']},
+  'Pro Style':    {side:'off', positions:['QB','RB','FB','X WR','Z WR','TE','OT','OT','IOL','IOL','IOL']},
+  'Power Run':    {side:'off', positions:['QB','RB','FB','X WR','Z WR','TE','OT','OT','IOL','IOL','IOL']},
+  'Triple Option':{side:'off', positions:['QB','A Back','B Back','Wingback','X WR','Z WR','OT','OT','IOL','IOL','IOL']},
+  'West Coast':   {side:'off', positions:['QB','RB','FB','X WR','Z WR','TE','OT','OT','IOL','IOL','IOL']},
+  'Run-and-Shoot':{side:'off', positions:['QB','RB','Monster WR','X WR','Y WR','Z WR','OT','OT','IOL','IOL','IOL']},
+  'Pistol':       {side:'off', positions:['QB','RB','X WR','H WR','Z WR','TE','OT','OT','IOL','IOL','IOL']},
+
+  // DEFENSE
+  '4-3 Base':     {side:'def', positions:['DE','DE','DT','DT','SAM','MIKE','WILL','CB','CB','FS','SS']},
+  '3-4 Base':     {side:'def', positions:['DE','NT','DE','LEO','SAM','MIKE','BUCK','WILL','CB','CB','FS','SS']},
+  'Nickel Base':  {side:'def', positions:['DE','DE','NT','MIKE','WILL','JACK','CB','CB','NICKEL','FS','SS']},
+  'Cover 2 Tampa':{side:'def', positions:['DE','DE','DT','DT','SAM','MIKE','WILL','CB','CB','FS','SS']},
+  'Cover 3 Zone': {side:'def', positions:['DE','DE','DT','DT','SAM','MIKE','WILL','CB','CB','FS','SS']},
+  'Bear Front':   {side:'def', positions:['DE','DT','NT','DT','DE','LB','LB','CB','CB','FS','SS']},
+  '3-3-5 Stack':  {side:'def', positions:['DE','NT','DE','MIKE','WILL','JACK','CB','CB','NICKEL','FS','SS']},
+  '46 Defense':   {side:'def', positions:['DE','DE','NT','DT','SAM','MIKE','WILL','CB','CB','FS','SS']},
+};
+
+// Map depth chart positions to roster positions
+const DC_POS_MAP = {
+  'QB':'QB','RB':'RB','A Back':'RB','B Back':'RB','Wingback':'RB','FB':'RB',
+  'X WR':'WR','Y WR':'WR','Z WR':'WR','H WR':'WR','Monster WR':'WR',
+  'TE':'TE','OT':'OT','IOL':'IOL',
+  'DE':'EDGE','NT':'DL','DT':'DL','LEO':'EDGE',
+  'SAM':'LB','MIKE':'LB','WILL':'LB','BUCK':'LB','JACK':'LB',
+  'CB':'CB','NICKEL':'CB','FS':'S','SS':'S',
+  'K':'K','P':'P',
+};
+
+function getBestAtPos(rosterPos, exclude=[]) {
+  return roster
+    .filter(p=>p.pos===rosterPos && !exclude.includes(p.id))
+    .sort((a,b)=>b.ovr-a.ovr);
+}
+
+function renderDepthChart() {
+  document.getElementById('dc-off-scheme').textContent = offScheme;
+  document.getElementById('dc-def-scheme').textContent = defScheme;
+  document.getElementById('dc-role').textContent = myRole;
+  document.getElementById('dc-sub').textContent = `${offScheme} Offense · ${defScheme} Defense`;
+  document.getElementById('dc-title').textContent = `${mySchool.name} Depth Chart`;
+
+  const offConfig = DC_SCHEMES[offScheme];
+  const defConfig = DC_SCHEMES[defScheme];
+
+  const grid = document.getElementById('dc-grid');
+  grid.innerHTML = `
+    <div>
+      ${renderUnit('Offense', offConfig?.positions||[], 2)}
+      <div style="margin-top:12px;">
+        ${renderUnit('Special Teams', ['K','P'], 2)}
+      </div>
+    </div>
+    <div>
+      ${renderUnit('Defense', defConfig?.positions||[], 2)}
+    </div>
+  `;
+}
+
+function renderUnit(title, positions, depth) {
+  const used = {};
+  const rows = positions.map(dcPos=>{
+    const rosterPos = DC_POS_MAP[dcPos] || dcPos;
+    const usedIds = Object.values(used).flat();
+    const players = getBestAtPos(rosterPos, usedIds).slice(0, depth);
+    if(!used[rosterPos]) used[rosterPos]=[];
+    players.forEach(p=>used[rosterPos].push(p.id));
+
+    return `<div class="dc-pos-row">
+      <div class="dc-pos-label">${dcPos}</div>
+      <div class="dc-player">
+        ${players[0] ? `
+          <div>
+            <div style="display:flex;align-items:center;gap:5px;">
+              <span class="dc-player-name">${players[0].name}</span>
+              <span class="yr-badge yr-${yearLabel(players[0].year)}">${yearLabel(players[0].year)}</span>
+            </div>
+          </div>` : `<span class="dc-empty">— Open</span>`}
+      </div>
+      <div class="dc-backup">
+        ${players[1] ? `<span style="font-size:0.75rem;color:var(--text-3);">${players[1].name}</span>` : ''}
+      </div>
+      <div class="dc-ovr">${players[0]?players[0].ovr:''}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="dc-unit">
+    <div class="dc-unit-head">
+      <span class="dc-unit-title">${title}</span>
+      <span style="font-family:var(--font-mono);font-size:0.5625rem;color:var(--text-4);">Starter · Backup</span>
+    </div>
+    ${rows}
+  </div>`;
+}
+
+// ═══ ROSTER TABLE ═══
+let sortCol = 'ovr', sortDir = -1;
+
+function renderRosterTable() {
+  const posF = document.getElementById('pos-filter').value;
+  const yrF = document.getElementById('yr-filter').value;
+  const sortF = document.getElementById('sort-filter').value;
+  const search = document.getElementById('search-filter').value.toLowerCase();
+
+  let filtered = [...roster];
+  if(posF) filtered = filtered.filter(p=>p.pos===posF||(posF==='OL'&&(p.pos==='OT'||p.pos==='IOL')));
+  if(yrF) filtered = filtered.filter(p=>p.year===parseInt(yrF));
+  if(search) filtered = filtered.filter(p=>p.name.toLowerCase().includes(search));
+
+  filtered.sort((a,b)=>{
+    if(sortF==='ovr') return b.ovr-a.ovr;
+    if(sortF==='pos') return a.pos.localeCompare(b.pos)||b.ovr-a.ovr;
+    if(sortF==='year') return a.year-b.year||b.ovr-a.ovr;
+    if(sortF==='name') return a.name.localeCompare(b.name);
+    return b.ovr-a.ovr;
+  });
+
+  document.getElementById('roster-count').textContent = `${roster.length} players on roster · Showing ${filtered.length}`;
+  document.getElementById('tb-scholarship').textContent = `${roster.length} / 85 scholarships`;
+
+  document.getElementById('roster-tbody').innerHTML = filtered.map(p=>`
+    <tr>
+      <td style="font-family:var(--font-mono);font-size:0.6875rem;color:var(--text-4);">${p.number||'—'}</td>
+      <td style="font-weight:500;">${p.name}</td>
+      <td><span class="pos-badge pos-${p.pos}">${p.pos}</span></td>
+      <td><span class="yr-badge yr-${yearLabel(p.year)}">${yearLabel(p.year)}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="ovr-bar"><div class="ovr-fill" style="width:${p.ovr}%;background:${ovrColor(p.ovr)};"></div></div>
+          <span style="font-family:var(--font-mono);font-size:0.8125rem;font-weight:500;color:${ovrColor(p.ovr)};">${p.ovr}</span>
+        </div>
+      </td>
+      <td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-3);">${p.ceiling||'—'}</td>
+      <td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-3);">${heightStr(p.height||73)}</td>
+      <td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-3);">${p.weight||220}</td>
+      <td style="font-size:0.75rem;color:var(--text-3);">${p.archetype||'—'}</td>
+      <td style="font-family:var(--font-mono);font-size:0.6875rem;color:${p.nilDemand>0?'var(--red)':'var(--text-5)'};">${p.nilDemand>0?'$'+(p.nilDemand/1000).toFixed(0)+'K/yr':'—'}</td>
+      <td>
+        ${redshirts.has(p.id)?'<span class="chip" style="background:#F3E8FF;color:#6B21A8;">RS</span>':''}
+        ${p.year===4?'<span class="chip chip-red">Graduating</span>':''}
+      </td>
+    </tr>`).join('');
+}
+
+// ═══ ROSTER MANAGEMENT ═══
+function renderManagement() {
+  const byYear = {1:[],2:[],3:[],4:[]};
+  roster.forEach(p=>{ if(byYear[p.year]) byYear[p.year].push(p); });
+
+  document.getElementById('count-fr').textContent = byYear[1].length;
+  document.getElementById('count-so').textContent = byYear[2].length;
+  document.getElementById('count-jr').textContent = byYear[3].length;
+  document.getElementById('count-sr').textContent = byYear[4].length;
+  document.getElementById('count-fr-rs').textContent = `${[...redshirts].filter(id=>roster.find(p=>p.id===id&&p.year===1)).length} redshirting`;
+  document.getElementById('count-so-rs').textContent = `${[...redshirts].filter(id=>roster.find(p=>p.id===id&&p.year===2)).length} still redshirting`;
+  document.getElementById('count-sr-leaving').textContent = `${byYear[4].length} leaving after season`;
+
+  document.getElementById('scholarship-used').textContent = roster.length;
+  document.getElementById('scholarship-open').textContent = Math.max(0, 85-roster.length);
+  document.getElementById('scholarship-graduating').textContent = byYear[4].length;
+
+  // Position depth
+  const posCounts = {};
+  const posNeeds = {QB:3,RB:4,WR:6,TE:3,OT:4,IOL:5,EDGE:4,DL:4,LB:4,CB:4,S:3,K:1,P:1};
+  roster.forEach(p=>{ posCounts[p.pos]=(posCounts[p.pos]||0)+1; });
+
+  document.getElementById('pos-depth-grid').innerHTML = Object.entries(posNeeds).map(([pos,needed])=>{
+    const have = posCounts[pos]||0;
+    const pct = Math.min(100, (have/needed)*100);
+    const color = pct>=100?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+    return `<div style="background:var(--surface-2);border:1px solid var(--border-1);border-radius:var(--r-md);padding:8px 10px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <span style="font-family:var(--font-mono);font-size:0.5625rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-4);">${pos}</span>
+        <span style="font-family:var(--font-mono);font-size:0.6875rem;font-weight:500;color:${color};">${have}/${needed}</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${color};"></div></div>
+    </div>`;
+  }).join('');
+
+  // Redshirt management — freshmen only
+  const freshmen = roster.filter(p=>p.year===1).sort((a,b)=>b.ovr-a.ovr);
+  document.getElementById('redshirt-list').innerHTML = freshmen.length?freshmen.map(p=>`
+    <div class="redshirt-row">
+      <div>
+        <span style="font-weight:500;">${p.name}</span>
+        <span style="font-size:0.6875rem;color:var(--text-4);margin-left:6px;">${p.pos} · OVR ${p.ovr}</span>
+      </div>
+      <span style="font-family:var(--font-mono);font-size:0.6875rem;color:var(--text-4);">Ceiling ${p.ceiling||'—'}</span>
+      <span class="yr-badge yr-FR">FR</span>
+      <button class="rs-toggle ${redshirts.has(p.id)?'active':''}" onclick="toggleRedshirt('${p.id}',this)">
+        ${redshirts.has(p.id)?'Redshirting':'Redshirt'}
+      </button>
+    </div>`).join(''):
+    '<div style="font-size:0.8125rem;color:var(--text-5);padding:8px 0;">No freshmen on roster.</div>';
+}
+
+function toggleRedshirt(id, btn) {
+  if(redshirts.has(id)) { redshirts.delete(id); btn.textContent='Redshirt'; btn.classList.remove('active'); }
+  else { redshirts.add(id); btn.textContent='Redshirting'; btn.classList.add('active'); }
+  renderManagement();
+}
+
+// ═══ IMPORT/EXPORT ═══
+function downloadTemplate() {
+  const header = 'Name,Pos,Year,OVR,Ceiling,Height_Inches,Weight\n';
+  const example = 'John Smith,QB,1,78,88,75,218\nMike Davis,RB,2,72,80,70,210\n';
+  const blob = new Blob([header+example], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='dynasty_roster_template.csv'; a.click();
+}
+
+function importCSV(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n').filter(l=>l.trim());
+    const imported = [];
+    lines.slice(1).forEach((line,i)=>{
+      const [name,pos,year,ovr,ceiling,height,weight] = line.split(',').map(s=>s.trim());
+      if(name&&pos&&ovr) {
+        imported.push({
+          id:`import_${i}`,
+          name, pos,
+          year: parseInt(year)||1,
+          ovr: parseInt(ovr)||60,
+          ceiling: parseInt(ceiling)||parseInt(ovr)+8||68,
+          height: parseInt(height)||73,
+          weight: parseInt(weight)||220,
+          archetype: getDefaultArchetype(pos),
+          number: i+1,
+          nilDemand:0,
+        });
+      }
+    });
+    if(imported.length>0) {
+      roster = imported;
+      alert(`Imported ${imported.length} players successfully.`);
+      renderDepthChart();
+      renderRosterTable();
+      renderManagement();
+    } else {
+      alert('No valid players found. Check your CSV format.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ═══ TAB SWITCHING ═══
+function switchTab(tab, el) {
+  ['depth','roster','mgmt'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
+  });
+  document.querySelectorAll('[data-tab]').forEach(e=>e.classList.remove('active'));
+  if(el) el.classList.add('active');
+
+  if(tab==='depth') renderDepthChart();
+  if(tab==='roster') renderRosterTable();
+  if(tab==='mgmt') renderManagement();
+}
+
+function filterGroup(group, el) {
+  const groupMap = {
+    OFF:['QB','RB','WR','TE','OT','IOL','ATH'],
+    DEF:['EDGE','DL','LB','CB','S'],
+    ST:['K','P'],
+  };
+  document.getElementById('pos-filter').value='';
+  document.getElementById('yr-filter').value='';
+  const posFilter = document.getElementById('pos-filter');
+  // Switch to roster tab and filter
+  switchTab('roster', document.querySelector('[data-tab="roster"]'));
+  document.querySelectorAll('[data-tab]').forEach(e=>e.classList.remove('active'));
+  document.querySelector('[data-tab="roster"]').classList.add('active');
+  renderRosterTable();
+}
+
+function jumpPos(pos) {
+  document.getElementById('pos-filter').value = pos;
+  switchTab('roster', document.querySelector('[data-tab="roster"]'));
+  document.querySelectorAll('[data-tab]').forEach(e=>e.classList.remove('active'));
+  document.querySelector('[data-tab="roster"]').classList.add('active');
+  renderRosterTable();
+}
+
+// ═══ TOPBAR ═══
+document.getElementById('tb-school').textContent = mySchool?.name||'Roster';
+document.getElementById('tb-season').textContent = `${career.year||2026} Season`;
+
+// ═══ INIT ═══
+loadRoster();
+renderDepthChart();
+</script>
+</body>
+</html>
