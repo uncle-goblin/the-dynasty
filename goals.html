@@ -104,7 +104,20 @@
   <!-- SCHOOL GOALS -->
   <div id="tab-school">
     <div class="page-title" id="school-goals-title">School Goals</div>
-    <div class="page-sub" id="school-goals-sub">Active objectives set by the program. These drive coach evaluations and contract decisions.</div>
+    <div class="page-sub" id="school-goals-sub">Active objectives set by the program. These influence school happiness which drives contract extensions and firings.</div>
+
+    <!-- School Happiness Meter -->
+    <div class="collective-meter" style="margin-bottom:16px;">
+      <div class="meter-header">
+        <span class="meter-label">School Happiness</span>
+        <span class="meter-val" id="school-happiness-val" style="color:var(--green);">78%</span>
+      </div>
+      <div class="meter-track">
+        <div class="meter-fill" id="school-happiness-bar" style="width:78%;background:var(--green);"></div>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-4);margin-top:6px;" id="school-happiness-label">Administration and fanbase are satisfied with program direction.</div>
+    </div>
+
     <div class="goals-grid" id="school-goals-list"></div>
   </div>
 
@@ -177,7 +190,6 @@ function genSchoolGoals(school, tier, contractYears, currentRecord) {
   const winTarget = tier>=5?10:tier>=4?9:tier>=3?7:tier>=2?6:5;
   const confTarget = tier>=5?'Win SEC/Big Ten/ACC/Big 12 Championship':tier>=4?'Win Conference Championship':tier>=3?'Finish Top 3 in Conference':'Win 4 Conference Games';
 
-  // Goal 1: Win total — always present, scales with tier
   goals.push({
     id:'wins_season',
     title:`Win ${winTarget}+ Games`,
@@ -186,14 +198,12 @@ function genSchoolGoals(school, tier, contractYears, currentRecord) {
     target: winTarget,
     current: currentRecord.w || 0,
     deadline: `${year} Season`,
-    reward: tier>=4?'Contract extension offer':'+$500K Collective contribution',
-    consequence: tier>=5?'Coach evaluation meeting':tier>=4?'Public pressure from collective':'Reduced recruiting budget',
-    consequenceSeverity: tier>=4?'high':'low',
+    happinessGain: tier>=5?10:tier>=4?8:6,
+    happinessPenalty: tier>=5?-18:tier>=4?-12:'-6',
     status:'active',
     progress: Math.min(100, ((currentRecord.w||0)/winTarget)*100),
   });
 
-  // Goal 2: Conference goal
   goals.push({
     id:'conf_goal',
     title: tier>=4?'Conference Championship':'Top Half of Conference',
@@ -202,26 +212,23 @@ function genSchoolGoals(school, tier, contractYears, currentRecord) {
     target: tier>=4?1:Math.floor((DYNASTY_SCHOOLS?.filter(s=>s.conf===myConf).length||8)/2),
     current: 0,
     deadline: `${year} Season End`,
-    reward: tier>=4?'+$1M Collective contribution, Prestige boost':'Recruiting class boost',
-    consequence: tier>=5?'AD meeting — job security concern':tier>=4?'Collective pressure':'Reduced NIL budget',
-    consequenceSeverity: tier>=5?'high':tier>=4?'medium':'low',
+    happinessGain: tier>=5?12:tier>=4?10:7,
+    happinessPenalty: tier>=5?-20:tier>=4?-15:'-5',
     status:'active',
     progress: 0,
   });
 
-  // Goal 3: Recruiting goal (scoped to contract length)
   const classTarget = tier>=5?'Top 5 class':tier>=4?'Top 15 class':tier>=3?'Top 30 class':'Top 60 class';
   goals.push({
     id:'recruiting_class',
     title:`Sign a ${classTarget}`,
-    desc:`Build a recruiting class that ranks in the ${classTarget} nationally. Elite talent is the foundation of sustained success.`,
+    desc:`Build a recruiting class that ranks in the ${classTarget} nationally.`,
     type:'recruiting',
     target: tier>=5?5:tier>=4?15:tier>=3?30:60,
     current: 0,
     deadline: `${year+1} Signing Day`,
-    reward: '+Recruiting pipeline bonus, Collective satisfaction',
-    consequence: tier>=4?'Recruiting coordinator review':'Slight collective unhappiness',
-    consequenceSeverity: tier>=4?'medium':'low',
+    happinessGain: tier>=4?8:5,
+    happinessPenalty: tier>=4?'-10':'-4',
     status:'active',
     progress: 0,
   });
@@ -232,61 +239,11 @@ function genSchoolGoals(school, tier, contractYears, currentRecord) {
 function genCollectiveGoals(school, tier) {
   const goals = [];
 
-  // Always: retain star player
-  goals.push({
-    id:'retain_star',
-    title:'Retain Star Player',
-    desc:'Keep your highest-rated player from entering the transfer portal this season.',
-    reward: '+$300K collective contribution',
-    deadline:`${year} Season`,
-    status:'active', progress:100, // starts at 100, drops if they leave
-  });
-
-  // Win threshold
-  const winThreshold = tier>=5?9:tier>=4?8:tier>=3?6:5;
-  goals.push({
-    id:'coll_wins',
-    title:`${winThreshold}+ Win Season`,
-    desc:`The collective wants results. Win at least ${winThreshold} games this season to maintain funding levels.`,
-    reward: tier>=4?'+$500K contribution':'Maintained funding level',
-    deadline:`${year} Season`,
-    status:'active',
-    progress: Math.min(100, ((wins||0)/winThreshold)*100),
-  });
-
-  // NIL efficiency
-  goals.push({
-    id:'nil_efficiency',
-    title:'NIL Contract Renewals',
-    desc:'Successfully renegotiate player NIL contracts before the portal window opens. Keep your core intact.',
-    reward: '+$200K bonus contribution',
-    deadline:`Week 45 — Portal Opens`,
-    status:'active', progress:0,
-  });
-
-  // Tier 4+ additional goals
-  if(tier>=4) {
-    goals.push({
-      id:'bowl_appearance',
-      title:'Bowl / Playoff Appearance',
-      desc:'Reach a bowl game or the CFP. The collective expects postseason appearances annually.',
-      reward: '+$750K contribution, Regional prestige boost',
-      deadline:`${year} Postseason`,
-      status:'active', progress:0,
-    });
-  }
-
-  // Tier 5 extra goal
-  if(tier>=5) {
-    goals.push({
-      id:'cfp_run',
-      title:'CFP Semifinal or Better',
-      desc:'The collective at this level expects legitimate national championship contention. Make a deep CFP run.',
-      reward: '+$2M contribution, Benefactor interest potential',
-      deadline:`${year} Postseason`,
-      status:'active', progress:0,
-    });
-  }
+  goals.push({id:'retain_star',title:'Retain Star Player',desc:'Keep your highest-rated player from entering the transfer portal this season.',reward:'+$300K collective contribution',deadline:`${year} Season`,status:'active',progress:100,bigGoal:false});
+  goals.push({id:'coll_wins',title:`${winThreshold}+ Win Season`,desc:`The collective wants results. Win at least ${winThreshold} games this season to maintain funding levels.`,reward:tier>=4?'+$500K contribution':'Maintained funding level',deadline:`${year} Season`,status:'active',progress:Math.min(100,((wins||0)/winThreshold)*100),bigGoal:true});
+  goals.push({id:'nil_efficiency',title:'NIL Contract Renewals',desc:'Successfully renegotiate player NIL contracts before the portal window opens.',reward:'+$200K bonus contribution',deadline:`Week 45 — Portal Opens`,status:'active',progress:0,bigGoal:false});
+  if(tier>=4) goals.push({id:'bowl_appearance',title:'Bowl / Playoff Appearance',desc:'Reach a bowl game or the CFP.',reward:'+$750K contribution, Regional prestige boost',deadline:`${year} Postseason`,status:'active',progress:0,bigGoal:true});
+  if(tier>=5) goals.push({id:'cfp_run',title:'CFP Semifinal or Better',desc:'The collective at this level expects legitimate national championship contention.',reward:'+$2M contribution, Benefactor interest potential',deadline:`${year} Postseason`,status:'active',progress:0,bigGoal:true});
 
   return goals;
 }
@@ -309,14 +266,14 @@ const SCHOOL_EVENTS = {
           id:'gt_instate',
           title:'In-State Authority',
           desc:'Claim permanent in-state recruiting dominance. Georgia Tech becomes Atlanta\'s program.',
-          worldChange:'Georgia Tech gets +8 in-state recruiting bonus. UGA coach faces public pressure.',
+          dynastyEffects:'Georgia Tech gets +8 in-state recruiting bonus. UGA coach faces public pressure.',
           unlocks:'The Border War',
         },
         {
           id:'gt_acc_power',
           title:'ACC Anchor',
           desc:'Shift focus to conference dominance. Win 3 ACC titles in 5 years and reshape the conference.',
-          worldChange:'Georgia Tech collective funding increases. ACC media deal favors Atlanta market.',
+          dynastyEffects:'Georgia Tech collective funding increases. ACC media deal favors Atlanta market.',
           unlocks:'The Invitation',
         },
       ],
@@ -336,14 +293,14 @@ const SCHOOL_EVENTS = {
           id:'gt_join_sec',
           title:'Accept the Invitation',
           desc:'Georgia Tech joins the SEC. Atlanta becomes an SEC market. In-state rivalry with Georgia intensifies.',
-          worldChange:'Conference realignment triggers. ACC must find replacement. Georgia Tech joins SEC.',
+          dynastyEffects:'Conference realignment triggers. ACC must find replacement. Georgia Tech joins SEC.',
           unlocks:null,
         },
         {
           id:'gt_stay_acc',
           title:'Decline — Lead the ACC',
           desc:'Turn down the SEC and become the ACC\'s premier program. Massive collective investment follows.',
-          worldChange:'Georgia Tech receives $5M collective boost. ACC restructures around Atlanta market.',
+          dynastyEffects:'Georgia Tech receives $5M collective boost. ACC restructures around Atlanta market.',
           unlocks:null,
         },
       ],
@@ -364,14 +321,14 @@ const SCHOOL_EVENTS = {
           id:'army_power',
           title:'Service Academy Power',
           desc:'Army becomes a legitimate mid-major power. Recruits embrace the unique culture.',
-          worldChange:'Army gets permanent +10 recruiting bonus for triple option specialists. Air Force and Navy\'s recruiting suffers.',
+          dynastyEffects:'Army gets permanent +10 recruiting bonus for triple option specialists. Air Force and Navy\'s recruiting suffers.',
           unlocks:'The West Point Effect',
         },
         {
           id:'army_conf',
           title:'Conference Pursuit',
           desc:'Army\'s success attracts conference interest. Pursue membership in a Group of 5 conference.',
-          worldChange:'Army joins AAC or Sun Belt. Schedule strengthens. Recruiting widens.',
+          dynastyEffects:'Army joins AAC or Sun Belt. Schedule strengthens. Recruiting widens.',
           unlocks:null,
         },
       ],
@@ -392,14 +349,14 @@ const SCHOOL_EVENTS = {
           id:'boise_p4',
           title:'Power Conference Bid',
           desc:'Sustained dominance earns Boise State a Power 4 invitation.',
-          worldChange:'Boise State joins Big 12 or ACC. MWC weakens. Recruiting upgrades dramatically.',
+          dynastyEffects:'Boise State joins Big 12 or ACC. MWC weakens. Recruiting upgrades dramatically.',
           unlocks:null,
         },
         {
           id:'boise_dynasty',
           title:'G5 Dynasty',
           desc:'Stay in the MWC and build the greatest Group of 5 dynasty in history.',
-          worldChange:'MWC gets automatic CFP bid. Boise State collective triples. Rivals struggle to recruit.',
+          dynastyEffects:'MWC gets automatic CFP bid. Boise State collective triples. Rivals struggle to recruit.',
           unlocks:'The Boise Standard',
         },
       ],
@@ -423,14 +380,14 @@ const GENERIC_EVENTS = [
         id:'rival_recruit',
         title:'Pipeline Control',
         desc:'Your dominance translates to recruiting. Own the region.',
-        worldChange:'Regional recruiting bonus +6. Rival\'s recruiting in shared states weakens.',
+        dynastyEffects:'Regional recruiting bonus +6. Rival\'s recruiting in shared states weakens.',
         unlocks:null,
       },
       {
         id:'rival_pressure',
         title:'Pressure the Rival',
         desc:'Your consistent wins put the rival\'s coach on the hot seat.',
-        worldChange:'50% chance rival coach gets fired. Their collective happiness drops 20 points.',
+        dynastyEffects:'50% chance rival coach gets fired. Their collective happiness drops 20 points.',
         unlocks:null,
       },
     ],
@@ -442,6 +399,16 @@ function renderSchoolGoals() {
   const goals = genSchoolGoals(mySchool, myTier, career.contractYears||3, {w:wins,l:losses});
   document.getElementById('school-goals-title').textContent = `${mySchool?.name} — School Goals`;
   document.getElementById('school-goals-sub').textContent = `3 active goals · ${year} season · Contract year ${career.contractYear||1} of ${career.contractYears||3}`;
+
+  // School happiness — affected by goal progress
+  const happiness = career.schoolHappiness || 78;
+  const happinessColor = happiness>=70?'var(--green)':happiness>=50?'var(--amber)':'var(--red)';
+  const happinessLabel = happiness>=80?'Administration and fanbase are very satisfied.':happiness>=60?'Administration and fanbase are satisfied with program direction.':happiness>=40?'There are concerns about program trajectory. Contract security at risk.':'Administration is frustrated. Your job may be in jeopardy.';
+  document.getElementById('school-happiness-val').textContent = happiness+'%';
+  document.getElementById('school-happiness-val').style.color = happinessColor;
+  document.getElementById('school-happiness-bar').style.width = happiness+'%';
+  document.getElementById('school-happiness-bar').style.background = happinessColor;
+  document.getElementById('school-happiness-label').textContent = happinessLabel;
 
   document.getElementById('school-goals-list').innerHTML = goals.map(g=>`
     <div class="goal-card ${g.status==='completed'?'completed':g.status==='failed'?'failed':'active-goal'}">
@@ -459,17 +426,19 @@ function renderSchoolGoals() {
           <span class="goal-progress-val">${Math.round(g.progress)}%</span>
         </div>
         <div class="progress-track" style="height:6px;">
-          <div class="progress-fill ${g.progress>=100?'green':g.progress>=50?'':'amber'}" style="width:${g.progress}%;${g.progress>=100?'background:var(--green)':g.progress>=50?'background:var(--accent)':'background:var(--amber)'};"></div>
+          <div class="progress-fill" style="width:${g.progress}%;background:${g.progress>=100?'var(--green)':g.progress>=50?'var(--accent)':'var(--amber)'};"></div>
         </div>
       </div>
-      <div class="goal-reward">
-        <span class="goal-reward-label">Reward</span>
-        <span class="goal-reward-val">${g.reward}</span>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <div style="flex:1;padding:6px 10px;background:var(--green-bg);border-radius:var(--r-sm);font-size:0.6875rem;color:var(--green);">
+          <span style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;display:block;color:var(--green);opacity:0.7;margin-bottom:1px;">If met</span>
+          School happiness +${g.happinessGain||8}%
+        </div>
+        <div style="flex:1;padding:6px 10px;background:var(--red-bg);border-radius:var(--r-sm);font-size:0.6875rem;color:var(--red);">
+          <span style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;display:block;color:var(--red);opacity:0.7;margin-bottom:1px;">If missed</span>
+          School happiness ${g.happinessPenalty||'-12'}%
+        </div>
       </div>
-      ${g.consequence?`<div class="goal-consequence">
-        <span class="goal-consequence-label">If missed</span>
-        <span class="goal-consequence-val">${g.consequence}</span>
-      </div>`:''}
     </div>`).join('');
 }
 
@@ -501,9 +470,15 @@ function renderCollectiveGoals() {
           <div class="progress-fill" style="width:${g.progress}%;background:${g.progress>=100?'var(--green)':g.progress>=50?'var(--accent)':'var(--amber)'};"></div>
         </div>
       </div>
-      <div class="goal-reward">
-        <span class="goal-reward-label">Reward</span>
-        <span class="goal-reward-val">${g.reward}</span>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <div style="flex:1;padding:5px 8px;background:var(--green-bg);border-radius:var(--r-sm);font-size:0.6875rem;color:var(--green);">
+          <span style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;display:block;opacity:0.7;margin-bottom:1px;">If met</span>
+          ${g.reward}
+        </div>
+        ${g.bigGoal?`<div style="flex:1;padding:5px 8px;background:var(--red-bg);border-radius:var(--r-sm);font-size:0.6875rem;color:var(--red);">
+          <span style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;display:block;opacity:0.7;margin-bottom:1px;">If missed</span>
+          Collective happiness -8%
+        </div>`:''}
       </div>
     </div>`).join('');
 }
@@ -542,7 +517,7 @@ function renderEvents() {
             <div class="event-branch ${isClaimed&&claimedBranch===b.id?'selected':isClaimed?'excluded':''}">
               <div class="event-branch-title">${b.title}</div>
               <div class="event-branch-desc">${b.desc}</div>
-              <div class="event-world-change">World change: ${b.worldChange}</div>
+              <div class="event-world-change">Dynasty Effects: ${b.dynastyEffects}</div>
               ${b.unlocks?`<div style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-top:4px;">Unlocks: ${b.unlocks}</div>`:''}
             </div>`).join('')}
         </div>
@@ -604,7 +579,7 @@ function claimEvent(eventId) {
 
   career.claimedEvents[eventId] = {branchId: ev.branches[idx].id, claimedYear: year};
   sessionStorage.setItem('dynastyCareer', JSON.stringify(career));
-  alert(`Event claimed: ${ev.branches[idx].title}\n\nWorld change: ${ev.branches[idx].worldChange}`);
+  alert(`Event claimed: ${ev.branches[idx].title}\n\nDynasty Effects: ${ev.branches[idx].dynastyEffects}`);
   renderEvents();
 }
 
