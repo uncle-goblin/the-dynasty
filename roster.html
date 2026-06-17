@@ -400,11 +400,9 @@ function renderDepthChart() {
 
   const grid = document.getElementById('dc-grid');
   grid.innerHTML = `
-    <div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
       ${renderUnit('Offense', offConfig?.positions||[], 2)}
-      <div style="margin-top:12px;">
-        ${renderUnit('Special Teams', ['K','P'], 2)}
-      </div>
+      ${renderUnit('Special Teams', ['K','P'], 2)}
     </div>
     <div>
       ${renderUnit('Defense', defConfig?.positions||[], 2)}
@@ -413,36 +411,48 @@ function renderDepthChart() {
 }
 
 function renderUnit(title, positions, depth) {
-  const used = {};
+  const usedByPos = {};
+
   const rows = positions.map(dcPos=>{
     const rosterPos = DC_POS_MAP[dcPos] || dcPos;
-    const usedIds = Object.values(used).flat();
+    if(!usedByPos[rosterPos]) usedByPos[rosterPos]=[];
+    const usedIds = Object.values(usedByPos).flat();
     const players = getBestAtPos(rosterPos, usedIds).slice(0, depth);
-    if(!used[rosterPos]) used[rosterPos]=[];
-    players.forEach(p=>used[rosterPos].push(p.id));
+    players.forEach(p=>usedByPos[rosterPos].push(p.id));
 
-    return `<div class="dc-pos-row">
-      <div class="dc-pos-label">${dcPos}</div>
-      <div class="dc-player">
-        ${players[0] ? `
-          <div>
-            <div style="display:flex;align-items:center;gap:5px;">
-              <span class="dc-player-name">${players[0].name}</span>
-              <span class="yr-badge yr-${yearLabel(players[0].year)}">${yearLabel(players[0].year)}</span>
-            </div>
-          </div>` : `<span class="dc-empty">— Open</span>`}
+    const starter = players[0];
+    const backup  = players[1];
+
+    return `<div style="display:grid;grid-template-columns:52px 1fr 1fr 36px;gap:8px;align-items:center;padding:7px 14px;border-bottom:1px solid var(--border-1);">
+      <div style="font-family:var(--font-mono);font-size:0.5625rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-4);">${dcPos}</div>
+      <div>
+        ${starter
+          ? `<div style="display:flex;align-items:center;gap:5px;">
+               <span style="font-size:0.8125rem;font-weight:600;color:var(--text-1);">${starter.name}</span>
+               <span class="yr-badge yr-${yearLabel(starter.year)}">${yearLabel(starter.year)}</span>
+             </div>`
+          : `<span style="font-size:0.75rem;color:var(--text-5);font-style:italic;">— Open</span>`}
       </div>
-      <div class="dc-backup">
-        ${players[1] ? `<span style="font-size:0.75rem;color:var(--text-3);">${players[1].name}</span>` : ''}
+      <div>
+        ${backup
+          ? `<div style="display:flex;align-items:center;gap:5px;">
+               <span style="font-size:0.75rem;color:var(--text-3);">${backup.name}</span>
+               <span class="yr-badge yr-${yearLabel(backup.year)}" style="opacity:0.7;">${yearLabel(backup.year)}</span>
+             </div>`
+          : ''}
       </div>
-      <div class="dc-ovr">${players[0]?players[0].ovr:''}</div>
+      <div style="font-family:var(--font-mono);font-size:0.8125rem;font-weight:500;color:${starter?ovrColor(starter.ovr):'var(--text-5)'};text-align:right;">${starter?starter.ovr:''}</div>
     </div>`;
   }).join('');
 
   return `<div class="dc-unit">
     <div class="dc-unit-head">
       <span class="dc-unit-title">${title}</span>
-      <span style="font-family:var(--font-mono);font-size:0.5625rem;color:var(--text-4);">Starter · Backup</span>
+      <div style="display:flex;gap:24px;">
+        <span style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-5);">Starter</span>
+        <span style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-5);">Backup</span>
+        <span style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-5);">OVR</span>
+      </div>
     </div>
     ${rows}
   </div>`;
