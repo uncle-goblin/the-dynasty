@@ -150,31 +150,42 @@
   <div class="nav-grid-2">
     <a class="nav-card primary" href="recruiting.html">
       <div class="nav-card-title">Recruiting</div>
-      
       <div class="nav-card-badge badge-hours">Uses Staff Hours</div>
     </a>
     <div class="nav-card primary" onclick="comingSoon('Game Plan')">
       <div class="nav-card-title">Game Plan</div>
-      
       <div class="nav-card-badge badge-hours">Uses Staff Hours</div>
+    </div>
+  </div>
+
+  <!-- POLLS + STANDINGS ROW -->
+  <div class="nav-grid-2" style="margin-bottom:16px;">
+    <div style="background:var(--surface-2);border:1px solid var(--border-1);border-radius:var(--r-lg);padding:12px 14px;">
+      <div style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);margin-bottom:8px;">Conference Standings</div>
+      <div id="hub-standings" style="font-size:0.75rem;color:var(--text-4);">Standings update during season</div>
+    </div>
+    <div style="background:var(--surface-2);border:1px solid var(--border-1);border-radius:var(--r-lg);padding:12px 14px;">
+      <div style="display:flex;gap:8px;margin-bottom:6px;">
+        <span id="poll-tab-ap" class="hub-poll-tab active" onclick="switchPollTab('AP')" style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);cursor:pointer;padding-bottom:2px;border-bottom:1px solid var(--accent);">AP</span>
+        <span id="poll-tab-coaches" class="hub-poll-tab" onclick="switchPollTab('Coaches')" style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-4);cursor:pointer;">Coaches</span>
+        <span id="poll-tab-cfp" class="hub-poll-tab" onclick="switchPollTab('CFP')" style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-4);cursor:pointer;">CFP</span>
+      </div>
+      <div id="hub-polls" style="font-size:0.75rem;color:var(--text-4);">Polls release Week 22</div>
     </div>
   </div>
 
   <div class="hub-section-label">Coaching</div>
   <div class="nav-grid-3">
+    <a class="nav-card" href="schedule.html">
+      <div class="nav-card-title">Schedule</div>
+      <div class="nav-card-badge badge-free">Free Action</div>
+    </a>
     <div class="nav-card" onclick="comingSoon('Depth Chart')">
       <div class="nav-card-title">Depth Chart</div>
-      
-      <div class="nav-card-badge badge-free">Free Action</div>
-    </div>
-    <div class="nav-card" onclick="comingSoon('Playbook')">
-      <div class="nav-card-title">Playbook</div>
-      
       <div class="nav-card-badge badge-free">Free Action</div>
     </div>
     <div class="nav-card" onclick="comingSoon('Scouting')">
       <div class="nav-card-title">Scouting</div>
-      
       <div class="nav-card-badge badge-hours">Uses Staff Hours</div>
     </div>
   </div>
@@ -423,6 +434,30 @@ function advanceWeek() {
   gs.hoursUsed=0; gs.hoursLog=[];
   career.week=gs.week; career.year=gs.year;
   sessionStorage.setItem('dynastyCareer',JSON.stringify(career));
+
+  // Advance simulation
+  const simRaw = sessionStorage.getItem('dynastySim');
+  if(simRaw && window.DYNASTY_SCHOOLS && window.DynastySimulation) {
+    try {
+      const simData = JSON.parse(simRaw);
+      // Re-create sim from saved data and advance
+      const sim = new DynastySimulation(window.DYNASTY_SCHOOLS, career.school?.name, career.year||2026);
+      sim.rosters = {}; // Will regenerate
+      sim.gamePool = simData.gamePool || [];
+      sim.schedules = simData.schedules || {};
+      sim.polls = simData.polls || {};
+      sim.playerRecord = simData.playerRecord || {w:0,l:0,confW:0,confL:0};
+      sim.currentWeek = simData.currentWeek || 1;
+      sim.initialized = true;
+      sim.advanceToWeek(gs.week);
+      const newSimData = sim.toJSON();
+      sessionStorage.setItem('dynastySim', JSON.stringify(newSimData));
+      updateHubFromSim(newSimData);
+      gs.wins = newSimData.playerRecord?.w || 0;
+      gs.losses = newSimData.playerRecord?.l || 0;
+    } catch(e) { console.error('Sim advance error:', e); }
+  }
+
   updateTopBar(); updateCalendar(); updateTasks(); updateHours(); updateGreeting();
   loadFeed();
 }
@@ -500,8 +535,118 @@ function switchFeedTab(tab) {
 
 function comingSoon(name){ alert(`${name} — coming soon.`); }
 
+// ═══ SIMULATION ═══
+let activePollTab = 'AP';
+
+function initOrLoadSim() {
+  if(!window.DYNASTY_SCHOOLS || !window.DynastySimulation) return;
+  const simRaw = sessionStorage.getItem('dynastySim');
+  if(simRaw) {
+    try {
+      const simData = JSON.parse(simRaw);
+      updateHubFromSim(simData);
+    } catch(e) {}
+  }
+}
+
+function updateHubFromSim(simData) {
+  if(!simData) return;
+
+  // Update record
+  const rec = simData.playerRecord || {w:0,l:0};
+  document.getElementById('rec-wins').textContent = rec.w;
+  document.getElementById('rec-losses').textContent = rec.l;
+
+  // Update ranking
+  const polls = simData.polls || {};
+  const apPoll = polls.AP || [];
+  const myRank = apPoll.find(t=>t.name===career.school?.name);
+  document.getElementById('rec-rank').textContent = myRank ? `#${myRank.rank}` : '—';
+
+  // Update standings widget
+  updateStandingsWidget(simData);
+
+  // Update polls widget
+  updatePollsWidget(simData, activePollTab);
+}
+
+function updateStandingsWidget(simData) {
+  const el = document.getElementById('hub-standings');
+  if(!simData?.gamePool?.filter(g=>g.played).length) {
+    el.innerHTML = '<span style="color:var(--text-5);">Standings update during season</span>';
+    return;
+  }
+  const schools = window.DYNASTY_SCHOOLS || [];
+  const myConf = career.school?.conf;
+  const standings = calcStandings(schools, simData.gamePool, myConf);
+  el.innerHTML = standings.slice(0,6).map((s,i)=>`
+    <div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border-1);">
+      <span style="font-size:0.75rem;font-weight:${s.name===career.school?.name?'700':'400'};color:${s.name===career.school?.name?'var(--accent)':'var(--text-2)'};">${i+1}. ${s.name}</span>
+      <span style="font-family:var(--font-mono);font-size:0.6875rem;color:var(--text-4);">${s.confW}-${s.confL}</span>
+    </div>`).join('');
+}
+
+function updatePollsWidget(simData, pollType) {
+  const el = document.getElementById('hub-polls');
+  const polls = simData?.polls || {};
+  const poll = polls[pollType] || [];
+
+  // Update tab styles
+  ['AP','Coaches','CFP'].forEach(p=>{
+    const tab = document.getElementById(`poll-tab-${p.toLowerCase()}`);
+    if(tab) {
+      const isActive = p===pollType;
+      tab.style.color = isActive?'var(--accent)':'var(--text-4)';
+      tab.style.borderBottom = isActive?'1px solid var(--accent)':'none';
+    }
+  });
+
+  if(!poll.length) {
+    el.innerHTML = `<span style="color:var(--text-5);">${pollType==='CFP'?'CFP releases Week 33':'Polls release Week 22'}</span>`;
+    return;
+  }
+
+  el.innerHTML = poll.slice(0,10).map((t,i)=>`
+    <div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border-1);">
+      <span style="display:flex;gap:5px;align-items:center;">
+        <span style="font-family:var(--font-mono);font-size:0.5625rem;color:var(--text-4);width:16px;text-align:right;">${t.rank}</span>
+        <span style="font-size:0.75rem;font-weight:${t.name===career.school?.name?'700':'400'};color:${t.name===career.school?.name?'var(--accent)':'var(--text-2)'};">${t.name}</span>
+      </span>
+      <span style="font-family:var(--font-mono);font-size:0.6875rem;color:var(--text-4);">${t.record}</span>
+    </div>`).join('');
+}
+
+function switchPollTab(pollType) {
+  activePollTab = pollType;
+  const simRaw = sessionStorage.getItem('dynastySim');
+  if(simRaw) {
+    try { updatePollsWidget(JSON.parse(simRaw), pollType); } catch(e) {}
+  }
+}
+
 // ═══ INIT ═══
 updateTopBar(); updateCalendar(); updateTasks(); updateHours(); updateGreeting(); loadFeed();
+initOrLoadSim();
+</script>
+<script src="schools.js"></script>
+<script src="simulation.js"></script>
+<script>
+// Wire simulation after schools.js and simulation.js load
+window.addEventListener('load', ()=>{
+  // Initialize simulation if not already done
+  if(window.DYNASTY_SCHOOLS && window.DynastySimulation) {
+    const simRaw = sessionStorage.getItem('dynastySim');
+    if(!simRaw && career.school) {
+      // First time — initialize sim
+      const sim = new DynastySimulation(window.DYNASTY_SCHOOLS, career.school.name, career.year||2026);
+      sim.init();
+      sessionStorage.setItem('dynastySim', JSON.stringify(sim.toJSON()));
+      updateHubFromSim(sim.toJSON());
+    } else if(simRaw) {
+      updateHubFromSim(JSON.parse(simRaw));
+    }
+  }
+});
 </script>
 </body>
 </html>
