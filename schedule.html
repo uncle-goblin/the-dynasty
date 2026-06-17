@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dynasty — Schedule</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.schedule-layout { display: grid; grid-template-columns: 280px 1fr; height: calc(100vh - 48px); }
+.sched-left { background: var(--surface-1); border-right: 1px solid var(--border-1); overflow-y: auto; }
+.sched-main { background: var(--bg); overflow-y: auto; padding: 20px; }
+.week-row { display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border-1); transition: background 0.08s; }
+.week-row:hover { background: var(--surface-2); }
+.week-row.game-week { cursor: default; }
+.week-num { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--text-4); }
+.week-info { display: flex; flex-direction: column; gap: 2px; }
+.week-opponent { font-size: 0.875rem; font-weight: 600; color: var(--text-1); }
+.week-meta { font-size: 0.6875rem; color: var(--text-4); }
+.week-result { font-family: var(--font-mono); font-size: 0.875rem; font-weight: 500; text-align: right; }
+.result-w { color: var(--green); }
+.result-l { color: var(--red); }
+.result-upcoming { color: var(--text-5); font-size: 0.6875rem; }
+.home-badge { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 1px 4px; border-radius: var(--r-sm); }
+.home-badge.home { background: var(--green-bg); color: var(--green); }
+.home-badge.away { background: var(--blue-bg); color: var(--blue); }
+.home-badge.neutral { background: var(--amber-bg); color: var(--amber); }
+.nc-slot { background: var(--surface-2); border: 1px dashed var(--border-2); border-radius: var(--r-md); padding: 10px 16px; display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 12px; cursor: pointer; transition: all 0.12s; }
+.nc-slot:hover { border-color: var(--accent); background: var(--accent-light); }
+.nc-slot-label { font-size: 0.8125rem; color: var(--text-4); font-style: italic; }
+.schedule-section { margin-bottom: 24px; }
+.sched-section-head { font-family: var(--font-mono); font-size: 0.5625rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border-1); }
+.record-chip { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; }
+.conf-rec { font-size: 0.6875rem; color: var(--text-4); font-family: var(--font-mono); }
+/* Scheduling market modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; display: none; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-xl); padding: 24px; width: 560px; max-height: 80vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal-title { font-size: 1rem; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
+.modal-sub { font-size: 0.8125rem; color: var(--text-3); margin-bottom: 20px; }
+.opp-list { display: grid; gap: 6px; }
+.opp-row { background: var(--surface-1); border: 1px solid var(--border-1); border-radius: var(--r-lg); padding: 10px 14px; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; cursor: pointer; transition: all 0.12s; }
+.opp-row:hover { border-color: var(--accent); background: var(--accent-light); }
+.opp-name { font-weight: 600; font-size: 0.875rem; color: var(--text-1); }
+.opp-conf { font-size: 0.6875rem; color: var(--text-4); margin-top: 1px; }
+.opp-payment { font-family: var(--font-mono); font-size: 0.75rem; color: var(--green); font-weight: 500; }
+.opp-payment.pay { color: var(--red); }
+.filter-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.filter-tab-btn { font-family: var(--font-mono); font-size: 0.625rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--border-1); border-radius: var(--r-sm); background: var(--surface-2); color: var(--text-3); cursor: pointer; transition: all 0.12s; }
+.filter-tab-btn.active { background: var(--accent); color: var(--surface-3); border-color: var(--accent); }
+.standings-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+.standings-table th { font-family: var(--font-mono); font-size: 0.5rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border-1); }
+.standings-table td { padding: 7px 8px; border-bottom: 1px solid var(--border-1); }
+.standings-table tr:hover td { background: var(--surface-2); }
+.standings-table tr.my-team td { background: var(--accent-light); font-weight: 600; }
+.standings-table .mono { font-family: var(--font-mono); }
+.payment-note { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--green-bg); border: 1px solid var(--green); border-radius: var(--r-md); margin-bottom: 12px; font-size: 0.75rem; color: var(--green); }
+.payment-note.paying { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-logo">The Dynasty</span>
+  <div class="topbar-sep"></div>
+  <span class="topbar-school" id="tb-school">Schedule</span>
+  <div class="topbar-sep"></div>
+  <span id="tb-season" style="font-family:var(--font-mono);font-size:0.8125rem;color:var(--text-3);">2026 Season</span>
+  <div class="topbar-spacer"></div>
+  <div style="font-family:var(--font-mono);font-size:0.875rem;font-weight:500;color:var(--accent);" id="tb-record">0-0</div>
+  <div class="topbar-sep"></div>
+  <a href="hub.html" class="btn btn-ghost btn-sm">Hub</a>
+</div>
+
+<div class="schedule-layout">
+
+<!-- LEFT: Conference Standings -->
+<div class="sched-left">
+  <div class="section-head">Conference Standings</div>
+  <div id="standings-panel" style="padding:12px 16px;"></div>
+  <div class="section-head" style="margin-top:8px;">Poll Rankings</div>
+  <div id="polls-panel" style="padding:8px 16px;"></div>
+</div>
+
+<!-- MAIN: Schedule -->
+<div class="sched-main">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
+    <div>
+      <div style="font-size:1.125rem;font-weight:700;color:var(--text-1);letter-spacing:-0.01em;" id="sched-title">2026 Season Schedule</div>
+      <div style="font-size:0.8125rem;color:var(--text-3);margin-top:3px;" id="sched-sub">Set your non-conference schedule before the season begins.</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:var(--font-mono);font-size:0.5625rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-4);">NC Slots</div>
+      <div style="font-family:var(--font-mono);font-size:1.25rem;font-weight:500;color:var(--accent);" id="nc-slots-remaining">3 / 3</div>
+    </div>
+  </div>
+
+  <!-- Non-conference scheduling notice -->
+  <div id="nc-budget-bar" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border-1);border-radius:var(--r-lg);margin-bottom:20px;">
+    <div>
+      <div style="font-family:var(--font-mono);font-size:0.5625rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-4);">Scheduling Revenue</div>
+      <div style="font-family:var(--font-mono);font-size:0.875rem;font-weight:500;color:var(--green);margin-top:2px;" id="scheduling-revenue">$0</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:var(--font-mono);font-size:0.5625rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-4);">Scheduling Cost</div>
+      <div style="font-family:var(--font-mono);font-size:0.875rem;font-weight:500;color:var(--red);margin-top:2px;" id="scheduling-cost">$0</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:var(--font-mono);font-size:0.5625rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-4);">FCS Games</div>
+      <div style="font-family:var(--font-mono);font-size:0.875rem;font-weight:500;color:var(--text-2);margin-top:2px;" id="fcs-count">0 / 1</div>
+    </div>
+  </div>
+
+  <div class="schedule-section" id="preseason-section">
+    <div class="sched-section-head">Non-Conference Schedule</div>
+    <div id="nc-games-list" style="display:grid;gap:6px;"></div>
+  </div>
+
+  <div class="schedule-section" id="conf-section">
+    <div class="sched-section-head">Conference Schedule</div>
+    <div id="conf-games-list" style="display:grid;gap:6px;"></div>
+  </div>
+
+  <div class="schedule-section" id="postseason-section" style="display:none;">
+    <div class="sched-section-head">Postseason</div>
+    <div id="postseason-list" style="display:grid;gap:6px;"></div>
+  </div>
+</div>
+
+</div>
+
+<!-- SCHEDULING MARKET MODAL -->
+<div class="modal-overlay" id="sched-modal">
+  <div class="modal">
+    <div class="modal-title">Schedule a Game</div>
+    <div class="modal-sub">Choose an opponent for your non-conference schedule. P4 vs P4 games become home-and-away series.</div>
+
+    <div class="filter-tabs" id="modal-filter-tabs">
+      <button class="filter-tab-btn active" data-filter="all" onclick="setModalFilter('all',this)">All</button>
+      <button class="filter-tab-btn" data-filter="p4" onclick="setModalFilter('p4',this)">Power 4</button>
+      <button class="filter-tab-btn" data-filter="g5" onclick="setModalFilter('g5',this)">Group of 5</button>
+      <button class="filter-tab-btn" data-filter="fcs" onclick="setModalFilter('fcs',this)">FCS</button>
+    </div>
+
+    <div class="opp-list" id="modal-opp-list"></div>
+
+    <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="schools.js"></script>
+<script src="simulation.js"></script>
+<script>
+// ═══ CAREER CONTEXT ═══
+const careerRaw = sessionStorage.getItem('dynastyCareer');
+const career = careerRaw ? JSON.parse(careerRaw) : null;
+const simRaw = sessionStorage.getItem('dynastySim');
+let simData = simRaw ? JSON.parse(simRaw) : null;
+
+if(!career){ window.location.href='setup.html'; }
+
+const mySchool = career.school;
+const myConf = mySchool?.conf;
+
+// Apply school colors
+function applyColors(school) {
+  if(!school?.primary) return;
+  const hex=school.primary;
+  document.documentElement.style.setProperty('--accent',hex);
+  const rv=parseInt(hex.slice(1,3),16)||26,gv=parseInt(hex.slice(3,5),16)||23,bv=parseInt(hex.slice(5,7),16)||20;
+  document.documentElement.style.setProperty('--accent-mid',`rgba(${rv},${gv},${bv},0.15)`);
+  document.documentElement.style.setProperty('--accent-light',`rgba(${rv},${gv},${bv},0.06)`);
+}
+applyColors(mySchool);
+
+// ═══ MY SCHEDULE STATE ═══
+// NC games: [{slot, opponent, home, conf, payment, fcs, seriesYear2}]
+const mySchedule = career.schedule || {
+  nc: [],           // non-conference games set by player
+  fcsUsed: false,
+  totalSlots: 3,
+};
+
+// ═══ TEAM TIER CLASSIFICATION ═══
+const P4_CONFS = ['SEC','Big Ten','Big 12','ACC'];
+const G5_CONFS = ['AAC','Sun Belt','MAC','MWC','C-USA'];
+
+function getTeamTier(school) {
+  if(P4_CONFS.includes(school.conf)) return 'p4';
+  if(G5_CONFS.includes(school.conf)) return 'g5';
+  return 'ind';
+}
+
+function getPayment(mySchool, oppSchool) {
+  const myTier = getTeamTier(mySchool);
+  const oppTier = getTeamTier(oppSchool);
+
+  if(myTier==='p4' && oppTier==='p4') return {amount:0, type:'series', label:'Home & Away Series'};
+  if(myTier==='p4' && oppTier==='g5'){
+    const amt = 150000 + Math.floor(Math.random()*150000);
+    return {amount:amt, type:'receive', label:`Pay visitor $${(amt/1000).toFixed(0)}K`};
+  }
+  if(myTier==='g5' && oppTier==='p4'){
+    const amt = 200000 + Math.floor(Math.random()*200000);
+    return {amount:amt, type:'receive', label:`Receive $${(amt/1000).toFixed(0)}K`};
+  }
+  // G5 vs G5 or ind
+  return {amount:0, type:'neutral', label:'Conference-level matchup'};
+}
+
+// ═══ SCHEDULE RENDERING ═══
+function renderSchedule() {
+  document.getElementById('tb-school').textContent = mySchool?.name || 'Schedule';
+  document.getElementById('tb-season').textContent = `${career.year || 2026} Season`;
+
+  const wins = simData?.playerRecord?.w || 0;
+  const losses = simData?.playerRecord?.l || 0;
+  document.getElementById('tb-record').textContent = `${wins}-${losses}`;
+
+  renderNCSlots();
+  renderConfSchedule();
+  renderStandings();
+  renderPolls();
+  updateBudgetBar();
+}
+
+function renderNCSlots() {
+  const list = document.getElementById('nc-games-list');
+  const usedSlots = mySchedule.nc.length;
+  const totalSlots = mySchedule.totalSlots;
+  document.getElementById('nc-slots-remaining').textContent = `${totalSlots-usedSlots} / ${totalSlots}`;
+
+  let html = '';
+
+  // Show filled NC games
+  mySchedule.nc.forEach((game, i) => {
+    const result = getGameResult(game.opponent);
+    const homeLabel = game.home ? 'HOME' : 'AWAY';
+    const homeCls = game.home ? 'home' : 'away';
+    html += `<div class="week-row game-week">
+      <div class="week-num" style="font-size:0.6875rem;color:var(--text-4);">NC ${i+1}</div>
+      <div class="week-info">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="week-opponent">${game.opponent}</span>
+          <span class="home-badge ${homeCls}">${homeLabel}</span>
+          ${game.fcs?'<span class="chip chip-amber">FCS</span>':''}
+          ${game.payment>0?`<span style="font-family:var(--font-mono);font-size:0.625rem;color:var(--green);">+$${(game.payment/1000).toFixed(0)}K</span>`:''}
+          ${game.cost>0?`<span style="font-family:var(--font-mono);font-size:0.625rem;color:var(--red);">-$${(game.cost/1000).toFixed(0)}K</span>`:''}
+        </div>
+        <div class="week-meta">${game.conf || 'Non-Conference'} · ${game.home?'Home':'Road'} game</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        ${result ? `<span class="week-result ${result.won?'result-w':'result-l'}">${result.myScore}-${result.oppScore}</span>` : '<span class="result-upcoming">Scheduled</span>'}
+        <button class="btn btn-ghost btn-sm" onclick="removeNCGame(${i})" style="font-size:0.625rem;padding:3px 6px;">Remove</button>
+      </div>
+    </div>`;
+  });
+
+  // Empty slots
+  for(let i=usedSlots; i<totalSlots; i++) {
+    html += `<div class="nc-slot" onclick="openModal(${i})">
+      <div class="week-num">NC ${i+1}</div>
+      <div class="nc-slot-label">Click to schedule a game</div>
+      <div style="font-family:var(--font-mono);font-size:0.625rem;color:var(--accent);">Schedule</div>
+    </div>`;
+  }
+
+  list.innerHTML = html;
+}
+
+function renderConfSchedule() {
+  if(!simData?.schedules) {
+    document.getElementById('conf-games-list').innerHTML = `<div style="font-size:0.8125rem;color:var(--text-4);padding:16px 0;">Conference schedule generates when the season begins.</div>`;
+    return;
+  }
+
+  const myGames = (simData.schedules[mySchool.name] || [])
+    .filter(g=>g.conf)
+    .sort((a,b)=>a.week-b.week);
+
+  document.getElementById('conf-games-list').innerHTML = myGames.map(game=>{
+    const result = simData ? getSimGameResult(game.gameId) : null;
+    const homeLabel = game.home ? 'HOME' : 'AWAY';
+    return `<div class="week-row game-week">
+      <div class="week-num">Wk ${game.week-27}</div>
+      <div class="week-info">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="week-opponent">${game.opponent}</span>
+          <span class="home-badge ${game.home?'home':'away'}">${homeLabel}</span>
+          <span class="chip chip-accent">Conf</span>
+        </div>
+        <div class="week-meta">${myConf} · Week ${game.week-27} of season</div>
+      </div>
+      <div class="week-result ${result?result.won?'result-w':'result-l':''}">
+        ${result ? `${result.myScore}-${result.oppScore}` : '<span class="result-upcoming">TBD</span>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderStandings() {
+  if(!simData?.gamePool) {
+    document.getElementById('standings-panel').innerHTML = `<div style="font-size:0.75rem;color:var(--text-4);">Standings update during the season.</div>`;
+    return;
+  }
+  const allSchools = DYNASTY_SCHOOLS || [];
+  const standings = calcStandings(allSchools, simData.gamePool, myConf);
+  const top8 = standings.slice(0,8);
+
+  document.getElementById('standings-panel').innerHTML = `
+    <table class="standings-table">
+      <thead><tr><th>Team</th><th>Conf</th><th>Overall</th></tr></thead>
+      <tbody>${top8.map(s=>`
+        <tr class="${s.name===mySchool.name?'my-team':''}">
+          <td>${s.name}</td>
+          <td class="mono">${s.confW}-${s.confL}</td>
+          <td class="mono">${s.w}-${s.l}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function renderPolls() {
+  if(!simData?.polls?.AP?.length) {
+    document.getElementById('polls-panel').innerHTML = `<div style="font-size:0.75rem;color:var(--text-4);margin-bottom:8px;">Polls release during the season.</div>`;
+    return;
+  }
+  const polls = simData.polls;
+  const pollTypes = ['AP','Coaches','CFP'].filter(p=>polls[p]?.length);
+
+  document.getElementById('polls-panel').innerHTML = pollTypes.map(pt=>`
+    <div style="margin-bottom:12px;">
+      <div style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-4);margin-bottom:4px;">${pt} Poll — Top 10</div>
+      ${(polls[pt]||[]).slice(0,10).map(t=>`
+        <div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid var(--border-1);">
+          <span style="font-family:var(--font-mono);font-size:0.6875rem;color:var(--text-4);width:18px;text-align:right;">${t.rank}</span>
+          <span style="font-size:0.8125rem;font-weight:${t.name===mySchool.name?'700':'400'};color:${t.name===mySchool.name?'var(--accent)':'var(--text-1)'};">${t.name}</span>
+          <span style="font-family:var(--font-mono);font-size:0.625rem;color:var(--text-4);margin-left:auto;">${t.record}</span>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function updateBudgetBar() {
+  let totalRevenue = 0, totalCost = 0;
+  mySchedule.nc.forEach(g=>{
+    if(g.payment) totalRevenue += g.payment;
+    if(g.cost) totalCost += g.cost;
+  });
+  document.getElementById('scheduling-revenue').textContent = `$${(totalRevenue/1000).toFixed(0)}K`;
+  document.getElementById('scheduling-cost').textContent = `$${(totalCost/1000).toFixed(0)}K`;
+  document.getElementById('fcs-count').textContent = `${mySchedule.fcsUsed?1:0} / 1`;
+}
+
+// ═══ GAME RESULTS ═══
+function getGameResult(opponent) {
+  if(!simData?.gamePool) return null;
+  const game = simData.gamePool.find(g=>
+    g.played && ((g.home===mySchool.name&&g.away===opponent)||(g.away===mySchool.name&&g.home===opponent))
+  );
+  if(!game) return null;
+  const isHome = game.home===mySchool.name;
+  return {
+    won: isHome?game.homeWins:!game.homeWins,
+    myScore: isHome?game.homeScore:game.awayScore,
+    oppScore: isHome?game.awayScore:game.homeScore,
+  };
+}
+
+function getSimGameResult(gameId) {
+  if(!simData?.gamePool) return null;
+  const game = simData.gamePool.find(g=>g.gameId===gameId&&g.played);
+  if(!game) return null;
+  const isHome = game.home===mySchool.name;
+  return {
+    won: isHome?game.homeWins:!game.homeWins,
+    myScore: isHome?game.homeScore:game.awayScore,
+    oppScore: isHome?game.awayScore:game.homeScore,
+  };
+}
+
+// ═══ MODAL ═══
+let modalSlot = 0;
+let modalFilter = 'all';
+
+function openModal(slot) {
+  modalSlot = slot;
+  document.getElementById('sched-modal').classList.add('open');
+  renderModalOpps();
+}
+function closeModal() {
+  document.getElementById('sched-modal').classList.remove('open');
+}
+function setModalFilter(filter, btn) {
+  modalFilter = filter;
+  document.querySelectorAll('.filter-tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderModalOpps();
+}
+
+function renderModalOpps() {
+  const list = document.getElementById('modal-opp-list');
+  const myTier = getTeamTier(mySchool);
+  const alreadyScheduled = mySchedule.nc.map(g=>g.opponent);
+  const fcsAllowed = !mySchedule.fcsUsed;
+
+  let opps = [];
+
+  // FCS options
+  if(modalFilter==='all'||modalFilter==='fcs') {
+    if(fcsAllowed) {
+      FCS_TIERS.forEach(fcs=>{
+        opps.push({
+          name: fcs.name, conf:'FCS', fcs:true,
+          payment: myTier==='p4'?fcs.fee:Math.round(fcs.fee*0.5),
+          cost:0, type:'receive',
+          strength: fcs.strength,
+          label: `Receive $${(fcs.fee/1000).toFixed(0)}K guarantee`,
+        });
+      });
+    }
+  }
+
+  // FBS schools
+  const schools = (window.DYNASTY_SCHOOLS||[]).filter(s=>
+    s.name!==mySchool.name &&
+    s.conf!==myConf &&
+    !alreadyScheduled.includes(s.name)
+  );
+
+  schools.forEach(s=>{
+    const tier = getTeamTier(s);
+    if(modalFilter==='p4'&&tier!=='p4') return;
+    if(modalFilter==='g5'&&tier!=='g5') return;
+    if(modalFilter==='fcs') return;
+
+    const pay = getPayment(mySchool, s);
+    opps.push({
+      name:s.name, conf:s.conf, fcs:false,
+      payment: pay.type==='receive'?pay.amount:0,
+      cost: pay.type==='pay'?pay.amount:0,
+      type: pay.type,
+      label: pay.label,
+      tier,
+    });
+  });
+
+  // Sort: P4 first, then G5, then by tier score
+  opps.sort((a,b)=>{
+    if(a.fcs&&!b.fcs) return 1;
+    if(!a.fcs&&b.fcs) return -1;
+    const ta = a.tier==='p4'?3:a.tier==='g5'?2:1;
+    const tb = b.tier==='p4'?3:b.tier==='g5'?2:1;
+    return tb-ta || b.payment-a.payment;
+  });
+
+  list.innerHTML = opps.slice(0,50).map(opp=>`
+    <div class="opp-row" onclick="scheduleGame('${opp.name.replace(/'/g,"\\'")}', ${opp.payment}, ${opp.cost}, ${opp.fcs})">
+      <div>
+        <div class="opp-name">${opp.name}</div>
+        <div class="opp-conf">${opp.conf}${opp.fcs?' · FCS Opponent':opp.type==='series'?' · Home & Away Series':''}</div>
+      </div>
+      <div class="opp-payment ${opp.cost>0?'pay':''}">
+        ${opp.payment>0?`+$${(opp.payment/1000).toFixed(0)}K`:''}
+        ${opp.cost>0?`-$${(opp.cost/1000).toFixed(0)}K`:''}
+        ${opp.payment===0&&opp.cost===0?opp.label:''}
+      </div>
+      <div class="btn btn-ghost btn-sm" style="font-size:0.6875rem;">Select</div>
+    </div>`).join('');
+}
+
+function scheduleGame(oppName, payment, cost, fcs) {
+  if(fcs && mySchedule.fcsUsed) { alert('You can only schedule 1 FCS game per season.'); return; }
+
+  const opp = fcs ? {name:oppName,conf:'FCS'} : (window.DYNASTY_SCHOOLS||[]).find(s=>s.name===oppName);
+  if(!opp&&!fcs) return;
+
+  const isHome = !fcs; // FCS always visits you; P4 vs P4 alternates
+  mySchedule.nc.push({
+    slot: modalSlot,
+    opponent: oppName,
+    conf: opp?.conf||'FCS',
+    home: isHome,
+    payment, cost, fcs,
+  });
+
+  if(fcs) mySchedule.fcsUsed = true;
+
+  // Save to career
+  career.schedule = mySchedule;
+  sessionStorage.setItem('dynastyCareer', JSON.stringify(career));
+
+  closeModal();
+  renderSchedule();
+}
+
+function removeNCGame(idx) {
+  const game = mySchedule.nc[idx];
+  if(game?.fcs) mySchedule.fcsUsed = false;
+  mySchedule.nc.splice(idx, 1);
+  career.schedule = mySchedule;
+  sessionStorage.setItem('dynastyCareer', JSON.stringify(career));
+  renderSchedule();
+}
+
+// Close modal on overlay click
+document.getElementById('sched-modal').addEventListener('click', e=>{
+  if(e.target===document.getElementById('sched-modal')) closeModal();
+});
+
+// ═══ INIT ═══
+renderSchedule();
+</script>
+</body>
+</html>
