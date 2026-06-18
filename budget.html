@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dynasty — Budget</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.budget-wrap { max-width: 900px; margin: 0 auto; padding: 24px; }
+.page-title { font-size: 1.125rem; font-weight: 700; color: var(--text-1); letter-spacing: -0.01em; margin-bottom: 3px; }
+.page-sub { font-size: 0.8125rem; color: var(--text-3); margin-bottom: 24px; }
+.budget-hero { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-xl); padding: 24px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; }
+.budget-total-label { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); margin-bottom: 4px; }
+.budget-total-num { font-family: var(--font-mono); font-size: 2.5rem; font-weight: 500; color: var(--accent); line-height: 1; }
+.budget-year { font-size: 0.8125rem; color: var(--text-4); margin-top: 4px; }
+.budget-health { text-align: right; }
+.budget-health-label { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); margin-bottom: 4px; }
+.budget-health-val { font-family: var(--font-mono); font-size: 1.25rem; font-weight: 500; }
+
+/* SOURCES */
+.section-head { font-family: var(--font-mono); font-size: 0.5625rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border-1); }
+.sources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+.source-card { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); padding: 14px; }
+.source-card-label { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); margin-bottom: 4px; }
+.source-card-amt { font-family: var(--font-mono); font-size: 1.25rem; font-weight: 500; color: var(--green); }
+.source-card-sub { font-size: 0.75rem; color: var(--text-3); margin-top: 3px; }
+.source-card-bar { margin-top: 8px; }
+
+/* SPENDING */
+.spending-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+.spending-table th { font-family: var(--font-mono); font-size: 0.5rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); padding: 7px 12px; text-align: left; border-bottom: 1px solid var(--border-1); background: var(--surface-2); }
+.spending-table th:last-child { text-align: right; }
+.spending-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-1); font-size: 0.8125rem; vertical-align: middle; }
+.spending-table td:last-child { text-align: right; font-family: var(--font-mono); font-weight: 500; }
+.spending-table .category-row td { font-weight: 600; color: var(--text-1); background: var(--surface-2); }
+.spending-table .sub-row td { color: var(--text-3); font-size: 0.75rem; padding-left: 28px; }
+.spending-table .total-row td { font-weight: 700; color: var(--accent); border-top: 1px solid var(--border-2); }
+.spend-bar { width: 100px; height: 4px; background: var(--border-1); border-radius: 2px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+.spend-bar-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+.spend-type { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 5px; border-radius: var(--r-sm); }
+.spend-annual   { background: var(--blue-bg); color: var(--blue); }
+.spend-onetime  { background: var(--amber-bg); color: var(--amber); }
+.spend-upkeep   { background: #F3E8FF; color: #6B21A8; }
+
+/* REMAINING */
+.remaining-bar-wrap { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); padding: 16px; }
+.remaining-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.remaining-track { height: 10px; background: var(--border-1); border-radius: 5px; overflow: hidden; margin-bottom: 8px; position: relative; }
+.remaining-fill { height: 100%; border-radius: 5px; transition: width 0.5s ease; }
+.remaining-label { font-size: 0.75rem; color: var(--text-3); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-logo">The Dynasty</span>
+  <div class="topbar-sep"></div>
+  <span class="topbar-school" id="tb-school">Budget</span>
+  <div class="topbar-spacer"></div>
+  <span id="tb-year" style="font-family:var(--font-mono);font-size:0.8125rem;color:var(--text-3);">2026 Season</span>
+  <div class="topbar-sep"></div>
+  <a href="hub.html" class="btn btn-ghost btn-sm">Hub</a>
+</div>
+
+<div class="budget-wrap">
+  <div class="page-title">Program Budget</div>
+  <div class="page-sub">Full financial overview — income sources, spending commitments, and remaining budget.</div>
+
+  <!-- HERO -->
+  <div class="budget-hero">
+    <div>
+      <div class="budget-total-label">Total Annual Budget</div>
+      <div class="budget-total-num" id="total-budget">$0</div>
+      <div class="budget-year" id="budget-year">2026 Season</div>
+    </div>
+    <div class="budget-health">
+      <div class="budget-health-label">Budget Health</div>
+      <div class="budget-health-val" id="budget-health-val">—</div>
+      <div style="font-size:0.75rem;color:var(--text-4);margin-top:3px;" id="budget-health-sub">—</div>
+    </div>
+  </div>
+
+  <!-- INCOME SOURCES -->
+  <div class="section-head">Income Sources</div>
+  <div class="sources-grid" id="sources-grid"></div>
+
+  <!-- SPENDING BREAKDOWN -->
+  <div class="section-head">Spending Commitments</div>
+  <table class="spending-table" id="spending-table"></table>
+
+  <!-- REMAINING -->
+  <div class="section-head">Budget Summary</div>
+  <div class="remaining-bar-wrap">
+    <div class="remaining-row">
+      <span style="font-family:var(--font-mono);font-size:0.6875rem;color:var(--text-4);">Available</span>
+      <span style="font-family:var(--font-mono);font-size:0.875rem;font-weight:500;color:var(--accent);" id="remaining-val">—</span>
+    </div>
+    <div class="remaining-track">
+      <div class="remaining-fill" id="remaining-fill" style="width:0%;"></div>
+    </div>
+    <div class="remaining-label" id="remaining-label">—</div>
+  </div>
+
+  <div style="margin-top:16px;display:flex;gap:10px;">
+    <a href="nil.html" class="btn btn-secondary">Manage NIL & Collective</a>
+    <a href="hub.html" class="btn btn-ghost">Back to Hub</a>
+  </div>
+</div>
+
+<script src="schools.js"></script>
+<script>
+const careerRaw = sessionStorage.getItem('dynastyCareer');
+const career = careerRaw ? JSON.parse(careerRaw) : null;
+if(!career) { window.location.href='setup.html'; }
+
+const mySchool = career.school;
+
+function applyColors(school) {
+  if(!school?.primary) return;
+  const hex=school.primary;
+  document.documentElement.style.setProperty('--accent',hex);
+  const rv=parseInt(hex.slice(1,3),16)||26,gv=parseInt(hex.slice(3,5),16)||23,bv=parseInt(hex.slice(5,7),16)||20;
+  document.documentElement.style.setProperty('--accent-mid',`rgba(${rv},${gv},${bv},0.15)`);
+  document.documentElement.style.setProperty('--accent-light',`rgba(${rv},${gv},${bv},0.06)`);
+}
+applyColors(mySchool);
+document.getElementById('tb-school').textContent = mySchool?.name||'Budget';
+document.getElementById('tb-year').textContent = `${career.year||2026} Season`;
+document.getElementById('budget-year').textContent = `${career.year||2026} Season`;
+
+// ═══ BUDGET CALCULATION ═══
+const nilGrade = mySchool?.nilBudget || 50;
+const tier = (mySchool && typeof calcTierScore!=='undefined') ? getTierStars(calcTierScore(mySchool)) : 3;
+
+function nilFromGrade(g) {
+  return g>=90?10000000:g>=80?7000000:g>=70?4500000:g>=60?2500000:g>=50?1200000:500000;
+}
+
+// Athletic Department real-world approximate budgets by tier
+const adBudgets = {5:85000000, 4:55000000, 3:35000000, 2:20000000, 1:12000000};
+const adBudget = adBudgets[tier] || 35000000;
+const adNilContrib = Math.round(nilFromGrade(nilGrade) * 0.4);
+const collectiveContrib = Math.round(nilFromGrade(nilGrade) * 0.55);
+const benefactorContrib = career.benefactor ? (career.benefactor.nilAmount||0) : 0;
+const totalNil = adNilContrib + collectiveContrib + benefactorContrib;
+const fundraisingTotal = career.fundraisingTotal || 0;
+const totalBudget = totalNil + fundraisingTotal;
+
+// Spending estimates
+const signedContracts = career.nilContracts || {};
+const playerNil = Object.keys(signedContracts).length * Math.round(totalNil * 0.03); // ~3% per player avg
+const coachingSalaries = Math.round(adBudget * 0.08); // ~8% of AD budget
+const facilitiesUpkeep = Math.round(adBudget * 0.04);
+const supportStaff = Math.round(adBudget * 0.02);
+const otherSpending = Math.round(adBudget * 0.01);
+const totalSpending = playerNil + coachingSalaries + facilitiesUpkeep + supportStaff + otherSpending;
+const remaining = Math.max(0, totalBudget - totalSpending);
+const remainingPct = totalBudget > 0 ? Math.min(100, (remaining/totalBudget)*100) : 0;
+
+function nilLabel(v) {
+  if(v>=1000000) return '$'+(v/1000000).toFixed(1)+'M';
+  if(v>=1000) return '$'+(v/1000).toFixed(0)+'K';
+  return '$'+v;
+}
+
+// ═══ RENDER ═══
+document.getElementById('total-budget').textContent = nilLabel(totalBudget);
+
+const health = remainingPct>=40?'Healthy':remainingPct>=20?'Tight':remainingPct>=5?'Strained':'Over Budget';
+const healthColor = remainingPct>=40?'var(--green)':remainingPct>=20?'var(--amber)':remainingPct>=5?'var(--red)':'var(--red)';
+document.getElementById('budget-health-val').textContent = health;
+document.getElementById('budget-health-val').style.color = healthColor;
+document.getElementById('budget-health-sub').textContent = `${Math.round(remainingPct)}% uncommitted`;
+
+// Sources
+document.getElementById('sources-grid').innerHTML = [
+  {label:'Athletic Department NIL', sub:'Institutional funding contribution', amt:adNilContrib},
+  {label:'Collective Contribution', sub:`${mySchool?.name||'Program'} NIL collective`, amt:collectiveContrib},
+  ...(benefactorContrib>0?[{label:career.benefactor?.name||'Benefactor', sub:'Special contribution', amt:benefactorContrib}]:[]),
+  ...(fundraisingTotal>0?[{label:'Fundraising', sub:'Coach-driven revenue this season', amt:fundraisingTotal}]:[]),
+].map(s=>{
+  const pct = (s.amt/totalBudget)*100;
+  return `<div class="source-card">
+    <div class="source-card-label">${s.label}</div>
+    <div class="source-card-amt">${nilLabel(s.amt)}</div>
+    <div class="source-card-sub">${s.sub}</div>
+    <div class="source-card-bar">
+      <div class="progress-track" style="height:4px;"><div class="progress-fill" style="width:${pct}%;background:var(--green);"></div></div>
+    </div>
+  </div>`;
+}).join('');
+
+// Spending
+const spendRows = [
+  {cat:'Player NIL Contracts', type:'annual', total:playerNil, subs:[
+    {name:'Signed contracts ('+Object.keys(signedContracts).length+' players)', amt:playerNil},
+  ]},
+  {cat:'Coaching Staff', type:'annual', total:coachingSalaries, subs:[
+    {name:'Coordinator salaries (OC/DC)', amt:Math.round(coachingSalaries*0.6)},
+    {name:'Support staff & position coaches', amt:Math.round(coachingSalaries*0.4)},
+  ]},
+  {cat:'Facilities Upkeep', type:'upkeep', total:facilitiesUpkeep, subs:[
+    {name:'Annual maintenance & operations', amt:facilitiesUpkeep},
+  ]},
+  {cat:'Support Staff', type:'annual', total:supportStaff, subs:[
+    {name:'Recruiting coordinator, strength staff, ST', amt:supportStaff},
+  ]},
+  {cat:'Miscellaneous', type:'annual', total:otherSpending, subs:[
+    {name:'Travel, recruiting visits, equipment', amt:otherSpending},
+  ]},
+];
+
+let tableHtml = `<thead><tr><th>Category</th><th>Type</th><th>Annual Cost</th></tr></thead><tbody>`;
+spendRows.forEach(row => {
+  tableHtml += `<tr class="category-row">
+    <td>${row.cat}</td>
+    <td><span class="spend-type spend-${row.type}">${row.type}</span></td>
+    <td>${nilLabel(row.total)}</td>
+  </tr>`;
+  row.subs.forEach(sub => {
+    tableHtml += `<tr class="sub-row">
+      <td>${sub.name}</td>
+      <td>
+        <div class="spend-bar"><div class="spend-bar-fill" style="width:${Math.min(100,(sub.amt/totalBudget)*100)}%;"></div></div>
+        ${nilLabel(sub.amt)}
+      </td>
+      <td></td>
+    </tr>`;
+  });
+});
+tableHtml += `<tr class="total-row"><td>Total Committed</td><td></td><td>${nilLabel(totalSpending)}</td></tr>`;
+tableHtml += `</tbody>`;
+document.getElementById('spending-table').innerHTML = tableHtml;
+
+// Remaining
+document.getElementById('remaining-val').textContent = nilLabel(remaining);
+document.getElementById('remaining-fill').style.width = remainingPct+'%';
+document.getElementById('remaining-fill').style.background = healthColor;
+document.getElementById('remaining-label').textContent = `${nilLabel(totalSpending)} committed of ${nilLabel(totalBudget)} total budget`;
+</script>
+</body>
+</html>
