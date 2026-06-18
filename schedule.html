@@ -183,40 +183,143 @@ const mySchedule = career.schedule || {
 };
 
 // ═══ PROTECTED RIVALRIES ═══
-const PROTECTED_RIVALRIES = {
-  'Alabama':      'Tennessee',
-  'Tennessee':    'Alabama',
-  'Alabama':      'Auburn',
-  'Auburn':       'Alabama',
-  'Georgia':      'Florida',
-  'Florida':      'Georgia',
-  'Army':         'Navy',
-  'Navy':         'Army',
-  'Ohio State':   'Michigan',
-  'Michigan':     'Ohio State',
-  'Oklahoma':     'Oklahoma State',
-  'Oklahoma State':'Oklahoma',
-  'USC':          'UCLA',
-  'UCLA':         'USC',
-  'Texas':        'Texas A&M',
-  'Texas A&M':    'Texas',
-  'Clemson':      'South Carolina',
-  'South Carolina':'Clemson',
-  'LSU':          'Mississippi',
-  'Mississippi':  'LSU',
-  'Notre Dame':   'USC',
-  'Florida State':'Florida',
-  'Penn State':   'Pittsburgh',
-  'Pittsburgh':   'Penn State',
-  'Kansas':       'Kansas State',
-  'Kansas State': 'Kansas',
-  'Iowa':         'Iowa State',
-  'Iowa State':   'Iowa',
-  'Boise State':  'Fresno State',
-  'Fresno State': 'Boise State',
-  'App State':    'Georgia Southern',
-  'Georgia Southern':'App State',
+// Each team can have multiple rivals. Array-based to handle teams with 2+ rivals.
+// These are locked into conference schedules — they always play each other.
+const PROTECTED_RIVALRIES_MAP = {
+  // SEC
+  'Alabama':        ['Auburn','Tennessee'],
+  'Auburn':         ['Alabama','Georgia'],
+  'Tennessee':      ['Alabama','Kentucky'],
+  'Georgia':        ['Florida','Auburn','Georgia Tech'],
+  'Florida':        ['Georgia','Florida State'],
+  'LSU':            ['Mississippi','Mississippi State'],
+  'Mississippi':    ['LSU','Mississippi State'],
+  'Mississippi State':['Mississippi','LSU'],
+  'Arkansas':       ['LSU','Missouri'],
+  'South Carolina': ['Clemson','Georgia'],
+  'Kentucky':       ['Tennessee','Louisville'],
+  'Missouri':       ['Kansas','Arkansas'],
+  'Vanderbilt':     ['Tennessee'],
+  'Texas':          ['Oklahoma','Texas A&M'],
+  'Oklahoma':       ['Texas','Oklahoma State'],
+  'Texas A&M':      ['Texas','LSU'],
+  // Big Ten
+  'Ohio State':     ['Michigan','Penn State'],
+  'Michigan':       ['Ohio State','Michigan State'],
+  'Michigan State': ['Michigan','Penn State'],
+  'Penn State':     ['Ohio State','Pittsburgh'],
+  'Nebraska':       ['Iowa','Oklahoma'],
+  'Iowa':           ['Iowa State','Wisconsin'],
+  'Iowa State':     ['Iowa','Kansas State'],
+  'Wisconsin':      ['Minnesota','Iowa'],
+  'Minnesota':      ['Wisconsin','Iowa'],
+  'Northwestern':   ['Illinois','Purdue'],
+  'Illinois':       ['Northwestern','Missouri'],
+  'Indiana':        ['Purdue'],
+  'Purdue':         ['Indiana','Notre Dame'],
+  'Rutgers':        ['Penn State'],
+  'Maryland':       ['Virginia','Penn State'],
+  'Oregon':         ['Oregon State','Washington'],
+  'Washington':     ['Oregon','Washington State'],
+  'USC':            ['UCLA','Notre Dame'],
+  'UCLA':           ['USC'],
+  // ACC
+  'Clemson':        ['South Carolina','Georgia Tech'],
+  'Florida State':  ['Miami','Florida'],
+  'Miami':          ['Florida State','Florida International'],
+  'Georgia Tech':   ['Georgia','Clemson'],
+  'North Carolina': ['NC State','Duke'],
+  'NC State':       ['North Carolina','Virginia Tech'],
+  'Virginia Tech':  ['Virginia','NC State'],
+  'Virginia':       ['Virginia Tech','Maryland'],
+  'Duke':           ['North Carolina','Wake Forest'],
+  'Wake Forest':    ['Duke','NC State'],
+  'Pittsburgh':     ['Penn State','West Virginia'],
+  'Syracuse':       ['Pittsburgh','Boston College'],
+  'Boston College': ['Notre Dame','Syracuse'],
+  'Louisville':     ['Kentucky','West Virginia'],
+  'Stanford':       ['California','Notre Dame'],
+  'California':     ['Stanford'],
+  'SMU':            ['TCU','Houston'],
+  // Big 12
+  'TCU':            ['Baylor','SMU'],
+  'Baylor':         ['TCU','Texas Tech'],
+  'Texas Tech':     ['Baylor','Oklahoma'],
+  'Oklahoma State': ['Oklahoma','Tulsa'],
+  'Kansas State':   ['Kansas','Iowa State'],
+  'Kansas':         ['Kansas State','Missouri'],
+  'West Virginia':  ['Pittsburgh','Louisville'],
+  'Cincinnati':     ['Louisville','UCF'],
+  'UCF':            ['South Florida','Cincinnati'],
+  'Houston':        ['Rice','Texas Tech'],
+  'BYU':            ['Utah'],
+  'Utah':           ['BYU','Colorado'],
+  'Colorado':       ['Utah','Colorado State'],
+  'Arizona':        ['Arizona State'],
+  'Arizona State':  ['Arizona'],
+  // AAC
+  'South Florida':  ['UCF'],
+  'East Carolina':  ['South Carolina'],
+  'Navy':           ['Army','Notre Dame'],
+  'Army':           ['Navy'],
+  'Tulsa':          ['Oklahoma State'],
+  'Tulane':         ['LSU'],
+  // Sun Belt
+  'App State':      ['Georgia Southern','Western Carolina'],
+  'Georgia Southern':['App State','Georgia State'],
+  'Georgia State':  ['Georgia Southern'],
+  'Troy':           ['Alabama'],
+  'South Alabama':  ['Troy'],
+  'Louisiana':      ['LSU'],
+  'Arkansas State': ['Arkansas'],
+  'Marshall':       ['West Virginia'],
+  'Old Dominion':   ['Virginia'],
+  'James Madison':  ['Virginia'],
+  // C-USA
+  'Western Kentucky':['Kentucky'],
+  'UAB':            ['Alabama'],
+  'UTEP':           ['New Mexico State'],
+  'Liberty':        ['Virginia Tech'],
+  // MAC
+  'Miami (OH)':     ['Cincinnati','Ohio'],
+  'Ohio':           ['Miami (OH)','Ohio State'],
+  'Toledo':         ['Bowling Green'],
+  'Bowling Green':  ['Toledo'],
+  'Northern Illinois':['Illinois'],
+  'Ball State':     ['Indiana'],
+  'Central Michigan':['Michigan'],
+  'Western Michigan':['Michigan State'],
+  'Eastern Michigan':['Michigan'],
+  'Buffalo':        ['Syracuse'],
+  'Akron':          ['Ohio'],
+  'Kent State':     ['Ohio State'],
+  // MWC
+  'Boise State':    ['Fresno State','Nevada'],
+  'Fresno State':   ['Boise State','San Jose State'],
+  'San Diego State':['SDSU','Fresno State'],
+  'Nevada':         ['Boise State','UNLV'],
+  'UNLV':           ['Nevada','Utah State'],
+  'Air Force':      ['Army','Navy'],
+  'Colorado State': ['Colorado','Wyoming'],
+  'Wyoming':        ['Colorado State'],
+  'New Mexico':     ['New Mexico State'],
+  'San Jose State': ['Fresno State','California'],
+  'Utah State':     ['BYU','Utah'],
+  'Hawaii':         ['Nevada','Boise State'],
+  // Ind
+  'Notre Dame':     ['USC','Navy','Stanford'],
+  'New Mexico State':['UTEP','New Mexico'],
 };
+
+// Helper — get rivals for a school (flat array, deduplicated)
+function getRivals(schoolName) {
+  return PROTECTED_RIVALRIES_MAP[schoolName] || [];
+}
+
+// For display — is this school a rival of mine?
+function isRival(schoolName) {
+  return getRivals(mySchool?.name||'').includes(schoolName);
+}
 
 // ═══ TEAM TIER CLASSIFICATION ═══
 const P4_CONFS = ['SEC','Big Ten','Big 12','ACC'];
@@ -496,7 +599,7 @@ function renderModalOpps() {
   });
 
   list.innerHTML = opps.slice(0,50).map(opp=>{
-    const isRivalry = PROTECTED_RIVALRIES[mySchool.name]===opp.name;
+    const isRivalry = isRival(opp?.name||"");
     return `
     <div class="opp-row" onclick="scheduleGame('${opp.name.replace(/'/g,"\\'")}', ${opp.payment}, ${opp.cost}, ${opp.fcs})">
       <div>
@@ -525,7 +628,7 @@ function scheduleGame(oppName, payment, cost, fcs) {
 
   const myTier = getTeamTier(mySchool);
   const oppTier = opp ? getTeamTier(opp) : 'fcs';
-  const isRivalry = PROTECTED_RIVALRIES[mySchool.name]===oppName;
+  const isRivalry = isRival(oppName);
 
   let isHome = true;
 
@@ -556,7 +659,7 @@ function scheduleGame(oppName, payment, cost, fcs) {
     payment: payment||0,
     cost: cost||0,
     fcs,
-    rivalry: isRivalry,
+    rivalry: isRival(oppName),
   });
 
   if(fcs) mySchedule.fcsUsed = true;
