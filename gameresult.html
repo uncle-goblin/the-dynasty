@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dynasty — Game Result</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.result-wrap { max-width: 860px; margin: 0 auto; padding: 24px; }
+
+/* SCOREBOARD */
+.scoreboard { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-xl); padding: 28px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 24px; }
+.team-side { display: flex; flex-direction: column; }
+.team-side.away { align-items: flex-end; text-align: right; }
+.team-name-big { font-size: 1.375rem; font-weight: 700; color: var(--text-1); letter-spacing: -0.01em; }
+.team-record { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--text-4); margin-top: 2px; }
+.team-rank { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--accent); margin-top: 2px; }
+.score-center { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.score-display { display: flex; align-items: center; gap: 16px; }
+.score-num { font-family: var(--font-mono); font-size: 3rem; font-weight: 500; line-height: 1; }
+.score-sep { font-family: var(--font-mono); font-size: 1.5rem; color: var(--text-5); }
+.score-final { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-4); }
+.score-ot { font-family: var(--font-mono); font-size: 0.5625rem; color: var(--amber); letter-spacing: 0.1em; text-transform: uppercase; }
+.result-badge { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 12px; border-radius: var(--r-sm); margin-top: 4px; }
+.badge-win { background: var(--green-bg); color: var(--green); }
+.badge-loss { background: var(--red-bg); color: var(--red); }
+.home-away-tag { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-5); margin-top: 3px; }
+
+/* QUARTER SCORES */
+.quarter-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; margin-bottom: 20px; }
+.quarter-table th { font-family: var(--font-mono); font-size: 0.5rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); padding: 6px 10px; text-align: center; border-bottom: 1px solid var(--border-1); background: var(--surface-2); }
+.quarter-table th:first-child { text-align: left; }
+.quarter-table td { padding: 8px 10px; text-align: center; border-bottom: 1px solid var(--border-1); font-family: var(--font-mono); font-size: 0.8125rem; }
+.quarter-table td:first-child { text-align: left; font-family: var(--font-body); font-weight: 600; color: var(--text-1); }
+.quarter-table .total-col { font-weight: 700; color: var(--accent); border-left: 1px solid var(--border-1); }
+.quarter-table tr.my-team { background: var(--accent-light); }
+
+/* BOX SCORE */
+.box-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.box-section { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); overflow: hidden; }
+.box-section-head { padding: 8px 14px; border-bottom: 1px solid var(--border-1); font-family: var(--font-mono); font-size: 0.5rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); display: flex; justify-content: space-between; align-items: center; }
+.box-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+.box-table th { font-family: var(--font-mono); font-size: 0.45rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-5); padding: 5px 10px; text-align: right; border-bottom: 1px solid var(--border-1); }
+.box-table th:first-child { text-align: left; }
+.box-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-1); font-family: var(--font-mono); font-size: 0.75rem; text-align: right; color: var(--text-2); }
+.box-table td:first-child { text-align: left; font-family: var(--font-body); font-size: 0.8125rem; color: var(--text-1); }
+.box-table tr:last-child td { border-bottom: none; }
+.box-table .leader { color: var(--accent); font-weight: 500; }
+
+/* TEAM STATS */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.stats-card { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); padding: 14px; }
+.stats-title { font-family: var(--font-mono); font-size: 0.5rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); margin-bottom: 10px; }
+.stat-row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border-1); font-size: 0.8125rem; }
+.stat-row:last-child { border-bottom: none; }
+.stat-label { color: var(--text-3); font-size: 0.75rem; }
+.stat-bar-wrap { width: 80px; }
+.stat-bar-home { height: 3px; background: var(--border-1); border-radius: 2px; overflow: hidden; }
+.stat-val { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; color: var(--text-1); min-width: 32px; text-align: right; }
+.stat-val.leader { color: var(--accent); }
+
+/* KEY PLAYS */
+.plays-list { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); overflow: hidden; margin-bottom: 20px; }
+.play-item { padding: 10px 14px; border-bottom: 1px solid var(--border-1); display: grid; grid-template-columns: 56px 1fr auto; gap: 10px; align-items: center; }
+.play-item:last-child { border-bottom: none; }
+.play-time { font-family: var(--font-mono); font-size: 0.5625rem; color: var(--text-4); }
+.play-desc { font-size: 0.8125rem; color: var(--text-2); line-height: 1.4; }
+.play-type { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 5px; border-radius: var(--r-sm); flex-shrink: 0; }
+.play-td    { background: var(--green-bg); color: var(--green); }
+.play-fg    { background: var(--blue-bg); color: var(--blue); }
+.play-int   { background: var(--red-bg); color: var(--red); }
+.play-fum   { background: var(--red-bg); color: var(--red); }
+.play-big   { background: var(--amber-bg); color: var(--amber); }
+.play-sack  { background: #F3E8FF; color: #6B21A8; }
+
+/* GAME NOTES */
+.notes-card { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); padding: 14px 16px; margin-bottom: 20px; }
+.notes-title { font-family: var(--font-mono); font-size: 0.5rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); margin-bottom: 8px; }
+.note-item { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; font-size: 0.8125rem; color: var(--text-2); line-height: 1.5; }
+.note-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 6px; }
+
+/* NAVIGATION */
+.result-nav { display: flex; gap: 10px; justify-content: space-between; align-items: center; }
+.season-progress { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--text-4); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-logo">The Dynasty</span>
+  <div class="topbar-sep"></div>
+  <span class="topbar-school" id="tb-school">Game Result</span>
+  <div class="topbar-sep"></div>
+  <span id="tb-game-info" style="font-family:var(--font-mono);font-size:0.8125rem;color:var(--text-3);">Week 1 · 2026</span>
+  <div class="topbar-spacer"></div>
+  <span id="tb-record" style="font-family:var(--font-mono);font-size:0.875rem;font-weight:500;color:var(--accent);">0-0</span>
+  <div class="topbar-sep"></div>
+  <a href="hub.html" class="btn btn-primary btn-sm">Return to Hub</a>
+</div>
+
+<div class="result-wrap">
+
+  <!-- SCOREBOARD -->
+  <div class="scoreboard" id="scoreboard"></div>
+
+  <!-- QUARTER SCORES -->
+  <table class="quarter-table" id="quarter-table"></table>
+
+  <!-- BOX SCORE -->
+  <div class="box-grid" id="box-score"></div>
+
+  <!-- TEAM STATS COMPARISON -->
+  <div class="stats-grid" id="team-stats"></div>
+
+  <!-- KEY PLAYS -->
+  <div class="plays-list" id="key-plays"></div>
+
+  <!-- GAME NOTES -->
+  <div class="notes-card">
+    <div class="notes-title">Game Notes</div>
+    <div id="game-notes"></div>
+  </div>
+
+  <!-- NAV -->
+  <div class="result-nav">
+    <div class="season-progress" id="season-progress"></div>
+    <a href="hub.html" class="btn btn-primary">Continue to Hub →</a>
+  </div>
+
+</div>
+
+<script src="schools.js"></script>
+<script>
+// ═══ CAREER & GAME DATA ═══
+const careerRaw = sessionStorage.getItem('dynastyCareer');
+const career = careerRaw ? JSON.parse(careerRaw) : null;
+const resultRaw = sessionStorage.getItem('lastGameResult');
+const gameResult = resultRaw ? JSON.parse(resultRaw) : null;
+if(!career) { window.location.href = 'setup.html'; }
+
+const mySchool = career.school;
+const myName = mySchool?.name || 'Your Team';
+
+// Apply school colors
+function applyColors(school) {
+  if(!school?.primary) return;
+  const hex = school.primary;
+  document.documentElement.style.setProperty('--accent', hex);
+  const rv=parseInt(hex.slice(1,3),16)||26,gv=parseInt(hex.slice(3,5),16)||23,bv=parseInt(hex.slice(5,7),16)||20;
+  document.documentElement.style.setProperty('--accent-mid',`rgba(${rv},${gv},${bv},0.15)`);
+  document.documentElement.style.setProperty('--accent-light',`rgba(${rv},${gv},${bv},0.06)`);
+}
+applyColors(mySchool);
+
+// ═══ RNG ═══
+function makeRng(seed) {
+  let s = (seed||12345)>>>0;
+  return ()=>{ s=Math.imul(1664525,s)+1013904223>>>0; return s/4294967296; };
+}
+function hashStr(str) {
+  let h=0;
+  for(let i=0;i<str.length;i++){h=(Math.imul(31,h)+str.charCodeAt(i))|0;}
+  return Math.abs(h);
+}
+
+// ═══ GENERATE GAME DATA ═══
+// Either use saved result or generate from sim data
+function getOrGenerateResult() {
+  if(gameResult) return gameResult;
+  // Generate a demo result for testing
+  const simRaw = sessionStorage.getItem('dynastySim');
+  const sim = simRaw ? JSON.parse(simRaw) : null;
+  const week = career.week || 29;
+  const opponent = 'Tennessee';
+  const myScore = 28;
+  const oppScore = 17;
+  return {
+    week, opponent, myScore, oppScore,
+    home: true, won: myScore > oppScore,
+    myRecord: {w: career.seasonRecord?.w||1, l: career.seasonRecord?.l||0},
+    confGame: true,
+    overtime: false,
+    myRank: 1,
+    oppRank: 8,
+  };
+}
+
+const result = getOrGenerateResult();
+const won = result.won;
+const myScore = result.myScore;
+const oppScore = result.oppScore;
+const opponent = result.opponent;
+const r = makeRng(hashStr(myName+opponent+(result.week||1)));
+
+// ═══ GENERATE BOX SCORE ═══
+function genBoxScore(score, offScheme, side) {
+  const isPassHeavy = ['Air Raid','Run-and-Shoot','West Coast'].includes(offScheme);
+  const isRunHeavy = ['Power Run','Triple Option'].includes(offScheme);
+
+  // Passing
+  const passYds = isPassHeavy ? 280+Math.floor(r()*150) : isRunHeavy ? 80+Math.floor(r()*80) : 180+Math.floor(r()*120);
+  const passComp = Math.floor((0.55+r()*0.2)*Math.floor(passYds/8));
+  const passAtt = Math.floor(passComp/(0.55+r()*0.1));
+  const passTd = Math.floor(score/7 * (isPassHeavy?0.75:isRunHeavy?0.3:0.55));
+  const passInt = r()<0.15?1:0;
+
+  // Rushing
+  const rushYds = isRunHeavy ? 220+Math.floor(r()*120) : isPassHeavy ? 60+Math.floor(r()*60) : 120+Math.floor(r()*80);
+  const rushAtt = Math.floor(rushYds/(4+r()*2));
+  const rushTd = Math.floor(score/7) - passTd;
+
+  // Players (use roster names if available)
+  const roster = career.myRoster || [];
+  const qbs = roster.filter(p=>p.pos==='QB').sort((a,b)=>b.ovr-a.ovr);
+  const rbs = roster.filter(p=>p.pos==='RB').sort((a,b)=>b.ovr-a.ovr);
+  const wrs = roster.filter(p=>p.pos==='WR').sort((a,b)=>b.ovr-a.ovr);
+
+  const qbName = qbs[0]?.name || genName(r);
+  const rb1Name = rbs[0]?.name || genName(r);
+  const wr1Name = wrs[0]?.name || genName(r);
+  const wr2Name = wrs[1]?.name || genName(r);
+
+  const rb1Yds = Math.floor(rushYds * (0.65+r()*0.2));
+  const rb1Att = Math.floor(rb1Yds/(4+r()*2));
+  const rb2Yds = rushYds - rb1Yds;
+  const rb2Att = rushAtt - rb1Att;
+
+  const wr1Rec = Math.floor(passComp*(0.3+r()*0.15));
+  const wr1Yds = Math.floor(wr1Rec*(10+r()*8));
+  const wr2Rec = Math.floor(passComp*(0.2+r()*0.1));
+  const wr2Yds = Math.floor(wr2Rec*(8+r()*7));
+
+  return {
+    passing: { comp:passComp, att:passAtt, yds:passYds, td:passTd, int:passInt, playerName:qbName },
+    rushing: [
+      {name:rb1Name, att:rb1Att, yds:rb1Yds, td:rushTd>0?1:0},
+      {name:rb2Name, att:rb2Att, yds:rb2Yds, td:0},
+    ],
+    receiving: [
+      {name:wr1Name, rec:wr1Rec, yds:wr1Yds, td:passTd>1?1:0},
+      {name:wr2Name, rec:wr2Rec, yds:wr2Yds, td:0},
+    ],
+    totals: {passYds, rushYds, totalYds:passYds+rushYds, turnovers:passInt+(r()<0.1?1:0)},
+  };
+}
+
+const FIRST_NAMES=['Malik','Darius','Jordan','Marcus','Tyrese','Cameron','Isaiah','Elijah'];
+const LAST_NAMES=['Williams','Johnson','Davis','Brown','Wilson','Moore','Taylor','Thomas'];
+function genName(r){return FIRST_NAMES[Math.floor(r()*FIRST_NAMES.length)]+' '+LAST_NAMES[Math.floor(r()*LAST_NAMES.length)];}
+
+const myBoxScore = genBoxScore(myScore, career.offScheme||'Spread RPO', 'my');
+const oppBoxScore = genBoxScore(oppScore, 'Pro Style', 'opp');
+
+// ═══ QUARTER SCORES ═══
+function genQuarterScores(total, seed) {
+  const rq = makeRng(seed);
+  let remaining = total;
+  const quarters = [];
+  for(let q=0;q<4;q++){
+    const last = q===3;
+    const qScore = last ? remaining : Math.min(remaining, Math.floor(rq()*(remaining/2)));
+    quarters.push(qScore);
+    remaining -= qScore;
+  }
+  // Redistribute to feel natural (multiples of 3/7)
+  return quarters.map(q => {
+    const tds = Math.floor(q/7);
+    const fgs = Math.floor((q - tds*7)/3);
+    return tds*7 + fgs*3;
+  });
+}
+
+const myQuarters = genQuarterScores(myScore, hashStr(myName+(result.week||1)));
+const oppQuarters = genQuarterScores(oppScore, hashStr(opponent+(result.week||1)));
+// Normalize to match actual total
+const myQTotal = myQuarters.reduce((a,b)=>a+b,0);
+const oppQTotal = oppQuarters.reduce((a,b)=>a+b,0);
+if(myQTotal !== myScore) myQuarters[3] += myScore - myQTotal;
+if(oppQTotal !== oppScore) oppQuarters[3] += oppScore - oppQTotal;
+
+// ═══ KEY PLAYS ═══
+function genKeyPlays() {
+  const plays = [];
+  const quarters = ['1st','2nd','3rd','4th'];
+  const rp = makeRng(hashStr(myName+opponent+'plays'));
+
+  // Opening drive result
+  if(won) {
+    plays.push({time:`${quarters[0]} 8:23`,desc:`${genName(rp)} ${rp()<0.5?'breaks free for a 34-yard gain':'catches a crossing route for 28 yards to move the chains'}`,type:'big'});
+  }
+
+  // Turnovers
+  if(oppBoxScore.totals.turnovers > 0) {
+    plays.push({time:`${quarters[1]} ${Math.floor(rp()*12+1)}:${Math.floor(rp()*59).toString().padStart(2,'0')}`,desc:`${genName(rp)} intercepts the pass and returns it ${Math.floor(rp()*30+10)} yards to the ${Math.floor(rp()*40+20)}`,type:'int'});
+  }
+
+  // Touchdowns
+  const tdCount = Math.floor(Math.max(myScore,oppScore)/7);
+  for(let i=0;i<Math.min(tdCount,4);i++){
+    const q = quarters[Math.floor(rp()*4)];
+    const isRunning = rp()<0.4;
+    const isMyTd = i<Math.floor(myScore/7);
+    const scorer = isMyTd ? (isRunning ? (myBoxScore.rushing[0]?.name||genName(rp)) : (myBoxScore.receiving[0]?.name||genName(rp))) : genName(rp);
+    const yds = isRunning ? Math.floor(rp()*20+3) : Math.floor(rp()*35+8);
+    plays.push({
+      time:`${q} ${Math.floor(rp()*12+1)}:${Math.floor(rp()*59).toString().padStart(2,'0')}`,
+      desc:`${scorer} ${isRunning?`rushes for a ${yds}-yard touchdown`:`hauls in a ${yds}-yard touchdown pass`}${isMyTd?` — ${myName}`:` — ${opponent}`} leads`,
+      type:'td'
+    });
+  }
+
+  // Big defensive play
+  if(rp()<0.5) {
+    plays.push({time:`${quarters[2]} ${Math.floor(rp()*10+2)}:${Math.floor(rp()*59).toString().padStart(2,'0')}`,desc:`${genName(rp)} records a sack, forcing ${opponent} into a 3rd-and-long situation`,type:'sack'});
+  }
+
+  // Sort by quarter roughly
+  return plays.slice(0,6);
+}
+
+const keyPlays = genKeyPlays();
+
+// ═══ GAME NOTES ═══
+function genGameNotes() {
+  const notes = [];
+  const rn = makeRng(hashStr(myName+opponent+'notes'));
+  if(won) {
+    if(myScore - oppScore >= 21) notes.push(`Dominant performance — ${myName} controlled both sides of the ball throughout.`);
+    else if(myScore - oppScore >= 10) notes.push(`Solid victory — ${myName} built a lead and managed the clock effectively in the second half.`);
+    else notes.push(`Hard-fought win — ${myName} survived a late ${opponent} push to secure the victory.`);
+  } else {
+    if(oppScore - myScore >= 21) notes.push(`Tough outing — ${opponent} was the better team today. Film review needed before next week.`);
+    else notes.push(`Close loss — ${myName} had chances but couldn't execute in key moments.`);
+  }
+  if(myBoxScore.passing.yds > 300) notes.push(`${myBoxScore.passing.playerName} had a big day through the air with ${myBoxScore.passing.yds} passing yards.`);
+  if(myBoxScore.rushing[0]?.yds > 100) notes.push(`${myBoxScore.rushing[0].name} hit triple digits on the ground, establishing the run game early.`);
+  if(myBoxScore.passing.int > 0) notes.push(`Turnover cost — the interception gave ${opponent} momentum in the second quarter.`);
+  if(result.confGame) notes.push(`Conference record ${won?'improves':'drops'} — ${result.confGame?'conference standings updated.':''}`);
+  return notes;
+}
+
+// ═══ RENDER ═══
+function renderScoreboard() {
+  const isHome = result.home;
+  const myColor = won ? 'var(--green)' : 'var(--red)';
+  document.getElementById('scoreboard').innerHTML = `
+    <div class="team-side">
+      <div class="team-name-big">${myName}</div>
+      ${result.myRank?`<div class="team-rank">#${result.myRank} AP</div>`:''}
+      <div class="team-record">${result.myRecord?.w||0}-${result.myRecord?.l||0}</div>
+      <div class="home-away-tag">${isHome?'Home':'Away'}</div>
+    </div>
+    <div class="score-center">
+      <div class="score-display">
+        <div class="score-num" style="color:${myScore>=oppScore?'var(--accent)':'var(--text-3)'};">${myScore}</div>
+        <div class="score-sep">—</div>
+        <div class="score-num" style="color:${oppScore>myScore?'var(--red)':'var(--text-3)'};">${oppScore}</div>
+      </div>
+      <div class="score-final">Final${result.overtime?' (OT)':''}</div>
+      <div class="result-badge ${won?'badge-win':'badge-loss'}">${won?'Victory':'Defeat'}</div>
+    </div>
+    <div class="team-side away">
+      <div class="team-name-big">${opponent}</div>
+      ${result.oppRank?`<div class="team-rank">#${result.oppRank} AP</div>`:''}
+      <div class="team-record">${result.oppRecord?.w||0}-${result.oppRecord?.l||0}</div>
+      <div class="home-away-tag">${isHome?'Away':'Home'}</div>
+    </div>`;
+}
+
+function renderQuarterTable() {
+  document.getElementById('quarter-table').innerHTML = `
+    <thead>
+      <tr>
+        <th>Team</th>
+        <th>1st</th><th>2nd</th><th>3rd</th><th>4th</th>
+        ${result.overtime?'<th>OT</th>':''}
+        <th class="total-col">Final</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="my-team">
+        <td>${myName}</td>
+        ${myQuarters.map(q=>`<td>${q}</td>`).join('')}
+        <td class="total-col" style="color:var(--accent);">${myScore}</td>
+      </tr>
+      <tr>
+        <td>${opponent}</td>
+        ${oppQuarters.map(q=>`<td>${q}</td>`).join('')}
+        <td class="total-col">${oppScore}</td>
+      </tr>
+    </tbody>`;
+}
+
+function renderBoxScore() {
+  const myB = myBoxScore;
+  const oppB = oppBoxScore;
+  document.getElementById('box-score').innerHTML = `
+    <div class="box-section">
+      <div class="box-section-head"><span>Passing</span><span>${myName}</span></div>
+      <table class="box-table">
+        <thead><tr><th>Player</th><th>C/ATT</th><th>YDS</th><th>TD</th><th>INT</th></tr></thead>
+        <tbody>
+          <tr><td class="leader">${myB.passing.playerName}</td><td>${myB.passing.comp}/${myB.passing.att}</td><td class="leader">${myB.passing.yds}</td><td>${myB.passing.td}</td><td>${myB.passing.int}</td></tr>
+        </tbody>
+      </table>
+      <div class="box-section-head" style="margin-top:1px;"><span>Rushing</span><span></span></div>
+      <table class="box-table">
+        <thead><tr><th>Player</th><th>ATT</th><th>YDS</th><th>TD</th></tr></thead>
+        <tbody>
+          ${myB.rushing.filter(p=>p.att>0).map(p=>`<tr><td>${p.name}</td><td>${p.att}</td><td>${p.yds}</td><td>${p.td}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="box-section-head" style="margin-top:1px;"><span>Receiving</span><span></span></div>
+      <table class="box-table">
+        <thead><tr><th>Player</th><th>REC</th><th>YDS</th><th>TD</th></tr></thead>
+        <tbody>
+          ${myB.receiving.filter(p=>p.rec>0).map(p=>`<tr><td>${p.name}</td><td>${p.rec}</td><td>${p.yds}</td><td>${p.td}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="box-section">
+      <div class="box-section-head"><span>Passing</span><span>${opponent}</span></div>
+      <table class="box-table">
+        <thead><tr><th>Player</th><th>C/ATT</th><th>YDS</th><th>TD</th><th>INT</th></tr></thead>
+        <tbody>
+          <tr><td class="leader">${oppB.passing.playerName}</td><td>${oppB.passing.comp}/${oppB.passing.att}</td><td>${oppB.passing.yds}</td><td>${oppB.passing.td}</td><td>${oppB.passing.int}</td></tr>
+        </tbody>
+      </table>
+      <div class="box-section-head" style="margin-top:1px;"><span>Rushing</span><span></span></div>
+      <table class="box-table">
+        <thead><tr><th>Player</th><th>ATT</th><th>YDS</th><th>TD</th></tr></thead>
+        <tbody>
+          ${oppB.rushing.filter(p=>p.att>0).map(p=>`<tr><td>${p.name}</td><td>${p.att}</td><td>${p.yds}</td><td>${p.td}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="box-section-head" style="margin-top:1px;"><span>Receiving</span><span></span></div>
+      <table class="box-table">
+        <thead><tr><th>Player</th><th>REC</th><th>YDS</th><th>TD</th></tr></thead>
+        <tbody>
+          ${oppB.receiving.filter(p=>p.rec>0).map(p=>`<tr><td>${p.name}</td><td>${p.rec}</td><td>${p.yds}</td><td>${p.td}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderTeamStats() {
+  const myT = myBoxScore.totals;
+  const oppT = oppBoxScore.totals;
+  const stats = [
+    {label:'Total Yards', my:myT.totalYds, opp:oppT.totalYds},
+    {label:'Passing Yards', my:myT.passYds, opp:oppT.passYds},
+    {label:'Rushing Yards', my:myT.rushYds, opp:oppT.rushYds},
+    {label:'Turnovers', my:myT.turnovers, opp:oppT.turnovers, lower:true},
+    {label:'Time of Possession', my:`${Math.floor(29+r()*3)}:${Math.floor(r()*59).toString().padStart(2,'0')}`, opp:'—', raw:true},
+  ];
+
+  document.getElementById('team-stats').innerHTML = `
+    <div class="stats-card" style="grid-column:1/-1;">
+      <div class="stats-title">Team Comparison</div>
+      ${stats.map(s=>{
+        if(s.raw) return `<div class="stat-row"><span class="stat-label">${s.label}</span><span class="stat-val">${s.my}</span><span class="stat-val" style="color:var(--text-4);">${s.opp}</span></div>`;
+        const myWins = s.lower ? s.my <= s.opp : s.my >= s.opp;
+        return `<div class="stat-row">
+          <span class="stat-label">${s.label}</span>
+          <div class="stat-bar-wrap">
+            <div class="stat-bar-home" style="background:var(--border-1);position:relative;height:4px;border-radius:2px;">
+              <div style="position:absolute;top:0;left:0;height:100%;width:${Math.min(100,(s.my/(s.my+s.opp))*100)}%;background:${myWins?'var(--accent)':'var(--red)'};border-radius:2px;"></div>
+            </div>
+          </div>
+          <span class="stat-val ${myWins?'leader':''}">${s.my}</span>
+          <span style="font-family:var(--font-mono);font-size:0.6875rem;color:var(--text-4);"> — </span>
+          <span class="stat-val ${!myWins?'leader':''}" style="${!myWins?'color:var(--red)':''}">${s.opp}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderKeyPlays() {
+  document.getElementById('key-plays').innerHTML = `
+    <div style="padding:8px 14px;border-bottom:1px solid var(--border-1);">
+      <span style="font-family:var(--font-mono);font-size:0.5rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);">Key Plays</span>
+    </div>
+    ${keyPlays.map(p=>`
+      <div class="play-item">
+        <div class="play-time">${p.time}</div>
+        <div class="play-desc">${p.desc}</div>
+        <span class="play-type play-${p.type}">${p.type.toUpperCase()}</span>
+      </div>`).join('')}`;
+}
+
+function renderNotes() {
+  const notes = genGameNotes();
+  document.getElementById('game-notes').innerHTML = notes.map(n=>`
+    <div class="note-item"><div class="note-dot"></div><div>${n}</div></div>`).join('');
+}
+
+function renderTopBar() {
+  document.getElementById('tb-school').textContent = myName;
+  document.getElementById('tb-game-info').textContent = `Week ${result.week||'—'} · ${career.year||2026} · ${result.confGame?'Conference':'Non-Conference'}`;
+  document.getElementById('tb-record').textContent = `${result.myRecord?.w||0}-${result.myRecord?.l||0}`;
+  document.getElementById('season-progress').textContent = `Week ${result.week||1} of 13 · ${result.confGame?career.school?.conf+' Game':'Non-Conference'}`;
+}
+
+// ═══ INIT ═══
+renderTopBar();
+renderScoreboard();
+renderQuarterTable();
+renderBoxScore();
+renderTeamStats();
+renderKeyPlays();
+renderNotes();
+</script>
+</body>
+</html>
