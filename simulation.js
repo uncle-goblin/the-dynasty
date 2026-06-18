@@ -644,12 +644,10 @@ class DynastySimulation {
 
   advanceToWeek(week) {
     if(!this.initialized) return;
-    // Simulate all weeks from current to target
+    this.lastGameResult = null;
     for(let w=this.currentWeek; w<=week; w++) {
       if(w >= SEASON_START_WEEK && w <= CONF_CHAMPIONSHIP_WEEK) {
         const results = simWeek(w, this.gamePool, this.rosters, this.schools);
-
-        // Update player record
         const playerGames = results.filter(g=>g.home===this.playerSchool||g.away===this.playerSchool);
         playerGames.forEach(game=>{
           const isHome = game.home===this.playerSchool;
@@ -660,11 +658,33 @@ class DynastySimulation {
             if(won) this.playerRecord.confW++;
             else this.playerRecord.confL++;
           }
+          // Store last game result for result screen
+          this.lastGameResult = {
+            week: w,
+            opponent: isHome?game.away:game.home,
+            myScore: isHome?game.homeScore:game.awayScore,
+            oppScore: isHome?game.awayScore:game.homeScore,
+            home: isHome,
+            won,
+            confGame: game.conf,
+            rivalry: game.rivalry||false,
+            myRecord: {...this.playerRecord},
+            myRank: null, // filled after poll update
+            oppRank: null,
+          };
         });
-
-        // Update polls if it's a poll release week
         if(w >= POLL_SCHEDULE.AP.startWeek || w === POLL_SCHEDULE.AP.preseason) {
           this.polls = generatePolls(this.schools, this.gamePool, w, this.polls);
+          // Fill in rankings for last game result
+          if(this.lastGameResult && this.polls.AP) {
+            const myEntry = this.polls.AP.find(t=>t.name===this.playerSchool);
+            const oppEntry = this.polls.AP.find(t=>t.name===this.lastGameResult.opponent);
+            if(this.lastGameResult) {
+              this.lastGameResult.myRank = myEntry?.rank||null;
+              this.lastGameResult.oppRank = oppEntry?.rank||null;
+              this.lastGameResult.myRecord = {...this.playerRecord};
+            }
+          }
         }
       }
     }
