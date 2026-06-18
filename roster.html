@@ -383,9 +383,18 @@ const DC_POS_MAP = {
 };
 
 function getBestAtPos(rosterPos, exclude=[]) {
+  const overrides = depthOverrides[rosterPos];
   return roster
     .filter(p=>p.pos===rosterPos && !exclude.includes(p.id))
-    .sort((a,b)=>b.ovr-a.ovr);
+    .sort((a,b)=>{
+      if(overrides){
+        const ai=overrides.indexOf(a.id), bi=overrides.indexOf(b.id);
+        if(ai>=0&&bi>=0) return ai-bi;
+        if(ai>=0) return -1;
+        if(bi>=0) return 1;
+      }
+      return b.ovr-a.ovr;
+    });
 }
 
 function renderDepthChart() {
@@ -641,12 +650,96 @@ function filterGroup(group, el) {
   renderRosterTable();
 }
 
+// ═══ POSITION EDITING ═══
+let editingPos = null;
+let depthOverrides = {}; // pos -> [playerId, playerId, ...] ordered by depth
+
 function jumpPos(pos) {
-  document.getElementById('pos-filter').value = pos;
-  switchTab('roster', document.querySelector('[data-tab="roster"]'));
+  editingPos = pos;
+  // Switch to a position edit view inside the depth chart tab
+  switchTab('depth', document.querySelector('[data-tab="depth"]'));
   document.querySelectorAll('[data-tab]').forEach(e=>e.classList.remove('active'));
-  document.querySelector('[data-tab="roster"]').classList.add('active');
-  renderRosterTable();
+  document.querySelector('[data-tab="depth"]').classList.add('active');
+  renderPositionEditor(pos);
+}
+
+function renderPositionEditor(pos) {
+  const grid = document.getElementById('dc-grid');
+  const playersAtPos = roster.filter(p=>p.pos===pos).sort((a,b)=>{
+    // Check overrides first
+    const overrides = depthOverrides[pos];
+    if(overrides) {
+      const ai = overrides.indexOf(a.id);
+      const bi = overrides.indexOf(b.id);
+      if(ai>=0&&bi>=0) return ai-bi;
+      if(ai>=0) return -1;
+      if(bi>=0) return 1;
+    }
+    return b.ovr-a.ovr;
+  });
+
+  document.getElementById('dc-title').textContent = `${pos} Depth Chart`;
+  document.getElementById('dc-sub').textContent = `Click players to set depth order. Drag to reorder.`;
+
+  const depthLabels = ['Starter','Backup','3rd String','4th String'];
+
+  grid.innerHTML = `
+    <div style="grid-column:1/-1;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <button class="btn btn-secondary btn-sm" onclick="renderDepthChart();document.getElementById('dc-title').textContent='${mySchool.name} Depth Chart';">← Full Depth Chart</button>
+        <span style="font-family:var(--font-mono);font-size:0.5625rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-4);">${pos} — ${playersAtPos.length} players</span>
+      </div>
+      <div class="dc-unit">
+        <div class="dc-unit-head">
+          <span class="dc-unit-title">${pos} Depth Chart</span>
+          <span style="font-size:0.6875rem;color:var(--text-4);">Click arrows to reorder</span>
+        </div>
+        ${playersAtPos.map((p,i)=>`
+          <div style="display:grid;grid-template-columns:80px 1fr auto auto 36px;gap:8px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border-1);background:${i===0?'var(--accent-light)':i===1?'var(--surface-1)':'var(--surface-2)'};">
+            <div style="font-family:var(--font-mono);font-size:0.625rem;font-weight:500;color:${i===0?'var(--accent)':i===1?'var(--text-3)':'var(--text-5)'};">${depthLabels[i]||`#${i+1}`}</div>
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:0.875rem;font-weight:${i===0?'700':'500'};color:var(--text-1);">${p.name}</span>
+                <span class="yr-badge yr-${yearLabel(p.year)}">${yearLabel(p.year)}</span>
+                <span style="font-family:var(--font-mono);font-size:0.625rem;color:var(--text-4);">${p.archetype||''}</span>
+              </div>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:0.875rem;font-weight:500;color:${ovrColor(p.ovr)};">${p.ovr}</div>
+            <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-4);">Ceil ${p.ceiling||'—'}</div>
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              ${i>0?`<button onclick="moveUp('${pos}',${i})" style="background:none;border:1px solid var(--border-1);border-radius:2px;cursor:pointer;font-size:0.6rem;padding:1px 4px;color:var(--text-3);">▲</button>`:'<div style="height:16px;"></div>'}
+              ${i<playersAtPos.length-1?`<button onclick="moveDown('${pos}',${i})" style="background:none;border:1px solid var(--border-1);border-radius:2px;cursor:pointer;font-size:0.6rem;padding:1px 4px;color:var(--text-3);">▼</button>`:'<div style="height:16px;"></div>'}
+            </div>
+          </div>`).join('')}
+        ${playersAtPos.length===0?`<div style="padding:16px;font-size:0.8125rem;color:var(--text-5);text-align:center;">No ${pos} players on roster.</div>`:''}
+      </div>
+    </div>`;
+}
+
+function moveUp(pos, idx) {
+  const players = getOrderedPlayers(pos);
+  if(idx===0) return;
+  const arr = players.map(p=>p.id);
+  [arr[idx-1],arr[idx]] = [arr[idx],arr[idx-1]];
+  depthOverrides[pos] = arr;
+  renderPositionEditor(pos);
+}
+
+function moveDown(pos, idx) {
+  const players = getOrderedPlayers(pos);
+  if(idx>=players.length-1) return;
+  const arr = players.map(p=>p.id);
+  [arr[idx],arr[idx+1]] = [arr[idx+1],arr[idx]];
+  depthOverrides[pos] = arr;
+  renderPositionEditor(pos);
+}
+
+function getOrderedPlayers(pos) {
+  return roster.filter(p=>p.pos===pos).sort((a,b)=>{
+    const overrides = depthOverrides[pos];
+    if(overrides){const ai=overrides.indexOf(a.id),bi=overrides.indexOf(b.id);if(ai>=0&&bi>=0)return ai-bi;if(ai>=0)return -1;if(bi>=0)return 1;}
+    return b.ovr-a.ovr;
+  });
 }
 
 // ═══ TOPBAR ═══
