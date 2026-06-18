@@ -211,12 +211,12 @@
     </div>
   </div>
   <div class="nav-grid-2">
-    <div class="nav-card" onclick="comingSoon('School Grades')">
+    <a class="nav-card" href="budget.html">
       <div class="nav-card-title">School Grades</div>
       
       <div class="nav-card-badge badge-free">Free Action</div>
     </div>
-    <div class="nav-card" onclick="comingSoon('Fundraising')">
+    <div class="nav-card" href="nil.html">
       <div class="nav-card-title">Fundraising</div>
       
       <div class="nav-card-badge badge-hours">Uses Staff Hours</div>
@@ -454,6 +454,12 @@ function advanceWeek() {
       sim.advanceToWeek(gs.week);
       const newSimData = sim.toJSON();
       sessionStorage.setItem('dynastySim', JSON.stringify(newSimData));
+      // If this week had a player game, redirect to result screen
+      if(newSimData.lastGameResult) {
+        sessionStorage.setItem('lastGameResult', JSON.stringify(newSimData.lastGameResult));
+        window.location.href = 'gameresult.html';
+        return;
+      }
       updateHubFromSim(newSimData);
       gs.wins = newSimData.playerRecord?.w || 0;
       gs.losses = newSimData.playerRecord?.l || 0;
