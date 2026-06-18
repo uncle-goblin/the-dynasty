@@ -168,70 +168,156 @@ const SEASON_START_WEEK = 28; // Week 28 = first game week
 const SEASON_WEEKS = 13;      // 13 regular season weeks (some teams have byes)
 const CONF_CHAMPIONSHIP_WEEK = 41;
 
+// Protected rivalries — must play each year as conference game
+// Array-based so teams can have multiple protected rivals
+const PROTECTED_RIVALRY_MAP = {
+  'Alabama':['Auburn','Tennessee'],'Auburn':['Alabama','Georgia'],
+  'Tennessee':['Alabama','Kentucky'],'Georgia':['Florida','Auburn'],
+  'Florida':['Georgia','Florida State'],'LSU':['Mississippi','Mississippi State'],
+  'Mississippi':['LSU','Mississippi State'],'Mississippi State':['Mississippi','LSU'],
+  'South Carolina':['Clemson'],'Kentucky':['Tennessee'],
+  'Texas':['Oklahoma','Texas A&M'],'Oklahoma':['Texas','Oklahoma State'],
+  'Texas A&M':['Texas'],'Ohio State':['Michigan','Penn State'],
+  'Michigan':['Ohio State','Michigan State'],'Michigan State':['Michigan'],
+  'Penn State':['Ohio State'],'Nebraska':['Iowa'],
+  'Iowa':['Iowa State','Wisconsin'],'Wisconsin':['Minnesota'],
+  'Minnesota':['Wisconsin'],'Iowa State':['Iowa'],
+  'Oregon':['Oregon State'],'Washington':['Oregon'],
+  'USC':['UCLA','Notre Dame'],'UCLA':['USC'],
+  'Clemson':['South Carolina','Georgia Tech'],'Florida State':['Miami'],
+  'Miami':['Florida State'],'Georgia Tech':['Georgia','Clemson'],
+  'North Carolina':['NC State'],'NC State':['North Carolina','Virginia Tech'],
+  'Virginia Tech':['Virginia'],'Virginia':['Virginia Tech'],
+  'TCU':['Baylor'],'Baylor':['TCU'],'Oklahoma State':['Oklahoma'],
+  'Kansas State':['Kansas'],'Kansas':['Kansas State'],
+  'West Virginia':['Pittsburgh'],'Pittsburgh':['West Virginia'],
+  'BYU':['Utah'],'Utah':['BYU'],'Colorado':['Utah'],
+  'Arizona':['Arizona State'],'Arizona State':['Arizona'],
+  'Navy':['Army'],'Army':['Navy'],
+  'Boise State':['Fresno State'],'Fresno State':['Boise State'],
+  'App State':['Georgia Southern'],'Georgia Southern':['App State'],
+  'Notre Dame':['USC','Navy'],
+};
+
 function generateAllSchedules(schools, year, playerSchoolName, existingNCGames) {
-  const schedules = {}; // schoolName -> [{week, opponent, home, gameId, conf, result}]
-  const gamePool = [];  // All games to simulate
-  const assigned = new Set(); // Track assigned matchups
+  const schedules = {};
+  const gamePool = [];
+  const assigned = new Set();
+  const weekSlots = {}; // track which weeks each team already has a game
 
-  schools.forEach(s => { schedules[s.name] = []; });
+  schools.forEach(s => { schedules[s.name] = []; weekSlots[s.name] = new Set(); });
 
-  // Step 1: Generate conference schedules
+  function addGame(home, away, week, conf, rivalry) {
+    const key = [home, away].sort().join('|');
+    if(assigned.has(key)) return;
+    assigned.add(key);
+    // Find available week near target for both teams
+    let finalWeek = week;
+    for(let offset=0; offset<=5; offset++) {
+      const w1 = week + offset;
+      const w2 = week - offset;
+      if(w1 <= SEASON_START_WEEK + SEASON_WEEKS &&
+         !weekSlots[home]?.has(w1) && !weekSlots[away]?.has(w1)) {
+        finalWeek = w1; break;
+      }
+      if(w2 >= SEASON_START_WEEK && offset > 0 &&
+         !weekSlots[home]?.has(w2) && !weekSlots[away]?.has(w2)) {
+        finalWeek = w2; break;
+      }
+    }
+    weekSlots[home] = weekSlots[home] || new Set();
+    weekSlots[away] = weekSlots[away] || new Set();
+    weekSlots[home].add(finalWeek);
+    weekSlots[away].add(finalWeek);
+
+    const gameId = `${year}_${key}_W${finalWeek}${rivalry?'_RIV':''}`;
+    gamePool.push({gameId, week:finalWeek, home, away, conf, rivalry:!!rivalry, played:false, homeScore:0, awayScore:0});
+    schedules[home].push({week:finalWeek, opponent:away, home:true, gameId, conf, rivalry:!!rivalry});
+    schedules[away].push({week:finalWeek, opponent:home, home:false, gameId, conf, rivalry:!!rivalry});
+  }
+
+  const confGroups = {};
+  schools.forEach(s => {
+    if(!confGroups[s.conf]) confGroups[s.conf] = [];
+    confGroups[s.conf].push(s);
+  });
+
+  // STEP 1: Schedule all protected rivalries FIRST at late-season weeks
+  const processedRivalries = new Set();
   schools.forEach(school => {
-    const conf = school.conf;
-    const confTeams = schools.filter(s=>s.conf===conf && s.name!==school.name);
-    const gamesNeeded = CONF_GAMES[conf] || 0;
-    if(gamesNeeded===0) return;
+    const rivals = PROTECTED_RIVALRY_MAP[school.name] || [];
+    rivals.forEach((rivalName, idx) => {
+      const key = [school.name, rivalName].sort().join('|');
+      if(processedRivalries.has(key)) return;
+      processedRivalries.add(key);
 
-    // Assign conference opponents
-    const opponents = shuffleArray([...confTeams], makeRng(hashStr(school.name+year))).slice(0,gamesNeeded);
-    opponents.forEach((opp, idx) => {
-      const key = [school.name,opp.name].sort().join('|');
-      if(assigned.has(key)) return;
-      assigned.add(key);
+      const rivalSchool = schools.find(s=>s.name===rivalName);
+      if(!rivalSchool) return;
 
-      const week = SEASON_START_WEEK + 1 + Math.floor(idx * (SEASON_WEEKS-1) / gamesNeeded);
-      const homeTeam = Math.random()>0.5 ? school.name : opp.name;
-      const gameId = `${year}_${key}_W${week}`;
-
-      const game = {gameId, week, home:homeTeam, away:homeTeam===school.name?opp.name:school.name, conf:true, played:false, homeScore:0, awayScore:0};
-      gamePool.push(game);
-
-      schedules[school.name].push({week, opponent:opp.name, home:homeTeam===school.name, gameId, conf:true});
-      schedules[opp.name].push({week, opponent:school.name, home:homeTeam===opp.name, gameId, conf:true});
+      const sameConf = school.conf === rivalSchool.conf;
+      // Late season weeks for rivalries: week 39, 40 (last 2 weeks of season)
+      // Army-Navy always week 42 (December)
+      let targetWeek = SEASON_START_WEEK + 11 - idx;
+      if((school.name==='Army'&&rivalName==='Navy')||(school.name==='Navy'&&rivalName==='Army')) {
+        targetWeek = SEASON_START_WEEK + 13; // Army-Navy is always last
+      }
+      const rng = makeRng(hashStr(key+year));
+      const homeTeam = rng() > 0.5 ? school.name : rivalName;
+      const awayTeam = homeTeam === school.name ? rivalName : school.name;
+      addGame(homeTeam, awayTeam, targetWeek, sameConf, true);
     });
   });
 
-  // Step 2: Fill non-conference slots (weeks 28-30 for most teams, also late season)
-  schools.forEach(school => {
-    if(school.name === playerSchoolName) return; // Player fills their own NC schedule
-    const currentGames = schedules[school.name].length;
-    const totalNeeded = 12; // Most teams play 12 regular season games
-    const ncNeeded = Math.max(0, totalNeeded - (CONF_GAMES[school.conf]||0));
+  // STEP 2: Fill remaining conference games
+  Object.entries(confGroups).forEach(([conf, confSchools]) => {
+    const gamesNeeded = CONF_GAMES[conf] || 0;
+    if(gamesNeeded === 0) return;
 
-    // Find NC opponents from other conferences or independents
+    confSchools.forEach(school => {
+      const currentGames = schedules[school.name].filter(g=>g.conf).length;
+      const remaining = gamesNeeded - currentGames;
+      if(remaining <= 0) return;
+
+      const others = confSchools.filter(s =>
+        s.name !== school.name &&
+        !schedules[school.name].find(g=>g.opponent===s.name)
+      );
+      const rng = makeRng(hashStr(school.name+'conf'+year));
+      const opponents = shuffleArray(others, rng).slice(0, remaining);
+
+      opponents.forEach((opp, idx) => {
+        const key = [school.name, opp.name].sort().join('|');
+        if(assigned.has(key)) return;
+        const rng2 = makeRng(hashStr(key+year));
+        const homeTeam = rng2()>0.5?school.name:opp.name;
+        const awayTeam = homeTeam===school.name?opp.name:school.name;
+        // Early-mid season weeks for non-rivalry conf games
+        const targetWeek = SEASON_START_WEEK + 1 + (idx % 9);
+        addGame(homeTeam, awayTeam, targetWeek, true, false);
+      });
+    });
+  });
+
+  // STEP 3: Fill NC slots for CPU teams
+  schools.forEach(school => {
+    if(school.name === playerSchoolName) return;
+    const totalNeeded = 12;
+    const confGameCount = schedules[school.name].filter(g=>g.conf).length;
+    const ncNeeded = Math.max(0, totalNeeded - confGameCount);
+
     const ncPool = schools.filter(s =>
       s.conf !== school.conf &&
-      !schedules[school.name].some(g=>g.opponent===s.name) &&
+      !schedules[school.name]?.find(g=>g.opponent===s.name) &&
       s.name !== school.name
     );
-
     const r = makeRng(hashStr(school.name+'nc'+year));
     const ncOpps = shuffleArray(ncPool, r).slice(0, ncNeeded);
 
     ncOpps.forEach((opp, idx) => {
-      const key = [school.name,opp.name].sort().join('|');
+      const key = [school.name, opp.name].sort().join('|');
       if(assigned.has(key)) return;
-      assigned.add(key);
-
-      const week = SEASON_START_WEEK + idx;
-      const homeTeam = school.name; // Home team hosts NC games generally
-      const gameId = `${year}_${key}_NC`;
-
-      const game = {gameId, week, home:homeTeam, away:opp.name, conf:false, played:false, homeScore:0, awayScore:0};
-      gamePool.push(game);
-
-      schedules[school.name].push({week, opponent:opp.name, home:true, gameId, conf:false});
-      schedules[opp.name].push({week, opponent:school.name, home:false, gameId, conf:false});
+      const targetWeek = SEASON_START_WEEK + idx;
+      addGame(school.name, opp.name, targetWeek, false, false);
     });
   });
 
