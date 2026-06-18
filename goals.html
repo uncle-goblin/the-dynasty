@@ -18,25 +18,20 @@
 
 /* GOAL CARDS */
 .goals-grid { display: grid; gap: 10px; }
-.goal-card { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); padding: 14px 16px; transition: all 0.12s; }
+.goals-grid-compact { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.goal-card { background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--r-lg); padding: 12px 14px; transition: all 0.12s; }
 .goal-card.active-goal { border-color: var(--accent); }
 .goal-card.completed { border-color: var(--green); background: var(--green-bg); opacity: 0.85; }
 .goal-card.failed { border-color: var(--border-2); opacity: 0.6; }
-.goal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
-.goal-title { font-size: 0.9375rem; font-weight: 700; color: var(--text-1); }
-.goal-deadline { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); flex-shrink: 0; margin-top: 3px; }
-.goal-desc { font-size: 0.8125rem; color: var(--text-3); line-height: 1.5; margin-bottom: 10px; }
-.goal-progress { margin-bottom: 10px; }
-.goal-progress-label { display: flex; justify-content: space-between; margin-bottom: 4px; }
-.goal-progress-text { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); }
-.goal-progress-val { font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 500; color: var(--accent); }
-.goal-reward { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--accent-light); border: 1px solid var(--accent-mid); border-radius: var(--r-md); margin-top: 8px; }
-.goal-reward-label { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); }
-.goal-reward-val { font-size: 0.75rem; font-weight: 600; color: var(--accent); }
-.goal-consequence { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--red-bg); border: 1px solid #FCA5A5; border-radius: var(--r-md); margin-top: 4px; }
-.goal-consequence-label { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); }
-.goal-consequence-val { font-size: 0.75rem; font-weight: 600; color: var(--red); }
-.goal-status-chip { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 6px; border-radius: var(--r-sm); flex-shrink: 0; }
+.goal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.goal-title { font-size: 0.875rem; font-weight: 700; color: var(--text-1); }
+.goal-deadline { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); flex-shrink: 0; margin-top: 2px; }
+.goal-desc { font-size: 0.75rem; color: var(--text-3); line-height: 1.45; margin-bottom: 8px; }
+.goal-progress { margin-bottom: 8px; }
+.goal-progress-label { display: flex; justify-content: space-between; margin-bottom: 3px; }
+.goal-progress-text { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); }
+.goal-progress-val { font-family: var(--font-mono); font-size: 0.625rem; font-weight: 500; color: var(--accent); }
+.goal-status-chip { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 5px; border-radius: var(--r-sm); flex-shrink: 0; }
 .status-active { background: var(--blue-bg); color: var(--blue); }
 .status-completed { background: var(--green-bg); color: var(--green); }
 .status-failed { background: var(--border-1); color: var(--text-4); }
@@ -165,10 +160,14 @@ if(!career) { window.location.href='setup.html'; }
 
 const mySchool = career.school;
 const myConf = mySchool?.conf;
-const myTier = career.school ? getTierStars(calcTierScore(career.school)) : 3;
 const wins = career.seasonRecord?.w || 0;
 const losses = career.seasonRecord?.l || 0;
 const year = career.year || 2026;
+
+// myTier calculated after schools.js loads
+let myTier = 3;
+// Set after DOM ready since schools.js loaded above
+try { if(mySchool && typeof calcTierScore!=='undefined') myTier = getTierStars(calcTierScore(mySchool)); } catch(e) {}
 
 function applyColors(school) {
   if(!school?.primary) return;
@@ -238,6 +237,7 @@ function genSchoolGoals(school, tier, contractYears, currentRecord) {
 
 function genCollectiveGoals(school, tier) {
   const goals = [];
+  const winThreshold = tier>=5?9:tier>=4?8:tier>=3?6:5;
 
   goals.push({id:'retain_star',title:'Retain Star Player',desc:'Keep your highest-rated player from entering the transfer portal this season.',reward:'+$300K collective contribution',deadline:`${year} Season`,status:'active',progress:100,bigGoal:false});
   goals.push({id:'coll_wins',title:`${winThreshold}+ Win Season`,desc:`The collective wants results. Win at least ${winThreshold} games this season to maintain funding levels.`,reward:tier>=4?'+$500K contribution':'Maintained funding level',deadline:`${year} Season`,status:'active',progress:Math.min(100,((wins||0)/winThreshold)*100),bigGoal:true});
@@ -251,7 +251,1329 @@ function genCollectiveGoals(school, tier) {
 // ═══ SCHOOL-SPECIFIC EVENTS ═══
 // Hand-crafted per school — branching narrative paths
 const SCHOOL_EVENTS = {
+  // ═══ SEC ═══
+  'Alabama': [
+    {id:'bama_dynasty',title:'The Standard',icon:'🏆',subtitle:'Sustained Dominance',
+     desc:'Win 3 national championships in 5 years. Cement Alabama as the program of the generation.',
+     prereq:'Win 3 CFP championships in 5 seasons',prereqMet:false,claimed:false,
+     branches:[
+       {id:'bama_aura',title:'Untouchable Aura',desc:'Alabama becomes the gold standard. Recruits choose Alabama before any visit.',dynastyEffects:'Top 5 class guaranteed annually. Rival programs lose 2 star recruits to Alabama pipeline. Benefactor interest triggers.',unlocks:null},
+       {id:'bama_spread',title:'Spread the Gospel',desc:'Your coaching tree produces the next generation of coaches. Assistants become HCs at major programs.',dynastyEffects:'5 Alabama assistants become P4 head coaches over the next 3 years. Alabama gets XP boost from alumni network.',unlocks:null},
+     ]},
+    {id:'bama_rival_end',title:'End the Rivalry',icon:'⚔️',subtitle:'Iron Bowl Dominance',
+     desc:'Win 5 straight Iron Bowls. Auburn\'s program enters an identity crisis.',
+     prereq:'Win Iron Bowl 5 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'bama_auburn_crisis',title:'Auburn in Crisis',desc:'Auburn fires its coach and collective loses faith.',dynastyEffects:'Auburn coach fired. Auburn collective happiness drops 30%. Alabama gets +5 in-state recruiting bonus permanently.',unlocks:null},
+       {id:'bama_statewide',title:'Own the State',desc:'Alabama owns every major recruit in the state for a generation.',dynastyEffects:'Alabama locks all 5-star Alabama natives for 3 recruiting cycles. Troy and UAB become farm teams.',unlocks:null},
+     ]},
+  ],
+  'Auburn': [
+    {id:'auburn_upset',title:'Kick Six Energy',icon:'🏈',subtitle:'The Upset Culture',
+     desc:'Beat Alabama in 3 of 4 seasons. The Kick Six spirit lives. The narrative swings in Auburn\'s favor.',
+     prereq:'Beat Alabama 3 of 4 years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'auburn_momentum',title:'Rivalry Swing',desc:'Auburn becomes the preferred destination for in-state recruits over Alabama.',dynastyEffects:'Auburn gets +6 in-state recruiting bonus. Alabama collective pressures coaching staff. The Iron Bowl rivalry resets.',unlocks:null},
+       {id:'auburn_billionaire',title:'The Plainsman Benefactor',desc:'A prominent Auburn alum emerges with transformative NIL vision.',dynastyEffects:'Benefactor triggered with $8M contribution. Auburn NIL becomes SEC elite. Conditional on maintaining winning record vs Alabama.',unlocks:null},
+     ]},
+  ],
+  'Georgia': [
+    {id:'uga_dynasty',title:'Between the Hedges Forever',icon:'🐾',subtitle:'SEC Permanence',
+     desc:'Win back-to-back national championships. Georgia cement themselves as the SEC\'s dominant program.',
+     prereq:'Win 2 consecutive CFP titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'uga_instate_lock',title:'Lock the State',desc:'Georgia becomes non-negotiable for every 5-star Georgia native.',dynastyEffects:'Georgia locks all 5-star GA recruits for 3 cycles. Georgia Tech loses 40% of its in-state pipeline. FL pipeline opens.',unlocks:null},
+       {id:'uga_nfl_factory',title:'NFL Factory',desc:'Georgia becomes the premier NFL draft program in the country.',dynastyEffects:'Georgia players get +3 OVR boost on draft projections. Pro Prospects grade permanently A+. Top national recruits prioritize Georgia.',unlocks:null},
+     ]},
+    {id:'uga_florida_lock',title:'The Cocktail Party Victory Lap',icon:'🍊',subtitle:'World\'s Largest',
+     desc:'Win 4 straight against Florida in Jacksonville. The rivalry tilts permanently.',
+     prereq:'Beat Florida 4 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'uga_fl_pipeline',title:'Florida Pipeline',desc:'Georgia recruits Florida like a home state.',dynastyEffects:'Georgia gets +5 Florida recruiting bonus. Florida\'s collective calls for coach firing. Georgia becomes the default SEC destination for South Florida recruits.',unlocks:null},
+       {id:'uga_fl_fire',title:'Fire the Gators',desc:'Florida\'s coach is fired. A coaching carousel opens in Gainesville.',dynastyEffects:'Florida coach fired. 50% chance Florida\'s top 2026 commit decommits to Georgia. Florida enters a 3-year rebuild.',unlocks:null},
+     ]},
+  ],
+  'Florida': [
+    {id:'fl_swamp_restored',title:'The Swamp Awakens',icon:'🐊',subtitle:'Restore the Mystique',
+     desc:'Win 3 consecutive SEC East titles. The Swamp returns to its 1990s status as the most feared venue in the SEC.',
+     prereq:'Win 3 straight SEC titles or division titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'fl_swamp_atmosphere',title:'Fortress Gainesville',desc:'Florida\'s home field advantage becomes elite. Road teams fear The Swamp again.',dynastyEffects:'Florida gets +5 home field OVR bonus. Florida\'s atmosphere grade upgrades to A+. Florida State and Georgia lose road game morale.',unlocks:null},
+       {id:'fl_miami_rivalry',title:'Sunshine Showdown',desc:'Reignite the Florida-Miami rivalry. Schedule it annually and own South Florida recruiting.',dynastyEffects:'Florida-Miami becomes annual game. South Florida recruiting bonus +8 for winner. Loser loses South Florida pipeline for 2 years.',unlocks:null},
+     ]},
+  ],
+  'LSU': [
+    {id:'lsu_death_valley',title:'Death Valley After Dark',icon:'🌙',subtitle:'Night Game Invincibility',
+     desc:'Win 10 straight home night games. Tiger Stadium becomes genuinely terrifying on national TV.',
+     prereq:'Win 10 consecutive home night games',prereqMet:false,claimed:false,
+     branches:[
+       {id:'lsu_nightgame_rep',title:'The Night Game Effect',desc:'LSU becomes the first call for recruits who want the biggest stage.',dynastyEffects:'LSU atmosphere grade upgrades permanently. 5-stars from Louisiana are 30% more likely to stay in-state. ESPN scheduling priority increases.',unlocks:null},
+       {id:'lsu_benefactor',title:'The Purple and Gold Patron',desc:'A prominent Louisiana oil billionaire emerges as LSU\'s benefactor.',dynastyEffects:'Benefactor triggered with $10M contribution. LSU NIL becomes SEC\'s best. Contingent on winning at least 9 games annually.',unlocks:null},
+     ]},
+  ],
+  'Tennessee': [
+    {id:'tenn_rocky_top',title:'Rocky Top Returns',icon:'🔶',subtitle:'Reclaim Relevance',
+     desc:'Win the SEC Championship for the first time since 1998. Neyland Stadium erupts. The fanbase reawakens.',
+     prereq:'Win the SEC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'tenn_orange_wave',title:'The Orange Wave',desc:'Tennessee\'s recruiting momentum becomes unstoppable. The 300-mile radius is Tennessee\'s.',dynastyEffects:'Tennessee gets +7 recruiting bonus in TN, KY, VA, NC, GA. Alabama loses 2 Tennessee pipeline recruits annually. Collective triples funding.',unlocks:null},
+       {id:'tenn_bama_rivalry',title:'Restore the Third Saturday',desc:'Make Alabama-Tennessee a true annual title game battle.',dynastyEffects:'Tennessee-Alabama becomes CFP elimination game for 3 straight years. Both programs get national recruiting boost. The Third Saturday in October returns to national prominence.',unlocks:null},
+     ]},
+  ],
+  'Texas': [
+    {id:'texas_return',title:'Texas is Back',icon:'🤘',subtitle:'Claim the Throne',
+     desc:'Win the SEC Championship in your first 3 years in the conference. The longhorn is fully back.',
+     prereq:'Win SEC Championship within 3 years of joining',prereqMet:false,claimed:false,
+     branches:[
+       {id:'texas_state_lock',title:'Lone Star Lock',desc:'Texas owns its home state like it\'s 2005 again.',dynastyEffects:'Texas gets +8 in-state bonus. Texas A&M loses 3 Texas pipeline recruits. Oklahoma loses Oklahoma-Texas rivalry recruiting edge.',unlocks:null},
+       {id:'texas_nil_throne',title:'NIL Throne',desc:'Texas becomes the NIL capital of college football.',dynastyEffects:'Benefactor triggered. Texas NIL budget becomes largest in CFB. National recruiting opens. Texas A&M collective scrambles to respond.',unlocks:null},
+     ]},
+  ],
+  'Oklahoma': [
+    {id:'ok_bedlam',title:'Bedlam Settled',icon:'🌪️',subtitle:'Red River Rules',
+     desc:'Win 5 straight Bedlam games and 3 straight Red River Showdowns. Oklahoma owns the state of Oklahoma.',
+     prereq:'Win 5 Bedlam and 3 Red River games in 5 years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ok_state_pipeline',title:'Oklahoma Owned',desc:'No recruit from Oklahoma considers OSU or Texas over the Sooners.',dynastyEffects:'Oklahoma locks all 5-star OK recruits for 4 cycles. OSU collective shrinks. Texas and Oklahoma must negotiate recruiting territory.',unlocks:null},
+       {id:'ok_sec_identity',title:'SEC Identity',desc:'Oklahoma establishes itself as an SEC power after conference realignment.',dynastyEffects:'Oklahoma gets SEC prestige bonus. Recruiting opens nationally. Oklahoma becomes SEC\'s wildcard program with distinct identity.',unlocks:null},
+     ]},
+  ],
+  'Texas A&M': [
+    {id:'aggie_12th_man',title:'12th Man Unleashed',icon:'💀',subtitle:'Kyle Field Supremacy',
+     desc:'Win 10 straight home games at Kyle Field. The 12th Man tradition hits its apex.',
+     prereq:'Win 10 straight home games',prereqMet:false,claimed:false,
+     branches:[
+       {id:'aggie_home_fortress',title:'Kyle Field Fortress',desc:'Kyle Field becomes the most feared stadium in the SEC.',dynastyEffects:'A&M gets +6 home OVR bonus. Atmosphere grade A+. Texas pipeline recruits choose A&M over Texas at +15% rate.',unlocks:null},
+       {id:'aggie_benefactor',title:'The Aggie Empire',desc:'A&M\'s massive alumni network produces a transformative benefactor.',dynastyEffects:'Benefactor triggered with $12M NIL contribution. A&M becomes NIL co-leader with Texas. Collective restructures for long-term commitment.',unlocks:null},
+     ]},
+  ],
+  'Mississippi': [
+    {id:'ole_miss_grove',title:'Grove to Glory',icon:'🌳',subtitle:'The Grove Effect',
+     desc:'Win the Egg Bowl 3 straight and win the SEC West. Ole Miss becomes impossible to ignore.',
+     prereq:'Win Egg Bowl 3 straight years and finish first in SEC West',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ole_miss_coastal',title:'Southern Coastal Pipeline',desc:'Ole Miss locks Mississippi and Louisiana coast recruiting.',dynastyEffects:'Ole Miss gets +7 MS and LA recruiting bonus. LSU loses coastal pipeline. 4-star skill positions prefer Ole Miss atmosphere.',unlocks:null},
+       {id:'ole_miss_nil',title:'Grove NIL',desc:'Ole Miss becomes the most fun NIL destination in the SEC.',dynastyEffects:'NIL budget doubles. Collective happiness A+. Ole Miss attracts 3 transfer portal 4-stars annually from top programs.',unlocks:null},
+     ]},
+  ],
+  'Mississippi State': [
+    {id:'mstate_cowbell',title:'Cowbell Nation Rises',icon:'🔔',subtitle:'Davis Wade Destiny',
+     desc:'Win the Egg Bowl 3 consecutive years. Mississippi State ends Ole Miss\'s grip on the state.',
+     prereq:'Win Egg Bowl 3 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'mstate_state_flip',title:'Flip the State',desc:'Mississippi State becomes the preferred in-state destination.',dynastyEffects:'MSU gets +6 Mississippi recruiting bonus. Ole Miss loses 40% of MS pipeline. MSU collective grows.',unlocks:null},
+       {id:'mstate_sec_disruptor',title:'SEC Disruptor',desc:'Mississippi State becomes the team that knocks off contenders annually.',dynastyEffects:'MSU gets upset bonus OVR boost in big games. Schedule strength increases. National media attention drives recruit interest.',unlocks:null},
+     ]},
+  ],
+  'Arkansas': [
+    {id:'ark_razorback_call',title:'Call the Hogs',icon:'🐗',subtitle:'Return to Prominence',
+     desc:'Win the SEC West for the first time since 1995. The Razorbacks are back on the national stage.',
+     prereq:'Win SEC Championship or SEC West title',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ark_regional',title:'The Natural State Rules',desc:'Arkansas locks its state and threatens Texas and Oklahoma pipelines.',dynastyEffects:'Arkansas gets +8 AR recruiting bonus. Texas pipeline opens +3. LSU loses neutral state Texas recruits to Arkansas.',unlocks:null},
+       {id:'ark_walton_benefactor',title:'The Walton Factor',desc:'A Walton family member becomes Arkansas\'s benefactor.',dynastyEffects:'Benefactor triggered. $15M NIL contribution unlocks. Arkansas becomes surprise CFP contender. Historic moment for small market power.',unlocks:null},
+     ]},
+  ],
+  'South Carolina': [
+    {id:'sc_rivalry_lock',title:'The Palmetto Bowl Flip',icon:'🐔',subtitle:'Own South Carolina',
+     desc:'Win 4 straight Palmetto Bowls against Clemson. Reroute the state\'s best recruits through Columbia.',
+     prereq:'Beat Clemson 4 consecutive years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'sc_state_pipeline',title:'Palmetto Takeover',desc:'South Carolina becomes the in-state destination over Clemson.',dynastyEffects:'SC gets +8 in-state bonus. Clemson loses 50% SC pipeline. Gamecocks get 3 extra in-state 4-stars for 3 years.',unlocks:null},
+       {id:'sc_sec_east',title:'SEC East Contender',desc:'South Carolina establishes itself as an annual SEC East title contender.',dynastyEffects:'SC collective doubles. National recruiting opens. SC becomes annual top 20 program.',unlocks:null},
+     ]},
+  ],
+  'Kentucky': [
+    {id:'ky_football_first',title:'Football First',icon:'🏈',subtitle:'Beyond Basketball Country',
+     desc:'Win 10+ games for 3 straight seasons. Kentucky becomes known for football as much as basketball.',
+     prereq:'Win 10+ games 3 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ky_state_lock',title:'Bluegrass Football',desc:'Kentucky locks in-state football recruits who previously left for bigger programs.',dynastyEffects:'KY gets +6 in-state bonus. Louisville loses 30% KY pipeline. Ohio and Tennessee pipelines open.',unlocks:null},
+       {id:'ky_nil_hoops_crossover',title:'Athletic Department Unity',desc:'Basketball NIL success expands to football collective funding.',dynastyEffects:'Kentucky gets $5M crossover collective contribution from basketball donors. Facilities upgrade unlocked. Program tier increases by 1.',unlocks:null},
+     ]},
+  ],
+  'Missouri': [
+    {id:'miz_border_war',title:'Border War Reignited',icon:'🐯',subtitle:'The Mizzou-Kansas History',
+     desc:'Beat Kansas 5 straight after the rivalry was dormant. Prove Missouri dominates the border region.',
+     prereq:'Beat Kansas 5 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'miz_midwest_pipeline',title:'Midwest Pipeline',desc:'Missouri locks Missouri and Kansas recruiting territory.',dynastyEffects:'Mizzou gets +7 MO and KS recruiting bonus. Kansas football program enters crisis. Kansas State loses one Midwest pipeline recruit annually.',unlocks:null},
+       {id:'miz_sec_identity',title:'The SEC Tiger',desc:'Missouri establishes itself as a legitimate SEC program far from the perceived traditional powers.',dynastyEffects:'Missouri gets SEC prestige bonus. National media reframes Mizzou narrative. Top 10 recruiting class unlocked.',unlocks:null},
+     ]},
+  ],
+  'Vanderbilt': [
+    {id:'vandy_academic_power',title:'The Nashville Miracle',icon:'⚡',subtitle:'Academics Meet Athletics',
+     desc:'Finish with a winning record 3 straight years. Vanderbilt proves the model of elite academics with winning football works.',
+     prereq:'3 straight winning seasons',prereqMet:false,claimed:false,
+     branches:[
+       {id:'vandy_scholar_athlete',title:'Scholar-Athlete Brand',desc:'Vanderbilt becomes the destination for elite student-athletes who want it all.',dynastyEffects:'Academic grade stays A+. Vandy gets +10 recruiting bonus for players with 4.0+ academic rating. NFL draft picks increase due to brain-body balance narrative.',unlocks:null},
+       {id:'vandy_nashville_nil',title:'Music City Money',desc:'Nashville\'s booming economy fuels an unexpected NIL surge for Vanderbilt.',dynastyEffects:'Benefactor triggered from music industry. NIL doubles. Campus Life grade upgrades to A. National brand grows dramatically.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ BIG TEN ═══
+  'Ohio State': [
+    {id:'osu_THE_program',title:'THE Program',icon:'🌰',subtitle:'The Nation\'s Standard',
+     desc:'Win 4 national championships in 10 years. Ohio State becomes the undisputed home of American football excellence.',
+     prereq:'Win 4 CFP titles in 10 seasons',prereqMet:false,claimed:false,
+     branches:[
+       {id:'osu_national_brand',title:'National Dominance',desc:'Ohio State recruits nationally like no other program.',dynastyEffects:'Ohio State can recruit any state with no penalty. Top WR and QB recruits default to OSU first. NFL pipeline A+ permanently.',unlocks:null},
+       {id:'osu_coaching_tree',title:'The Coaching Factory',desc:'Ohio State becomes the premier coaching development program in the country.',dynastyEffects:'5 OSU assistants become P4 head coaches. OSU\'s OC/DC market value increases. Alumni network across CFB expands influence.',unlocks:null},
+     ]},
+    {id:'osu_michigan_end',title:'Erase the Rivalry',icon:'🔵',subtitle:'The Game',
+     desc:'Win The Game 6 straight years. Michigan\'s program enters its darkest era.',
+     prereq:'Win The Game 6 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'osu_midwest_lock',title:'Midwest Monopoly',desc:'Ohio State becomes the only destination for Midwest elite recruits.',dynastyEffects:'OSU locks all OH, MI, IN, IL 5-stars. Michigan loses in-state pipeline permanently. Big Ten recruiting gap widens.',unlocks:null},
+       {id:'osu_michigan_crisis',title:'Michigan in Crisis',desc:'Michigan fires its coach. Ann Arbor erupts. The program rebuilds.',dynastyEffects:'Michigan HC fired. Michigan collective loses faith. 2 Michigan commits flip to OSU. Big Ten power balance shifts.',unlocks:null},
+     ]},
+  ],
+  'Michigan': [
+    {id:'mich_return',title:'Those Who Stay Will Be Champions',icon:'🏆',subtitle:'The Winged Helmet Returns',
+     desc:'Win the Big Ten and beat Ohio State in back-to-back seasons. Michigan reclaims its place among the elites.',
+     prereq:'Win Big Ten Championship and beat OSU 2 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'mich_midwest_reclaim',title:'Reclaim the Midwest',desc:'Michigan reasserts dominance over Ohio State for Midwest elite recruits.',dynastyEffects:'Michigan gets +8 OH, MI, IN recruiting bonus. OSU loses 3 Midwest 5-stars to Michigan. Big House returns to feared venue status.',unlocks:null},
+       {id:'mich_alumni_surge',title:'Silicon Valley Alumni',desc:'Michigan\'s tech alumni create the most sophisticated NIL infrastructure in the Big Ten.',dynastyEffects:'Benefactor triggered from tech sector. NIL reaches $12M. Michigan academic brand + football creates unique recruit profile.',unlocks:null},
+     ]},
+  ],
+  'Penn State': [
+    {id:'psu_white_out',title:'White Out the World',icon:'⚪',subtitle:'Beaver Stadium Supremacy',
+     desc:'Host 3 straight White Out games ranked in the top 10. Penn State\'s atmosphere becomes CFB\'s gold standard.',
+     prereq:'3 ranked White Out home wins in 3 years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'psu_northeast_pipeline',title:'Northeast Pipeline',desc:'Penn State locks the Northeast corridor recruiting pipeline.',dynastyEffects:'PSU gets +8 PA, NJ, NY, MD recruiting bonus. Ohio State loses 2 Northeast pipeline recruits. Penn State becomes top 5 annual class.',unlocks:null},
+       {id:'psu_natty_run',title:'Happy Valley Natty',desc:'Penn State wins the national championship for the first time in a generation.',dynastyEffects:'PSU collective triples. National brand reaches elite status. Program tier upgrades. Joe Paterno\'s legacy reframed by new era.',unlocks:null},
+     ]},
+  ],
+  'Nebraska': [
+    {id:'neb_return',title:'Return to Relevance',icon:'🌽',subtitle:'Husker Power Restored',
+     desc:'Win 10+ games for 3 straight seasons. Nebraska football returns to the national conversation.',
+     prereq:'Win 10+ games 3 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'neb_sea_of_red',title:'Sea of Red Returns',desc:'Memorial Stadium\'s attendance record is shattered. Nebraska becomes must-see TV.',dynastyEffects:'Nebraska atmosphere grade A+. Midwest recruiting bonus +7. Big Ten rival coaches acknowledge Nebraska as contender publicly.',unlocks:null},
+       {id:'neb_portal_flip',title:'Portal Powerhouse',desc:'Nebraska uses the transfer portal to build a championship-caliber roster in 2 years.',dynastyEffects:'Nebraska gets +5 portal recruiting bonus permanently. 4-star transfers choose Nebraska over Big Ten rivals. NIL collective restructures.',unlocks:null},
+     ]},
+  ],
+  'Oregon': [
+    {id:'or_nike_effect',title:'The Nike Effect',icon:'',subtitle:'Swoosh Power',
+     desc:'Win 3 Pac-style championships in the Big Ten within 5 years. Oregon\'s fashion-forward identity captures the national imagination.',
+     prereq:'Win 3 Big Ten Championships in 5 years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'or_national_brand',title:'West Coast Becomes Power',desc:'Oregon reframes what the West Coast means in college football.',dynastyEffects:'Oregon gets national recruiting bonus. Nike NIL partnership upgrades. West Coast players stop defaulting East. Oregon becomes top 5 brand.',unlocks:null},
+       {id:'or_benefactor_nike',title:'Swoosh Benefactor',desc:'A Nike-adjacent benefactor restructures Oregon\'s entire NIL operation.',dynastyEffects:'Benefactor triggered. NIL reaches $15M. Oregon becomes NIL leader nationally. Phil Knight legacy continues through new patron.',unlocks:null},
+     ]},
+  ],
+  'USC': [
+    {id:'usc_la_restored',title:'Los Angeles Belongs to SC',icon:'✌️',subtitle:'The Coliseum Restored',
+     desc:'Win 3 Big Ten titles and beat Notre Dame in back-to-back seasons. USC reclaims Los Angeles and the national stage.',
+     prereq:'Win 3 Big Ten titles and beat Notre Dame 2 straight',prereqMet:false,claimed:false,
+     branches:[
+       {id:'usc_socal_lock',title:'SoCal Monopoly',desc:'USC locks all SoCal elite recruits. UCLA\'s program is rendered irrelevant in its own city.',dynastyEffects:'USC gets +10 CA recruiting bonus. UCLA loses 60% of SoCal pipeline. USC becomes default NFL prep program for skill positions.',unlocks:null},
+       {id:'usc_hollywood_nil',title:'Hollywood Collective',desc:'Entertainment industry alumni create the most unique NIL program in the country.',dynastyEffects:'Benefactor triggered from entertainment sector. NIL reaches $18M. Campus Life grade A+. National brand becomes unique cultural phenomenon.',unlocks:null},
+     ]},
+  ],
+  'Wisconsin': [
+    {id:'wisc_ol_factory',title:'The OL Factory',icon:'🔨',subtitle:'Offensive Line Legacy',
+     desc:'Have your OL rated top 3 in the nation 4 straight years. Wisconsin\'s OL becomes the most coveted in football.',
+     prereq:'Top 3 OL rating for 4 straight seasons',prereqMet:false,claimed:false,
+     branches:[
+       {id:'wisc_nfl_ol',title:'NFL OL Pipeline',desc:'Wisconsin OL recruits choose Madison knowing they\'ll reach the NFL.',dynastyEffects:'Wisconsin OL recruiting bonus +10. 4-star OL recruits choose Wisconsin over glamor programs. NFL OL draft picks increase annually.',unlocks:null},
+       {id:'wisc_run_game',title:'Smashmouth Dominance',desc:'Wisconsin\'s run game becomes historically dominant. The power run identity peaks.',dynastyEffects:'Wisconsin RB and OL OVR gets +3 scheme boost. Time of possession leads nation. Run-stopping defenses gameplan Wisconsin first.',unlocks:null},
+     ]},
+  ],
+  'Iowa': [
+    {id:'iowa_kinnick',title:'Kinnick Stadium After Dark',icon:'🌙',subtitle:'The Noise Machine',
+     desc:'Win 5 night games at Kinnick ranked in the top 15. Iowa\'s night game reputation becomes legendary.',
+     prereq:'Win 5 ranked night games at Kinnick',prereqMet:false,claimed:false,
+     branches:[
+       {id:'iowa_midwest_def',title:'Defensive Identity',desc:'Iowa becomes the nation\'s premier defensive program. Recruits buy into the defensive culture.',dynastyEffects:'Iowa defensive positions get +3 scheme OVR boost. Iowa DB recruits increase nationally. Iowa becomes annual top 10 scoring defense.',unlocks:null},
+       {id:'iowa_portal_def',title:'Portal Defense Factory',desc:'Iowa uses the portal to build the best defensive unit in the country.',dynastyEffects:'Iowa gets +5 portal bonus for defensive positions. Iowa defensive starters average 1.5 years per transfer. Defense becomes identity play.',unlocks:null},
+     ]},
+  ],
+  'Michigan State': [
+    {id:'msu_little_brother_done',title:'No Longer Little Brother',icon:'💚',subtitle:'Spartan War',
+     desc:'Beat Michigan 3 straight years. Michigan State ends its big brother complex permanently.',
+     prereq:'Beat Michigan 3 consecutive years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'msu_michigan_flip',title:'Flip Michigan Recruits',desc:'Michigan State steals Michigan\'s primary in-state targets.',dynastyEffects:'MSU gets +6 MI recruiting bonus. Michigan loses top 2 in-state recruits for 2 cycles. MSU collective grows significantly.',unlocks:null},
+       {id:'msu_identity',title:'Spartan Identity',desc:'Michigan State forges its own legacy separate from Michigan entirely.',dynastyEffects:'MSU becomes annual top 20 program. Independent brand identity established. Coaching carousel value increases.',unlocks:null},
+     ]},
+  ],
+  'Penn State': [
+    {id:'psu_white_out',title:'White Out the World',icon:'⚪',subtitle:'Beaver Stadium Supremacy',
+     desc:'Host 3 straight ranked White Out games in the top 10.',
+     prereq:'3 top-10 ranked White Out home wins in 3 years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'psu_northeast',title:'Northeast Pipeline',desc:'Penn State locks the Northeast corridor.',dynastyEffects:'PSU gets +8 PA, NJ, NY, MD recruiting bonus. OSU loses 2 Northeast pipeline recruits.',unlocks:null},
+       {id:'psu_natty',title:'Happy Valley Natty',desc:'Penn State wins the national championship.',dynastyEffects:'PSU collective triples. Program tier upgrades. National brand reaches elite.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ ACC ═══
+  'Clemson': [
+    {id:'clem_dynasty_cont',title:'The Death Valley Dynasty',icon:'🐅',subtitle:'ACC Permanence',
+     desc:'Win 5 ACC Championships in 8 years. Clemson cements itself as the ACC\'s permanent king.',
+     prereq:'Win 5 ACC titles in 8 years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'clem_sc_lock',title:'Lock South Carolina',desc:'Clemson makes South Carolina\'s best recruits into automatic Tigers.',dynastyEffects:'Clemson gets +8 SC recruiting bonus. South Carolina loses primary state pipeline. Clemson-SC rivalry intensifies as Clemson dominates.',unlocks:'The Invitation'},
+       {id:'clem_national_brand',title:'National Brand',desc:'Clemson becomes a national brand rivaling the SEC blue bloods.',dynastyEffects:'Clemson gets national recruiting access. NIL collective doubles. Clemson joins Alabama and Ohio State in elite tier discussion.',unlocks:null},
+     ]},
+    {id:'clem_sec_invite',title:'The Invitation',icon:'📋',subtitle:'Leave the ACC',
+     desc:'The SEC considers Clemson membership. This would reshape college football\'s power structure.',
+     prereq:'Win 3 ACC titles — claim Death Valley Dynasty first',prereqMet:false,claimed:false,locked:true,
+     branches:[
+       {id:'clem_join_sec',title:'Accept — Join the SEC',desc:'Clemson enters the SEC. The conference becomes historically dominant.',dynastyEffects:'Clemson joins SEC. ACC scrambles. Clemson-Georgia and Clemson-Alabama become annual games. National championship chances increase.',unlocks:null},
+       {id:'clem_acc_leader',title:'Decline — Lead the ACC',desc:'Clemson stays and receives massive loyalty bonus.',dynastyEffects:'Clemson gets $8M collective boost. ACC restructures. Clemson becomes the ACC anchor program with massive platform.',unlocks:null},
+     ]},
+  ],
+  'Florida State': [
+    {id:'fsu_restored',title:'Unconquered',icon:'🏹',subtitle:'Restore the Seminoles',
+     desc:'Win the ACC Championship and make the CFP for the first time since 1999\'s title. Tallahassee erupts.',
+     prereq:'Win ACC Championship and reach CFP',prereqMet:false,claimed:false,
+     branches:[
+       {id:'fsu_fl_rivalry',title:'Claim Florida',desc:'Florida State ends Florida\'s recruiting dominance in the state.',dynastyEffects:'FSU gets +8 FL recruiting bonus. Florida loses South Florida pipeline. FSU-Florida becomes highest stakes in-state rivalry in CFB.',unlocks:null},
+       {id:'fsu_nil_rise',title:'The Tallahassee Collective',desc:'FSU\'s collective gets dramatically restructured by a prominent alumni group.',dynastyEffects:'FSU NIL doubles. Benefactor interest grows. Tallahassee transforms into a football-first city.',unlocks:null},
+     ]},
+  ],
+  'Miami': [
+    {id:'miami_swagger_back',title:'The U Returns',icon:'🌴',subtitle:'Swagger Restored',
+     desc:'Win the ACC and beat Florida and Florida State in the same season. The U is back on the national stage.',
+     prereq:'Win ACC, beat Florida and FSU in same year',prereqMet:false,claimed:false,
+     branches:[
+       {id:'miami_canes_culture',title:'Miami Culture',desc:'Miami\'s unique culture becomes the most sought-after atmosphere in football.',dynastyEffects:'Miami gets +10 FL and FL skill position recruiting bonus. Campus Life grade A+. 5-star skill positions default to Miami. The U becomes national brand again.',unlocks:null},
+       {id:'miami_nil_magic',title:'305 NIL',desc:'Miami\'s connection to the music and sports industry creates a one-of-a-kind NIL setup.',dynastyEffects:'Benefactor triggered from entertainment/sports industry. NIL reaches $20M. Miami becomes THE destination for elite skill position players.',unlocks:null},
+     ]},
+  ],
+  'Notre Dame': [
+    {id:'nd_the_golden_dome',title:'The Golden Dome Shines',icon:'☘️',subtitle:'National Championship Restored',
+     desc:'Win the national championship. Notre Dame\'s brand reaches every corner of the world.',
+     prereq:'Win CFP National Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'nd_catholic_nationwide',title:'National Catholic Pipeline',desc:'Notre Dame recruits from every major Catholic high school in the country.',dynastyEffects:'Notre Dame gets national recruiting bonus in every state with major Catholic school. Academic grade stays A+. Alumni donations surge.',unlocks:null},
+       {id:'nd_conference_decision',title:'The Conference Decision',desc:'Notre Dame\'s championship success forces a conference decision. Independence ends.',dynastyEffects:'Notre Dame joins Big Ten or SEC. Massive scheduling shakeup. Notre Dame NIL reaches $15M from alumni network.',unlocks:null},
+     ]},
+    {id:'nd_independence_forever',title:'Forever Independent',icon:'🏛️',subtitle:'The Catholic University',
+     desc:'Win 10+ games in 5 straight seasons while remaining independent. Prove independence works in the modern era.',
+     prereq:'5 straight 10+ win seasons as independent',prereqMet:false,claimed:false,
+     branches:[
+       {id:'nd_nbc_deal',title:'The NBC Legacy',desc:'Notre Dame\'s television deal becomes the most valuable in college football.',dynastyEffects:'Notre Dame brand reaches A++ permanently. Scheduling flexibility increases. Every home game becomes a national event.',unlocks:null},
+       {id:'nd_navy_forever',title:'Honor the Tradition',desc:'Notre Dame commits to Navy and USC as permanent annual games. Tradition above all.',dynastyEffects:'Notre Dame-Navy and Notre Dame-USC permanently protected. Alumni loyalty intensifies. Recruiting from military and West Coast families surges.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ BIG 12 ═══
+  'Oklahoma State': [
+    {id:'okst_bedlam_flip',title:'Bedlam Belongs to Stillwater',icon:'🤠',subtitle:'Orange Uprising',
+     desc:'Win 4 straight Bedlam games. Oklahoma State emerges from Oklahoma\'s shadow permanently.',
+     prereq:'Win Bedlam 4 consecutive years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'okst_boone_legacy',title:'Boone\'s Legacy Continues',desc:'A Pickens family-adjacent figure becomes Oklahoma State\'s benefactor.',dynastyEffects:'Benefactor triggered. NIL reaches $10M. OSU facilities reach elite status. Oklahoma State becomes Big 12 co-leader.',unlocks:null},
+       {id:'okst_ok_pipeline',title:'Oklahoma Owned',desc:'Oklahoma State flips the in-state recruiting advantage.',dynastyEffects:'OSU gets +8 OK recruiting bonus. Oklahoma loses 4-star OK recruits to OSU for 2 cycles. Bedlam rivalry rebalances.',unlocks:null},
+     ]},
+  ],
+  'TCU': [
+    {id:'tcu_fort_worth',title:'Horned Frog Nation',icon:'🐸',subtitle:'The Metroplex Rises',
+     desc:'Win the Big 12 Championship and make the CFP. TCU proves small private schools can compete at the highest level.',
+     prereq:'Win Big 12 and make CFP',prereqMet:false,claimed:false,
+     branches:[
+       {id:'tcu_dfw_pipeline',title:'DFW Pipeline',desc:'TCU locks the Dallas-Fort Worth metroplex recruiting against Texas and Oklahoma.',dynastyEffects:'TCU gets +8 DFW recruiting bonus. Texas loses metroplex recruits. TCU NIL surges from alumni base.',unlocks:null},
+       {id:'tcu_private_power',title:'Private School Power',desc:'TCU becomes the model for private school success in the modern NIL era.',dynastyEffects:'TCU academic grade improves. National recruiting opens. Other private schools model their NIL structure after TCU.',unlocks:null},
+     ]},
+  ],
+  'Baylor': [
+    {id:'baylor_waco',title:'Waco Wonder',icon:'🐻',subtitle:'Bears on the Rise',
+     desc:'Win 3 Big 12 titles in 5 years. Baylor\'s transformation from program of scandal to champion is complete.',
+     prereq:'Win 3 Big 12 titles in 5 years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'baylor_texas_corridor',title:'Texas Corridor Lock',desc:'Baylor dominates the I-35 corridor from Dallas to Austin to San Antonio.',dynastyEffects:'Baylor gets +7 TX recruiting bonus. TCU and Texas lose corridor pipeline. Baylor becomes default Texas destination.',unlocks:null},
+       {id:'baylor_christian_nil',title:'Faith and Football',desc:'Baylor\'s unique identity creates a distinct NIL donor base from Christian business community.',dynastyEffects:'Benefactor triggered from faith-based business community. NIL doubles. Baylor brand grows nationally as unique identity program.',unlocks:null},
+     ]},
+  ],
+  'Kansas State': [
+    {id:'ksu_midwest_king',title:'Manhattan Rules the Midwest',icon:'👑',subtitle:'Little Apple, Big Stage',
+     desc:'Win 3 Big 12 Championships. Kansas State proves small market programs can win in the NIL era.',
+     prereq:'Win 3 Big 12 titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ksu_midwest_pipeline',title:'Great Plains Pipeline',desc:'Kansas State locks the Kansas-Missouri corridor and surrounding states.',dynastyEffects:'KSU gets +7 KS, MO recruiting bonus. Kansas football irrelevance deepens. KSU becomes default Midwest destination.',unlocks:null},
+       {id:'ksu_agriculture_nil',title:'Agricultural Collective',desc:'Kansas State\'s agricultural alumni create a unique and loyal NIL collective.',dynastyEffects:'KSU NIL doubles from Ag sector donors. Facilities upgrade. Program tier increases.',unlocks:null},
+     ]},
+  ],
+  'West Virginia': [
+    {id:'wvu_mountaineer_pride',title:'Almost Heaven, Always Winning',icon:'⚡',subtitle:'The Backyard Brawl Settled',
+     desc:'Win the Big 12 Championship and reignite the rivalry with Pittsburgh. The Mountaineers return to prominence.',
+     prereq:'Win Big 12 Championship and schedule Pittsburgh annually',prereqMet:false,claimed:false,
+     branches:[
+       {id:'wvu_appalachian',title:'Appalachian Pipeline',desc:'WVU locks recruiting in West Virginia, Ohio, and Pennsylvania.',dynastyEffects:'WVU gets +7 WV, OH, PA recruiting bonus. Pittsburgh and Penn State lose pipeline recruits. WVU becomes Appalachian region anchor.',unlocks:null},
+       {id:'wvu_brawl_restored',title:'Brawl Restored',desc:'West Virginia-Pittsburgh becomes an annual game with conference implications.',dynastyEffects:'WVU-Pitt scheduled annually. Backyard Brawl becomes must-see CFB event. Both programs\' recruiting spikes from renewed rivalry.',unlocks:null},
+     ]},
+  ],
+  'BYU': [
+    {id:'byu_holy_war',title:'The Holy War Restored',icon:'✝️',subtitle:'BYU-Utah Supremacy',
+     desc:'Win 4 straight Holy War games. BYU establishes dominance over Utah permanently.',
+     prereq:'Win Holy War 4 consecutive years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'byu_utah_pipeline',title:'Utah Pipeline',desc:'BYU locks Utah state recruiting and expands to the Mountain West.',dynastyEffects:'BYU gets +8 UT recruiting bonus. Utah loses in-state pipeline. Mormon athlete pipeline from nationally grows.',unlocks:null},
+       {id:'byu_national_lds',title:'National LDS Network',desc:'BYU\'s unique identity drives a national NIL network from LDS community.',dynastyEffects:'Benefactor triggered from LDS business community. NIL reaches $8M nationally. BYU recruits from every major LDS population center.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ G5 SCHOOLS ═══
+  'Boise State': [
+    {id:'boise_blue',title:'The Blue Turf Legacy',icon:'💙',subtitle:'G5 Royalty',
+     desc:'Win 11+ games 4 seasons in a row. Boise State becomes undeniable.',
+     prereq:'Win 11+ games 4 straight seasons',prereqMet:false,claimed:false,
+     branches:[
+       {id:'boise_p4',title:'Power Conference Invitation',desc:'Sustained dominance earns Boise State a P4 invitation.',dynastyEffects:'Boise State joins Big 12 or ACC. MWC weakens. Recruiting upgrades dramatically. Blue turf follows to new conference.',unlocks:null},
+       {id:'boise_g5_dynasty',title:'G5 Dynasty',desc:'Stay in the MWC and build the greatest G5 dynasty.',dynastyEffects:'MWC gets automatic CFP bid. BSU collective triples. Rivals struggle to recruit against blue turf legend.',unlocks:'The Boise Standard'},
+     ]},
+  ],
+  'App State': [
+    {id:'app_upset_culture',title:'Boone to the Show',icon:'⛰️',subtitle:'The Michigan Moment Lives',
+     desc:'Beat 3 different P4 teams in 3 years as a non-conference road underdog.',
+     prereq:'Beat 3 P4 road teams in 3 years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'app_g5_elite',title:'G5 Elite',desc:'App State becomes the Sun Belt\'s permanent powerhouse.',dynastyEffects:'App State gets +6 NC, TN, VA, SC recruiting bonus. Sun Belt rivals lose recruits to Boone. App State becomes CFP dark horse.',unlocks:null},
+       {id:'app_p4_invite',title:'Mountain Ascent',desc:'App State\'s consistent success earns a P4 conference invitation.',dynastyEffects:'App State joins AAC or C-USA with P4 aspirations. Program tier increases. Recruiting opens dramatically.',unlocks:null},
+     ]},
+  ],
+  'Army': [
+    {id:'army_option',title:'The Option Lives',icon:'⚔️',subtitle:'Triple Option Legacy',
+     desc:'Win 10+ games 3 seasons in a row running the triple option.',
+     prereq:'Win 10+ games 3 straight seasons',prereqMet:false,claimed:false,
+     branches:[
+       {id:'army_sa_power',title:'Service Academy Power',desc:'Army becomes a legitimate mid-major power.',dynastyEffects:'Army gets +10 triple option specialist recruiting bonus. Air Force and Navy recruiting suffers.',unlocks:null},
+       {id:'army_conf',title:'Conference Pursuit',desc:'Army joins a G5 conference.',dynastyEffects:'Army joins AAC or Sun Belt. Schedule strengthens. National recruiting widens.',unlocks:null},
+     ]},
+  ],
+  'Navy': [
+    {id:'navy_army_lock',title:'Own Annapolis',icon:'⚓',subtitle:'Service Academy King',
+     desc:'Beat Army 5 straight times. Navy dominates the Commander in Chief\'s Trophy.',
+     prereq:'Win Army-Navy game 5 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'navy_sa_dom',title:'Service Academy Dominance',desc:'Navy becomes the premier service academy football program.',dynastyEffects:'Navy gets +8 nationwide military family recruiting bonus. Army and Air Force pipelines weaken. Commander in Chief\'s Trophy becomes Navy fixture.',unlocks:null},
+       {id:'navy_triple_nat',title:'Service Option Nation',desc:'Navy spreads the triple option culture nationally.',dynastyEffects:'Navy gets option specialist bonus nationally. Notre Dame scheduling priority increases. National media attention.',unlocks:null},
+     ]},
+  ],
   'Georgia Tech': [
+    {id:'gt_rivalry',title:'Upset the Neighborhood',icon:'🏈',subtitle:'The Georgia Rivalry',
+     desc:'Beat UGA back-to-back seasons.',
+     prereq:'Beat Georgia 2 years in a row',prereqMet:false,claimed:false,
+     branches:[
+       {id:'gt_instate',title:'In-State Authority',desc:'Georgia Tech becomes Atlanta\'s program.',dynastyEffects:'GT gets +8 in-state recruiting bonus. UGA coach faces public pressure. Atlanta market tilts to Tech.',unlocks:'The Invitation'},
+       {id:'gt_acc_power',title:'ACC Anchor',desc:'Win 3 ACC titles in 5 years.',dynastyEffects:'GT collective doubles. ACC media favors Atlanta. GT becomes ACC power.',unlocks:'The Invitation'},
+     ]},
+    {id:'gt_sec_invite',title:'The Invitation',icon:'📋',subtitle:'Conference Realignment',
+     desc:'The SEC considers Georgia Tech membership.',
+     prereq:'Win 3 ACC Championships first',prereqMet:false,claimed:false,locked:true,
+     branches:[
+       {id:'gt_join_sec',title:'Accept — Join the SEC',desc:'Georgia Tech enters the SEC.',dynastyEffects:'GT joins SEC. ACC scrambles. Gt-Georgia and GT-Alabama become annual games.',unlocks:null},
+       {id:'gt_acc_lead',title:'Lead the ACC',desc:'Decline and become the ACC anchor.',dynastyEffects:'GT gets $5M collective boost. ACC restructures around Atlanta.',unlocks:null},
+     ]},
+  ],
+  'Memphis': [
+    {id:'mem_tiger_town',title:'Tiger Town Rising',icon:'🐯',subtitle:'Memphis on the Map',
+     desc:'Win 3 AAC Championships. Memphis becomes the AAC\'s marquee program.',
+     prereq:'Win 3 AAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'mem_mid_south',title:'Mid-South Pipeline',desc:'Memphis locks Tennessee, Mississippi, and Arkansas recruiting.',dynastyEffects:'Memphis gets +7 TN, MS, AR recruiting bonus. Tennessee and Ole Miss lose pipeline recruits. Liberty Bowl becomes must-see event.',unlocks:null},
+       {id:'mem_p4_bid',title:'Power Bid',desc:'Memphis earns a P4 conference invitation.',dynastyEffects:'Memphis joins Big 12 or ACC. Program tier increases 2 levels. Recruiting opens nationally.',unlocks:null},
+     ]},
+  ],
+  'Tulane': [
+    {id:'tul_nola_power',title:'New Orleans Never Sleeps',icon:'🎭',subtitle:'The Green Wave Rises',
+     desc:'Win the AAC and beat a ranked P4 opponent. Tulane puts New Orleans football on the map.',
+     prereq:'Win AAC and beat ranked P4 team',prereqMet:false,claimed:false,
+     branches:[
+       {id:'tul_nola_nil',title:'Mardi Gras Collective',desc:'New Orleans\' unique culture creates an unmatched NIL environment.',dynastyEffects:'Benefactor triggered from hospitality/entertainment industry. NIL doubles. Campus Life becomes A+. Skill position recruits choose Tulane for the lifestyle.',unlocks:null},
+       {id:'tul_louisiana_pipeline',title:'Bayou Pipeline',desc:'Tulane competes with LSU for Louisiana\'s elite recruits.',dynastyEffects:'Tulane gets +7 LA recruiting bonus. LSU loses 2 state recruits annually. Tulane becomes a CFP dark horse conversation.',unlocks:null},
+     ]},
+  ],
+  'Coastal Carolina': [
+    {id:'cc_chanticleers',title:'The Chanticleer Uprising',icon:'🐓',subtitle:'Conway Rises',
+     desc:'Win 3 Sun Belt Championships. Coastal Carolina becomes the Sun Belt\'s rising story.',
+     prereq:'Win 3 Sun Belt titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'cc_beach_pipeline',title:'Carolina Coast Pipeline',desc:'Coastal locks the South Carolina coast and Myrtle Beach corridor.',dynastyEffects:'CC gets +7 SC coastal recruiting bonus. South Carolina and Clemson lose 3-star SC recruits. NIL grows from beach region tourism industry.',unlocks:null},
+       {id:'cc_g5_elite',title:'G5 Elite Status',desc:'Coastal Carolina earns national G5 recognition.',dynastyEffects:'CC becomes Sun Belt anchor. Program tier increases. AAC or Big 12 invite becomes possible.',unlocks:null},
+     ]},
+  ],
+  'UAB': [
+    {id:'uab_blazers_rise',title:'The Blazer Resurrection',icon:'🔥',subtitle:'They Tried to Kill Us',
+     desc:'Win 10+ games 3 straight years. UAB\'s comeback story from program elimination to powerhouse is complete.',
+     prereq:'Win 10+ games 3 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'uab_al_pipeline',title:'Alabama Steel City Pipeline',desc:'UAB becomes Birmingham\'s program and challenges Alabama and Auburn for state recruits.',dynastyEffects:'UAB gets +8 AL recruiting bonus. Alabama and Auburn lose some 3-star AL recruits. UAB becomes the ultimate underdog story.',unlocks:null},
+       {id:'uab_g5_elite',title:'C-USA to Power',desc:'UAB\'s success earns a conference upgrade.',dynastyEffects:'UAB joins AAC or Sun Belt. Program tier increases. Birmingham market activates NIL donors.',unlocks:null},
+     ]},
+  ],
+  'Liberty': [
+    {id:'lib_flames',title:'Liberty Flames Nationwide',icon:'🔥',subtitle:'The Independent Power',
+     desc:'Win 10+ games 4 years in a row as a C-USA/independent program.',
+     prereq:'Win 10+ games 4 straight seasons',prereqMet:false,claimed:false,
+     branches:[
+       {id:'lib_christian_network',title:'National Christian Network',desc:'Liberty\'s faith-based identity drives a national NIL and recruiting network.',dynastyEffects:'Benefactor triggered from Christian business community nationwide. NIL reaches $7M. Recruiting opens to every major market with faith-based community.',unlocks:null},
+       {id:'lib_conf_upgrade',title:'Conference Power',desc:'Liberty earns a G5 or fringe P4 conference invitation.',dynastyEffects:'Liberty joins AAC or Big 12 fringe. Program tier increases. Recruiting upgrades nationally.',unlocks:null},
+     ]},
+  ],
+  'Jacksonville State': [
+    {id:'jsu_gamecocks',title:'From FCS to Force',icon:'🐔',subtitle:'The Transition Complete',
+     desc:'Win the C-USA Championship within 5 years of joining FBS. The Gamecocks\' FBS transition is complete.',
+     prereq:'Win C-USA Championship within 5 years of FBS entry',prereqMet:false,claimed:false,
+     branches:[
+       {id:'jsu_al_pipeline',title:'Alabama Sleeper Pipeline',desc:'Jacksonville State becomes a legitimate alternative for Alabama recruits passed over by Alabama and Auburn.',dynastyEffects:'JSU gets +6 AL recruiting bonus. Recruits see JSU as a development-first platform. JSU becomes the Sun Belt\'s rising mid-major.',unlocks:null},
+       {id:'jsu_cinderella',title:'Cinderella Forever',desc:'Jacksonville State embraces the underdog brand nationally.',dynastyEffects:'JSU gets upset bonus OVR in big games permanently. National media attention. Program tier increases.',unlocks:null},
+     ]},
+  ],
+  'Kennesaw State': [
+    {id:'ksu_owls_rise',title:'Owls Take Flight',icon:'🦉',subtitle:'Atlanta\'s Other Program',
+     desc:'Win 3 straight C-USA Championships. Kennesaw State becomes Atlanta\'s second football program.',
+     prereq:'Win 3 C-USA titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ksu_atlanta_market',title:'Atlanta\'s Other Team',desc:'Kennesaw State captures Atlanta suburban recruits ignored by Georgia Tech.',dynastyEffects:'KSU gets +6 Atlanta metro recruiting bonus. Georgia Tech loses suburban pipeline. KSU NIL grows from Atlanta business community.',unlocks:null},
+       {id:'ksu_g5_move',title:'Conference Upgrade',desc:'Kennesaw State earns an AAC or Sun Belt invitation.',dynastyEffects:'KSU joins stronger conference. Program tier increases. Scheduling opens national opportunities.',unlocks:null},
+     ]},
+  ],
+  'UTSA': [
+    {id:'utsa_runners',title:'San Antonio Rising',icon:'🌮',subtitle:'AAC Power',
+     desc:'Win the AAC Championship. UTSA becomes San Antonio\'s program and a Texas recruiting disruptor.',
+     prereq:'Win AAC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'utsa_tx_pipeline',title:'San Antonio Pipeline',desc:'UTSA locks South Texas recruiting.',dynastyEffects:'UTSA gets +8 San Antonio and South TX recruiting bonus. Texas and Texas A&M lose South TX pipeline recruits. UTSA becomes AAC anchor.',unlocks:null},
+       {id:'utsa_p4_bid',title:'Power Conference Bid',desc:'UTSA earns a Big 12 consideration.',dynastyEffects:'UTSA joins Big 12 fringe discussions. Program tier increases. Texas market NIL surges.',unlocks:null},
+     ]},
+  ],
+  'UTEP': [
+    {id:'utep_miners',title:'El Paso Gold',icon:'⛏️',subtitle:'Borderland Rising',
+     desc:'Win 3 C-USA Championships. UTEP becomes a pipeline between Texas and Mexico talent.',
+     prereq:'Win 3 C-USA titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'utep_border_pipeline',title:'Border Pipeline',desc:'UTEP locks El Paso and Northern Mexico talent corridor.',dynastyEffects:'UTEP gets +8 West TX and border region recruiting bonus. Unique international student-athlete pipeline opens. C-USA power.',unlocks:null},
+       {id:'utep_sun_belt',title:'Sun Belt Upgrade',desc:'UTEP earns a conference upgrade.',dynastyEffects:'UTEP joins Sun Belt or MWC. El Paso market NIL activates. Program tier increases.',unlocks:null},
+     ]},
+  ],
+  'Hawaii': [
+    {id:'hawaii_rainbow',title:'Island Warriors',icon:'🌺',subtitle:'Paradise Power',
+     desc:'Win 3 MWC Championships. Hawaii becomes the ultimate destination program.',
+     prereq:'Win 3 MWC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'hawaii_pacific_pipeline',title:'Pacific Rim Pipeline',desc:'Hawaii recruits from Hawaii, California, and Pacific Islander communities.',dynastyEffects:'Hawaii gets +8 HI and Pacific Islander recruiting bonus. California skill positions see Hawaii as lifestyle alternative. Campus Life A+.',unlocks:null},
+       {id:'hawaii_nil_tourism',title:'Tourism NIL',desc:'Hawaii\'s tourism industry creates a unique NIL ecosystem.',dynastyEffects:'Benefactor triggered from tourism/hospitality sector. NIL reaches $6M. Hawaii becomes national brand unlike any other.',unlocks:null},
+     ]},
+  ],
+  'New Mexico State': [
+    {id:'nmsu_aggies_rise',title:'Desert Storm',icon:'🌵',subtitle:'Independent Power',
+     desc:'Win 8+ games 3 straight years as an independent. NMSU proves small programs can survive independently.',
+     prereq:'Win 8+ games 3 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'nmsu_border_recruit',title:'Southwest Pipeline',desc:'NMSU locks New Mexico and El Paso recruiting against UTEP.',dynastyEffects:'NMSU gets +7 NM and West TX recruiting bonus. UTEP loses pipeline recruits. NMSU becomes G5 conversation.',unlocks:null},
+       {id:'nmsu_conference',title:'Find a Home',desc:'NMSU earns a conference membership.',dynastyEffects:'NMSU joins MWC or C-USA. Program tier increases. Scheduling strengthens.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ BIG TEN ADDITIONS ═══
+  'Illinois': [
+    {id:'ill_chief_restored',title:'The Chief Returns',icon:'🏈',subtitle:'Champaign Resurgent',
+     desc:'Win 10+ games for 2 straight seasons. Illinois reclaims its Midwest identity.',
+     prereq:'Win 10+ games 2 straight seasons',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ill_midwest_lock',title:'Illinois Lock',desc:'Illinois locks in-state recruits who previously left for Ohio State and Michigan.',dynastyEffects:'Illinois gets +8 IL recruiting bonus. Ohio State loses Chicago pipeline. Illinois becomes annual top 25 program.',unlocks:null},
+       {id:'ill_big_ten_power',title:'Big Ten Contender',desc:'Illinois becomes a legitimate Big Ten title contender.',dynastyEffects:'Illinois collective doubles. Facilities upgrade unlocked. Big Ten prestige fully extends to Illinois program.',unlocks:null},
+     ]},
+  ],
+  'Indiana': [
+    {id:'ind_football_state',title:'Hoosier Football First',icon:'🏈',subtitle:'Beyond Basketball',
+     desc:'Win 9+ games for 2 straight seasons. Indiana proves it can be a football school.',
+     prereq:'Win 9+ games 2 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ind_ohio_pipeline',title:'Ohio Valley Pipeline',desc:'Indiana steals Ohio and Kentucky recruits from bigger programs.',dynastyEffects:'Indiana gets +6 OH and KY recruiting bonus. Ohio State loses some Ohio depth recruits. Indiana collective surges.',unlocks:null},
+       {id:'ind_bloomington_brand',title:'Bloomington Brand',desc:'Indiana merges basketball prestige with football success into a unique NIL brand.',dynastyEffects:'NIL crossover bonus from basketball donors. Program tier increases. Campus Life A+ attracts diverse roster.',unlocks:null},
+     ]},
+  ],
+  'Iowa State': [
+    {id:'iast_cy_hawk',title:'Cy-Hawk Supremacy',icon:'🌪️',subtitle:'The Iowa Battle',
+     desc:'Win 4 straight Cy-Hawk games. Iowa State ends Iowa\'s dominance of the in-state rivalry.',
+     prereq:'Beat Iowa 4 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'iast_state_flip',title:'Flip the State',desc:'Iowa State becomes Iowa\'s preferred in-state destination.',dynastyEffects:'Iowa State gets +7 Iowa recruiting bonus. Iowa loses 40% of state pipeline. Big 12 prestige extends.',unlocks:null},
+       {id:'iast_big12_contender',title:'Big 12 Contender',desc:'Iowa State establishes itself as a legitimate Big 12 title threat.',dynastyEffects:'Iowa State collective grows. National recruiting opens. Annual top 25 program status achieved.',unlocks:null},
+     ]},
+  ],
+  'Kansas': [
+    {id:'kan_football_rise',title:'Jayhawk Football',icon:'🦅',subtitle:'Beyond Basketball',
+     desc:'Win a Big 12 Championship. Kansas becomes the biggest sports story in college football.',
+     prereq:'Win Big 12 Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'kan_national_story',title:'The National Story',desc:'Kansas football becomes the biggest Cinderella story in college football history.',dynastyEffects:'National media coverage explodes. Kansas NIL triples. Kansas recruits nationally as curiosity becomes contender. Benefactor interest triggered.',unlocks:null},
+       {id:'kan_border_war',title:'Reignite the Border War',desc:'Kansas vs Missouri becomes an annual showdown again.',dynastyEffects:'Kansas-Missouri rivalry restored. Border War generates national interest. Both programs benefit from elevated platform.',unlocks:null},
+     ]},
+  ],
+  'Maryland': [
+    {id:'md_dmv_lock',title:'Own the DMV',icon:'🦁',subtitle:'DC Metro Dominance',
+     desc:'Win 9+ games 3 straight seasons. Maryland becomes the premier program in the DC/Maryland/Virginia corridor.',
+     prereq:'Win 9+ games 3 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'md_dmv_pipeline',title:'DMV Pipeline',desc:'Maryland locks the most talent-dense recruiting corridor in the East.',dynastyEffects:'Maryland gets +9 MD, DC, VA, NJ recruiting bonus. Penn State and Ohio State lose DMV pipeline recruits. Big Ten prestige unlocked.',unlocks:null},
+       {id:'md_nil_dc',title:'Washington Money',desc:'DC political and business alumni create a powerful collective.',dynastyEffects:'Benefactor triggered from DC business community. NIL reaches $8M. National brand grows dramatically.',unlocks:null},
+     ]},
+  ],
+  'Minnesota': [
+    {id:'min_paul_bunyan',title:'The Axe Returns Home',icon:'🪓',subtitle:'Paul Bunyan\'s Axe',
+     desc:'Win Paul Bunyan\'s Axe from Wisconsin 5 consecutive times. Minnesota reclaims Big Ten relevance.',
+     prereq:'Beat Wisconsin 5 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'min_midwest_north',title:'Northern Pipeline',desc:'Minnesota locks Minnesota, Wisconsin, and North Dakota recruiting.',dynastyEffects:'Minnesota gets +7 MN, WI, ND recruiting bonus. Wisconsin loses border state pipeline. Minnesota becomes Big Ten dark horse annually.',unlocks:null},
+       {id:'min_tcu_moment',title:'Minnesota\'s TCU Moment',desc:'Minnesota shocks the country with a CFP run.',dynastyEffects:'National media reframes Minnesota. Collective triples. National recruiting opens. Program tier permanently upgrades.',unlocks:null},
+     ]},
+  ],
+  'Northwestern': [
+    {id:'nw_academic_power',title:'The Purple Pride',icon:'💜',subtitle:'Evanston Excellence',
+     desc:'Win the Big Ten Championship. Northwestern proves elite academics and elite football can coexist.',
+     prereq:'Win Big Ten Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'nw_scholar_athlete',title:'Scholar-Athlete Magnet',desc:'Northwestern becomes the destination for elite student-athletes who want NFL prep and elite academics.',dynastyEffects:'Academic grade A+ permanently. +10 recruiting bonus for academic excellence. NFL prep narrative strengthens.',unlocks:null},
+       {id:'nw_chicago_nil',title:'Chicago Money',desc:'Chicago\'s financial industry creates a powerful Northwestern collective.',dynastyEffects:'Benefactor triggered from financial sector. NIL reaches $12M. Chicago market opens massive recruiting possibilities.',unlocks:null},
+     ]},
+  ],
+  'Purdue': [
+    {id:'purdue_giant_killer',title:'The Giant Killer',icon:'⚡',subtitle:'Boilermaker Upsets',
+     desc:'Beat 3 top-5 teams in the same season. Purdue\'s upset culture reaches its peak.',
+     prereq:'Beat 3 top-5 ranked opponents in one season',prereqMet:false,claimed:false,
+     branches:[
+       {id:'purdue_engineering_nil',title:'Engineering NIL',desc:'Purdue\'s engineering and tech alumni create a unique STEM-focused collective.',dynastyEffects:'Benefactor triggered from tech sector. NIL reaches $9M. Academic-athlete brand unique in Big Ten.',unlocks:null},
+       {id:'purdue_big_ten_dark_horse',title:'Perennial Dark Horse',desc:'Purdue becomes the team every Big Ten contender fears.',dynastyEffects:'Purdue gets upset OVR bonus vs top-15 teams permanently. Collective grows. National scheduling interest increases.',unlocks:null},
+     ]},
+  ],
+  'Rutgers': [
+    {id:'rut_new_jersey_lock',title:'Garden State Football',icon:'🌿',subtitle:'Jersey First',
+     desc:'Win 8+ games 3 straight seasons. Rutgers stops being the Big Ten\'s punching bag.',
+     prereq:'Win 8+ games 3 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'rut_nj_pipeline',title:'Lock New Jersey',desc:'Rutgers keeps New Jersey\'s elite recruits home for the first time in decades.',dynastyEffects:'Rutgers gets +9 NJ and NYC metro recruiting bonus. Penn State and Ohio State lose tri-state pipeline. NYC media market opens.',unlocks:null},
+       {id:'rut_big_ten_legit',title:'Big Ten Legitimate',desc:'Rutgers proves it belongs in the Big Ten with a legitimate run.',dynastyEffects:'Rutgers collective doubles. NYC media coverage expands. Program tier increases. National brand emerges from tri-state market.',unlocks:null},
+     ]},
+  ],
+  'UCLA': [
+    {id:'ucla_la_battle',title:'L.A. Belongs to the Bruins',icon:'💛',subtitle:'Crosstown Showdown',
+     desc:'Beat USC 4 straight times. UCLA claims Los Angeles as its city.',
+     prereq:'Beat USC 4 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ucla_socal_flip',title:'SoCal Flip',desc:'UCLA steals USC\'s Los Angeles recruiting dominance.',dynastyEffects:'UCLA gets +8 CA recruiting bonus. USC loses 50% SoCal pipeline. UCLA Campus Life A+ attracts elite skill positions.',unlocks:null},
+       {id:'ucla_entertainment_nil',title:'Hollywood Bruins',desc:'UCLA\'s entertainment industry alumni create a massive NIL ecosystem.',dynastyEffects:'Benefactor triggered. NIL reaches $16M. UCLA-Hollywood brand becomes national phenomenon. Skill position recruits choose UCLA for spotlight.',unlocks:null},
+     ]},
+  ],
+  'Washington': [
+    {id:'wash_apple_cup',title:'Apple Cup Dominance',icon:'🍎',subtitle:'Pacific Northwest Crown',
+     desc:'Win 5 straight Apple Cup games and 2 Big Ten titles. Washington owns the Pacific Northwest.',
+     prereq:'Win Apple Cup 5 straight and 2 Big Ten titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'wash_pnw_pipeline',title:'Pacific Northwest Lock',desc:'Washington locks Washington and Oregon state recruits.',dynastyEffects:'Washington gets +8 WA, OR recruiting bonus. Oregon loses cross-state pipeline. Big Ten prestige fully extended.',unlocks:null},
+       {id:'wash_tech_nil',title:'Seattle Tech Money',desc:'Seattle\'s tech industry creates the most innovative NIL structure in the Big Ten.',dynastyEffects:'Benefactor triggered from tech sector. NIL reaches $14M. Washington becomes national brand. Academic and football excellence merged.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ BIG 12 ADDITIONS ═══
+  'Arizona': [
+    {id:'az_desert_rise',title:'Arizona Rises',icon:'🌵',subtitle:'Desert Storm',
+     desc:'Win the Big 12 Championship within 5 years of joining. Arizona becomes a legitimate power.',
+     prereq:'Win Big 12 Championship within 5 years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'az_southwest_lock',title:'Desert Pipeline',desc:'Arizona locks Arizona and Nevada recruiting.',dynastyEffects:'Arizona gets +7 AZ and NV recruiting bonus. Arizona State loses half of in-state pipeline. Pac-legacy athletes return west.',unlocks:null},
+       {id:'az_nil_tucson',title:'Copper State NIL',desc:'Arizona mining and real estate alumni create a powerful collective.',dynastyEffects:'NIL doubles. Benefactor interest triggered. Arizona becomes CFB story of the year.',unlocks:null},
+     ]},
+  ],
+  'Arizona State': [
+    {id:'asu_tempe_rises',title:'Tempe\'s Time',icon:'☀️',subtitle:'Sun Devil Supremacy',
+     desc:'Win 3 Big 12 Championships. Arizona State becomes the Big 12\'s western power.',
+     prereq:'Win 3 Big 12 titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'asu_phoenix_nil',title:'Phoenix Money',desc:'Phoenix\'s growing business scene funds a massive collective.',dynastyEffects:'Benefactor triggered from Phoenix business community. NIL reaches $10M. Arizona State becomes Big 12 NIL leader.',unlocks:null},
+       {id:'asu_az_flip',title:'Flip the State',desc:'Arizona State becomes Arizona\'s preferred program permanently.',dynastyEffects:'ASU gets +9 AZ recruiting bonus. University of Arizona loses 60% in-state pipeline. Sun Belt to Big 12 prestige arc complete.',unlocks:null},
+     ]},
+  ],
+  'Cincinnati': [
+    {id:'cin_bearcat_power',title:'Bearcat Power',icon:'🐾',subtitle:'Appalachian Ascent',
+     desc:'Win the Big 12 Championship and reach the CFP. Cincinnati builds on its historic 2022 breakthrough.',
+     prereq:'Win Big 12 Championship and reach CFP',prereqMet:false,claimed:false,
+     branches:[
+       {id:'cin_ohio_pipeline',title:'Ohio Pipeline Wars',desc:'Cincinnati challenges Ohio State for in-state recruits.',dynastyEffects:'Cincinnati gets +7 OH recruiting bonus. Ohio State loses some Cincinnati metro recruits. Big 12 platform elevates program nationally.',unlocks:null},
+       {id:'cin_mid_american_exit',title:'Power Program Forever',desc:'Cincinnati cements itself as a legitimate power conference staple.',dynastyEffects:'Program tier increases permanently. NIL doubles. Cincinnati becomes annual Big 12 title contender.',unlocks:null},
+     ]},
+  ],
+  'Colorado': [
+    {id:'col_buffs_return',title:'The Buffs Are Back',icon:'🦬',subtitle:'Rocky Mountain Power',
+     desc:'Win the Big 12 Championship. Colorado builds on its momentum and becomes a legitimate power.',
+     prereq:'Win Big 12 Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'col_deion_legacy',title:'Prime Legacy',desc:'The culture Deion Sanders built reaches its ultimate form.',dynastyEffects:'Colorado gets +8 national skill position recruiting bonus. Campus Life A+. National brand becomes electric. Benefactor from entertainment sector triggered.',unlocks:null},
+       {id:'col_rocky_mountain',title:'Rocky Mountain Lock',desc:'Colorado locks Colorado, Utah, and Wyoming recruiting.',dynastyEffects:'Colorado gets +7 CO, UT, WY recruiting bonus. Utah loses some mountain west pipeline. Colorado becomes consistent top 25 program.',unlocks:null},
+     ]},
+  ],
+  'Houston': [
+    {id:'hou_space_city',title:'Space City Power',icon:'🚀',subtitle:'H-Town Football',
+     desc:'Win the Big 12 Championship. Houston builds on its energy city identity.',
+     prereq:'Win Big 12 Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'hou_texas_pipeline',title:'Houston Pipeline',desc:'Houston locks Greater Houston area recruits over Texas and Texas A&M.',dynastyEffects:'Houston gets +8 Greater Houston recruiting bonus. Texas and A&M lose H-Town pipeline. Big 12 status cemented.',unlocks:null},
+       {id:'hou_energy_nil',title:'Energy Sector NIL',desc:'Houston\'s oil and energy industry alumni create a massive collective.',dynastyEffects:'Benefactor triggered from energy sector. NIL reaches $12M. Houston becomes Big 12 NIL leader.',unlocks:null},
+     ]},
+  ],
+  'Texas Tech': [
+    {id:'ttech_red_raider',title:'Guns Up for Real',icon:'🔴',subtitle:'West Texas Power',
+     desc:'Win the Big 12 Championship for the first time. Lubbock becomes relevant nationally.',
+     prereq:'Win Big 12 Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ttech_west_texas',title:'West Texas Lock',desc:'Texas Tech locks West Texas and New Mexico recruiting.',dynastyEffects:'Texas Tech gets +8 West TX and NM recruiting bonus. UTEP loses pipeline. Texas and A&M lose Permian Basin recruits.',unlocks:null},
+       {id:'ttech_air_raid_legacy',title:'Air Raid Legacy',desc:'Texas Tech\'s Air Raid identity reaches its apex as an elite passing program.',dynastyEffects:'Texas Tech QB recruiting bonus +10. WR recruits choose Tech for NFL passing prep. Air Raid becomes brand.',unlocks:null},
+     ]},
+  ],
+  'Utah': [
+    {id:'utah_holy_war',title:'Holy War Dominance',icon:'🔴',subtitle:'Utah vs BYU',
+     desc:'Win 5 straight Holy War games and 2 Big 12 titles. Utah becomes the state\'s premier program.',
+     prereq:'Beat BYU 5 straight and win 2 Big 12 titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'utah_state_lock',title:'Lock the State',desc:'Utah locks all major in-state recruits over BYU.',dynastyEffects:'Utah gets +9 UT recruiting bonus. BYU loses 60% of in-state pipeline. Ute faithful dominate the state.',unlocks:null},
+       {id:'utah_mountain_nil',title:'Mountain NIL',desc:'Utah\'s tech and business community creates a modern collective.',dynastyEffects:'NIL doubles. Benefactor from tech sector triggered. Utah becomes surprise CFP contender annually.',unlocks:null},
+     ]},
+  ],
+  'UCF': [
+    {id:'ucf_national_champs',title:'UCF Championship Culture',icon:'⚔️',subtitle:'Knights of the Realm',
+     desc:'Win the Big 12 Championship and make the CFP. UCF builds on its 2017 undefeated legacy.',
+     prereq:'Win Big 12 Championship and reach CFP',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ucf_florida_pipeline',title:'Central Florida Lock',desc:'UCF locks Central Florida recruiting from Florida and FSU.',dynastyEffects:'UCF gets +8 Central FL recruiting bonus. Florida and FSU lose Tampa/Orlando pipeline. Big 12 status makes UCF viable nationally.',unlocks:null},
+       {id:'ucf_nil_tech',title:'Tech Corridor NIL',desc:'UCF\'s tech corridor alumni create a powerful collective.',dynastyEffects:'NIL reaches $9M. Benefactor from tech sector. UCF becomes permanent Big 12 player.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ ACC ADDITIONS ═══
+  'Boston College': [
+    {id:'bc_eagle_rise',title:'Chestnut Hill Awakens',icon:'🦅',subtitle:'New England Power',
+     desc:'Win the ACC Championship. Boston College becomes the ACC\'s New England powerhouse.',
+     prereq:'Win ACC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'bc_new_england_lock',title:'New England Pipeline',desc:'Boston College locks the most underrecruited talent region in the country.',dynastyEffects:'BC gets +9 MA, CT, RI, NH, NY recruiting bonus. No other program recruits the region seriously. Boston market drives NIL.',unlocks:null},
+       {id:'bc_boston_nil',title:'Boston Financial NIL',desc:'Boston\'s financial and tech industry alumni create a powerful collective.',dynastyEffects:'Benefactor triggered from Boston finance community. NIL reaches $10M. Boston brand becomes national.',unlocks:null},
+     ]},
+  ],
+  'California': [
+    {id:'cal_bear_territory',title:'Bear Territory Reclaimed',icon:'🐻',subtitle:'Bay Area Power',
+     desc:'Win the ACC Championship. Cal reclaims its status as a Bay Area power.',
+     prereq:'Win ACC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'cal_bay_area_nil',title:'Silicon Valley NIL',desc:'Cal\'s tech alumni create the most sophisticated NIL infrastructure in the country.',dynastyEffects:'Benefactor triggered from tech sector. NIL reaches $20M. Cal becomes national brand. Academic excellence + football success attracts national recruits.',unlocks:null},
+       {id:'cal_norcal_lock',title:'NorCal Dominance',desc:'Cal locks Northern California recruiting against USC and Stanford.',dynastyEffects:'Cal gets +9 NorCal recruiting bonus. USC loses Bay Area pipeline. Stanford academic brand no longer outshines Cal football.',unlocks:null},
+     ]},
+  ],
+  'Duke': [
+    {id:'duke_blue_devil_ball',title:'Blue Devil Football',icon:'😈',subtitle:'Durham Rising',
+     desc:'Win the ACC Championship and make the CFP. Duke becomes the ultimate crossover program.',
+     prereq:'Win ACC Championship and reach CFP',prereqMet:false,claimed:false,
+     branches:[
+       {id:'duke_academic_football',title:'Ivy League Energy',desc:'Duke becomes the destination for elite student-athletes who want top academics and NFL prep.',dynastyEffects:'Academic grade A+ permanently. +12 academic recruiting bonus. NIL from Duke\'s financial alumni triples. Duke becomes national story.',unlocks:null},
+       {id:'duke_carolina_flip',title:'Triangle Takeover',desc:'Duke steals North Carolina and NC State recruits in the Research Triangle.',dynastyEffects:'Duke gets +8 NC recruiting bonus. UNC loses Research Triangle recruits. NC State loses 40% Triangle pipeline.',unlocks:null},
+     ]},
+  ],
+  'Louisville': [
+    {id:'lou_card_nation',title:'Card Nation Football',icon:'🃏',subtitle:'Kentucky\'s City',
+     desc:'Win the ACC Championship. Louisville becomes the ACC\'s Kentucky outpost.',
+     prereq:'Win ACC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'lou_kentucky_lock',title:'Louisville Lock',desc:'Louisville keeps Kentucky\'s best recruits from SEC schools.',dynastyEffects:'Louisville gets +7 KY recruiting bonus. Kentucky (SEC) loses Louisville metro pipeline. ACC prestige extends to Louisville.',unlocks:null},
+       {id:'lou_hoops_crossover',title:'Basketball NIL Crossover',desc:'Louisville\'s basketball success funds football collective.',dynastyEffects:'NIL doubles from basketball crossover donations. Campus Life A+. Louisville brand grows nationally.',unlocks:null},
+     ]},
+  ],
+  'NC State': [
+    {id:'ncst_wolfpack',title:'The Pack is Back',icon:'🐺',subtitle:'Raleigh Rising',
+     desc:'Win the ACC Championship. NC State ends Clemson\'s ACC dominance.',
+     prereq:'Win ACC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ncst_nc_lock',title:'Triangle Football Lock',desc:'NC State locks North Carolina recruits over UNC and Duke.',dynastyEffects:'NC State gets +8 NC recruiting bonus. UNC loses Triangle pipeline. Duke loses 50% NC recruits.',unlocks:null},
+       {id:'ncst_acc_identity',title:'ACC Disruptor',desc:'NC State becomes the team that knocks off ACC favorites annually.',dynastyEffects:'NC State gets upset bonus vs top-10 ACC teams. Collective grows. National media attention brings recruits.',unlocks:null},
+     ]},
+  ],
+  'North Carolina': [
+    {id:'unc_heels_football',title:'Carolina Football',icon:'💙',subtitle:'Tar Heel Power',
+     desc:'Win the ACC Championship. UNC matches its basketball dominance with football success.',
+     prereq:'Win ACC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'unc_nc_pipeline',title:'State of North Carolina',desc:'UNC locks the state of North Carolina over NC State, Duke, and Clemson.',dynastyEffects:'UNC gets +9 NC recruiting bonus. NC State loses 40% pipeline. Duke loses all NC football pipeline. Clemson SC pipeline weakens.',unlocks:null},
+       {id:'unc_basketball_nil',title:'Dean Dome Effect',desc:'UNC basketball\'s donor network expands to football.',dynastyEffects:'NIL doubles from basketball crossover. Facilities upgrade unlocked. Chapel Hill becomes a destination city.',unlocks:null},
+     ]},
+  ],
+  'Pittsburgh': [
+    {id:'pitt_steel_city',title:'Steel City Football',icon:'🏙️',subtitle:'Pittsburgh Power',
+     desc:'Win the ACC Championship. Pittsburgh returns to its 1976 national championship legacy.',
+     prereq:'Win ACC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'pitt_pa_pipeline',title:'Pennsylvania Pipeline',desc:'Pittsburgh keeps Pennsylvania recruits home over Penn State.',dynastyEffects:'Pittsburgh gets +8 PA recruiting bonus. Penn State loses Western PA pipeline. Pittsburgh-Penn State rivalry reignites.',unlocks:null},
+       {id:'pitt_steel_nil',title:'Steel Industry NIL',desc:'Pittsburgh\'s steel, tech, and healthcare alumni create a powerful collective.',dynastyEffects:'NIL doubles. Benefactor from Pittsburgh business community. National brand returns to 1970s glory.',unlocks:null},
+     ]},
+  ],
+  'SMU': [
+    {id:'smu_highland_park',title:'Highland Park Returns',icon:'💎',subtitle:'Dallas Power',
+     desc:'Win the ACC Championship. SMU becomes the premier program in the Dallas-Fort Worth metroplex.',
+     prereq:'Win ACC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'smu_dfw_pipeline',title:'DFW Pipeline',desc:'SMU locks Dallas-Fort Worth recruits over Texas and TCU.',dynastyEffects:'SMU gets +9 DFW recruiting bonus. Texas and TCU lose DFW pipeline. SMU NIL from Dallas business community triples.',unlocks:null},
+       {id:'smu_benefactor',title:'Dallas Money',desc:'A Dallas oil executive becomes SMU\'s transformative benefactor.',dynastyEffects:'Benefactor triggered with $15M contribution. SMU becomes ACC NIL leader. Dallas becomes a recruiting power base.',unlocks:null},
+     ]},
+  ],
+  'Stanford': [
+    {id:'stan_farm_football',title:'The Farm Rises Again',icon:'🌾',subtitle:'Silicon Valley Power',
+     desc:'Win the ACC Championship. Stanford combines elite academics with elite football again.',
+     prereq:'Win ACC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'stan_nil_tech',title:'Silicon Valley NIL',desc:'Stanford\'s tech billionaire alumni create the most resourced collective in college football.',dynastyEffects:'Benefactor triggered from tech sector. NIL reaches $25M. Stanford becomes elite tier program. Academic recruiting bonus +15.',unlocks:null},
+       {id:'stan_west_coast_power',title:'West Coast Standard',desc:'Stanford becomes the gold standard for West Coast football.',dynastyEffects:'Stanford gets +8 CA recruiting bonus. USC and UCLA lose Bay Area pipeline. Stanford Academic + Football brand becomes global.',unlocks:null},
+     ]},
+  ],
+  'Syracuse': [
+    {id:'syr_orange_restored',title:'Orange is the New Power',icon:'🍊',subtitle:'Carrier Dome Supremacy',
+     desc:'Win the ACC Championship. Syracuse returns to the national stage for the first time since 1987.',
+     prereq:'Win ACC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'syr_northeast_lock',title:'Northeast Lock',desc:'Syracuse locks New York, New Jersey, and New England recruiting.',dynastyEffects:'Syracuse gets +9 NY, NJ, New England recruiting bonus. Rutgers and Boston College lose pipeline. Northeast becomes Syracuse territory.',unlocks:null},
+       {id:'syr_basketball_nil',title:'Basketball City NIL',desc:'Syracuse\'s basketball culture funds a football revival.',dynastyEffects:'NIL doubles from basketball crossover. Campus Life A. National brand grows from Northeast market.',unlocks:null},
+     ]},
+  ],
+  'Virginia': [
+    {id:'vir_wahoo_football',title:'Wahoo Football',icon:'🎓',subtitle:'Charlottesville Rising',
+     desc:'Win the ACC Championship. Virginia transforms from academic powerhouse to football powerhouse.',
+     prereq:'Win ACC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'vir_dmv_lock',title:'DMV Pipeline',desc:'Virginia locks DC/Maryland/Virginia recruiting over Maryland and Penn State.',dynastyEffects:'Virginia gets +8 VA, MD, DC recruiting bonus. Maryland loses pipeline. Virginia Tech loses 40% in-state recruits.',unlocks:null},
+       {id:'vir_uva_nil',title:'DC Legal and Finance NIL',desc:'Virginia\'s law and finance alumni create a powerful collective.',dynastyEffects:'NIL doubles from alumni network. Academic prestige A+ drives unique recruiting. National brand transforms.',unlocks:null},
+     ]},
+  ],
+  'Virginia Tech': [
+    {id:'vt_enter_sandman',title:'Enter Sandman Returns',icon:'🎸',subtitle:'Lane Stadium Dominance',
+     desc:'Win the ACC Championship and restore Lane Stadium as CFB\'s most electric entrance.',
+     prereq:'Win ACC Championship',prereqMet:false,claimed:false,
+     branches:[
+       {id:'vt_state_lock',title:'Virginia Lock',desc:'Virginia Tech locks Virginia state recruiting over Virginia and Richmond-area schools.',dynastyEffects:'VT gets +8 VA recruiting bonus. Virginia loses 50% in-state pipeline. Enter Sandman becomes national television moment annually.',unlocks:null},
+       {id:'vt_acc_restore',title:'ACC Power',desc:'Virginia Tech restores its early-2000s ACC dominance.',dynastyEffects:'VT becomes annual ACC title contender. Collective doubles. National recruiting opens. Program tier increases.',unlocks:null},
+     ]},
+  ],
+  'Wake Forest': [
+    {id:'wf_demon_deacon',title:'Demon Deacon Dynasty',icon:'🎩',subtitle:'Winston-Salem Wins',
+     desc:'Win 3 ACC Championships. Wake Forest becomes the ultimate overachiever story in college football.',
+     prereq:'Win 3 ACC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'wf_academic_nil',title:'Academic NIL',desc:'Wake Forest\'s business school alumni create a disproportionately powerful collective.',dynastyEffects:'Wake Forest gets massive academic recruiting bonus. NIL reaches $8M from alumni. Wake becomes model for small school success.',unlocks:null},
+       {id:'wf_nc_dark_horse',title:'NC Dark Horse',desc:'Wake Forest becomes North Carolina\'s most surprising annual contender.',dynastyEffects:'Wake gets +6 NC recruiting bonus. Upset bonus vs ranked ACC teams. National media covers the Demon Deacon story.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ AAC ADDITIONS ═══
+  'East Carolina': [
+    {id:'ecu_pirate_power',title:'Pirates of the AAC',icon:'☠️',subtitle:'Greenville Rising',
+     desc:'Win the AAC Championship 3 straight times. ECU becomes the AAC\'s dominant program.',
+     prereq:'Win AAC title 3 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ecu_nc_disruptor',title:'NC Disruptor',desc:'ECU recruits steal recruits from UNC, NC State, and Wake Forest.',dynastyEffects:'ECU gets +7 NC recruiting bonus. ACC schools lose some NC pipeline. ECU becomes AAC gold standard.',unlocks:null},
+       {id:'ecu_p5_invite',title:'Power Invite',desc:'ECU\'s consistent success earns a Power conference look.',dynastyEffects:'ECU invited to ACC or Big 12. Program tier increases dramatically. National recruiting opens.',unlocks:null},
+     ]},
+  ],
+  'South Florida': [
+    {id:'usf_bull_run',title:'Bull Run',icon:'🐂',subtitle:'Tampa Bay Football',
+     desc:'Win the AAC Championship 3 times. USF becomes the Tampa Bay area\'s football home.',
+     prereq:'Win AAC title 3 times',prereqMet:false,claimed:false,
+     branches:[
+       {id:'usf_tampa_pipeline',title:'Tampa Bay Lock',desc:'USF locks Tampa Bay area recruits from Florida and FSU.',dynastyEffects:'USF gets +8 Tampa Bay recruiting bonus. Florida loses Tampa pipeline. USF becomes AAC blue blood.',unlocks:null},
+       {id:'usf_bucs_nil',title:'Tampa Bay Money',desc:'Tampa Bay business community creates a powerful collective.',dynastyEffects:'NIL doubles from Tampa business sector. Benefactor interest triggered. USF becomes P5 conversation.',unlocks:null},
+     ]},
+  ],
+  'Rice': [
+    {id:'rice_owl_rise',title:'The Smartest Team in Football',icon:'🦉',subtitle:'Houston Academic Power',
+     desc:'Win the AAC Championship with a roster of academic all-Americans. Rice becomes the ultimate academic football story.',
+     prereq:'Win AAC title with top academic roster',prereqMet:false,claimed:false,
+     branches:[
+       {id:'rice_academic_brand',title:'Academic Brand',desc:'Rice becomes the destination for elite student-athletes who want Harvard-level academics and football success.',dynastyEffects:'Academic bonus A+. Rice recruits nationally for academic-athlete profile. Houston business alumni fund NIL.',unlocks:null},
+       {id:'rice_houston_pipeline',title:'Houston Takeover',desc:'Rice steals Houston area recruits from Houston and Texas A&M.',dynastyEffects:'Rice gets +7 Houston metro recruiting bonus. Houston and Texas A&M lose some Houston pipeline. Rice becomes Houston\'s program.',unlocks:null},
+     ]},
+  ],
+  'Tulsa': [
+    {id:'tul_golden_hurricane',title:'Golden Hurricane',icon:'🌀',subtitle:'Tulsa Power',
+     desc:'Win the AAC Championship 3 times. Tulsa becomes a consistent mid-major power.',
+     prereq:'Win AAC title 3 times',prereqMet:false,claimed:false,
+     branches:[
+       {id:'tul_oklahoma_steal',title:'Oklahoma Recruits',desc:'Tulsa steals recruits from Oklahoma and Oklahoma State.',dynastyEffects:'Tulsa gets +6 OK recruiting bonus. Oklahoma programs lose depth recruits. Tulsa becomes AAC perennial.',unlocks:null},
+       {id:'tul_oil_nil',title:'Oil Country NIL',desc:'Tulsa\'s oil industry alumni create a surprisingly powerful collective.',dynastyEffects:'NIL doubles from oil industry. Benefactor from energy sector. Program tier upgrades.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ SUN BELT ADDITIONS ═══
+  'Arkansas State': [
+    {id:'arst_red_wolves',title:'Red Wolves Rising',icon:'🐺',subtitle:'Jonesboro Power',
+     desc:'Win 5 Sun Belt Championships. Arkansas State becomes the Sun Belt\'s most dominant program.',
+     prereq:'Win 5 Sun Belt titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'arst_ar_pipeline',title:'Arkansas Pipeline',desc:'Arkansas State recruits compete with Arkansas for in-state talent.',dynastyEffects:'Arkansas State gets +7 AR recruiting bonus. Arkansas loses some in-state depth recruits. A-State becomes Sun Belt blue blood.',unlocks:null},
+       {id:'arst_g5_power',title:'G5 Power',desc:'Arkansas State earns a Power conference invitation.',dynastyEffects:'Arkansas State joins Big 12 or another Power conference. Program tier increases dramatically.',unlocks:null},
+     ]},
+  ],
+  'Georgia State': [
+    {id:'gast_atlanta_football',title:'Atlanta\'s Team',icon:'🏙️',subtitle:'ATL Football',
+     desc:'Win the Sun Belt Championship 3 times. Georgia State becomes Atlanta\'s football program.',
+     prereq:'Win Sun Belt title 3 times',prereqMet:false,claimed:false,
+     branches:[
+       {id:'gast_atl_pipeline',title:'Atlanta Pipeline',desc:'Georgia State locks Atlanta metro recruits from Georgia and Georgia Tech.',dynastyEffects:'Georgia State gets +9 Atlanta metro recruiting bonus. UGA and GT lose 40% Atlanta pipeline. ATL becomes Georgia State territory.',unlocks:null},
+       {id:'gast_atl_nil',title:'Atlanta Business NIL',desc:'Atlanta\'s thriving business community creates a powerful collective.',dynastyEffects:'NIL reaches $7M from Atlanta business community. Benefactor triggered. Georgia State becomes Sun Belt elite.',unlocks:null},
+     ]},
+  ],
+  'James Madison': [
+    {id:'jmu_duke_dogs',title:'The Duke Dog Rises',icon:'🐕',subtitle:'Harrisonburg Power',
+     desc:'Win 4 Sun Belt Championships. JMU becomes one of the great G5 programs in the country.',
+     prereq:'Win 4 Sun Belt titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'jmu_dmv_recruit',title:'DMV Pipeline',desc:'JMU recruits the DC/Virginia corridor against Maryland and Virginia.',dynastyEffects:'JMU gets +7 VA and MD recruiting bonus. Virginia and Maryland lose some DMV depth recruits. JMU becomes Sun Belt gold standard.',unlocks:null},
+       {id:'jmu_fcs_legacy',title:'FCS to FBS Power',desc:'JMU completes the ultimate from FCS dynasty to FBS power arc.',dynastyEffects:'National story of the year. NIL doubles. Program tier increases. JMU becomes P5 conversation.',unlocks:null},
+     ]},
+  ],
+  'Louisiana': [
+    {id:'la_ragin_cajuns',title:'Cajun Football',icon:'🌶️',subtitle:'Lafayette Power',
+     desc:'Win 5 Sun Belt Championships. Louisiana becomes the Sun Belt\'s elite program.',
+     prereq:'Win 5 Sun Belt titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'la_state_lock',title:'Louisiana Pipeline',desc:'Louisiana locks in-state recruits from LSU\'s recruiting base.',dynastyEffects:'Louisiana gets +8 LA recruiting bonus. LSU loses some Louisiana pipeline recruits. Lafayette becomes the in-state alternative.',unlocks:null},
+       {id:'la_cajun_culture',title:'Cajun Culture Brand',desc:'Louisiana\'s unique culture becomes a national football brand.',dynastyEffects:'Campus Life A+. National media covers the Lafayette story. Louisiana becomes a program with unique national identity.',unlocks:null},
+     ]},
+  ],
+  'Marshall': [
+    {id:'mar_thundering_herd',title:'We Are Marshall',icon:'💚',subtitle:'Huntington Resurgent',
+     desc:'Win 4 Sun Belt Championships. Marshall honors its history with sustained success.',
+     prereq:'Win 4 Sun Belt titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'mar_wv_pipeline',title:'West Virginia Pipeline',desc:'Marshall recruits compete with West Virginia for in-state talent.',dynastyEffects:'Marshall gets +7 WV and KY recruiting bonus. WVU loses some Huntington area recruits. Sun Belt presence elevates.',unlocks:null},
+       {id:'mar_film_legacy',title:'We Are Marshall Legacy',desc:'Marshall\'s cultural connection to its tragedy and revival becomes a recruiting asset.',dynastyEffects:'Marshall gets resilience narrative bonus. National recruiting opens for players drawn to the program\'s story.',unlocks:null},
+     ]},
+  ],
+  'Old Dominion': [
+    {id:'odu_monarchs_rise',title:'Hampton Roads Football',icon:'⚓',subtitle:'Norfolk Power',
+     desc:'Win 3 Sun Belt Championships. Old Dominion becomes the Virginia coast\'s football home.',
+     prereq:'Win 3 Sun Belt titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'odu_hampton_pipeline',title:'Hampton Roads Pipeline',desc:'ODU locks the Hampton Roads military corridor recruiting.',dynastyEffects:'ODU gets +7 VA coast recruiting bonus. Virginia and Virginia Tech lose some Tidewater pipeline. Military community engaged.',unlocks:null},
+       {id:'odu_military_nil',title:'Military Community NIL',desc:'ODU\'s connections to military bases creates a unique collective.',dynastyEffects:'NIL from military-adjacent business community. Program tier increases. National story of community college football.',unlocks:null},
+     ]},
+  ],
+  'South Alabama': [
+    {id:'sou_jaguars',title:'Gulf Coast Football',icon:'🐆',subtitle:'Mobile Rising',
+     desc:'Win 3 Sun Belt Championships. South Alabama becomes the Gulf Coast\'s premier program.',
+     prereq:'Win 3 Sun Belt titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'sou_alabama_steal',title:'Alabama Steals',desc:'South Alabama recruits compete with Alabama and Auburn for Gulf Coast talent.',dynastyEffects:'South Alabama gets +7 AL and MS Gulf Coast recruiting bonus. Alabama loses some depth Gulf Coast recruits. Mobile becomes a football city.',unlocks:null},
+       {id:'sou_gulf_nil',title:'Gulf Coast NIL',desc:'Mobile\'s port and business community creates a powerful collective.',dynastyEffects:'NIL doubles from Gulf Coast business community. Program tier increases.',unlocks:null},
+     ]},
+  ],
+  'Southern Miss': [
+    {id:'sm_golden_eagles',title:'Southern Miss to the Top',icon:'🦅',subtitle:'Hattiesburg Power',
+     desc:'Win 4 Sun Belt Championships. Southern Miss returns to its Brett Favre era relevance.',
+     prereq:'Win 4 Sun Belt titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'sm_ms_pipeline',title:'Mississippi Pipeline',desc:'Southern Miss recruits compete with Ole Miss and Mississippi State.',dynastyEffects:'Southern Miss gets +7 MS recruiting bonus. Ole Miss and Miss State lose some pipeline recruits. Hattiesburg becomes football relevant.',unlocks:null},
+       {id:'sm_brett_favre_legacy',title:'Favre Legacy',desc:'Southern Miss leverages its NFL legacy for modern recruiting narrative.',dynastyEffects:'QB recruiting bonus +8. NFL development narrative attracts national talent. Program identity strengthens.',unlocks:null},
+     ]},
+  ],
+  'Texas State': [
+    {id:'txst_bobcat',title:'Bobcat Football',icon:'🐱',subtitle:'San Marcos Power',
+     desc:'Win 3 Sun Belt Championships. Texas State becomes a legitimate player in the crowded Texas football market.',
+     prereq:'Win 3 Sun Belt titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'txst_texas_steal',title:'Texas Depth Market',desc:'Texas State recruits 3-star Texas talent that Texas and A&M overlook.',dynastyEffects:'Texas State gets +6 TX recruiting bonus. Texas programs lose some depth Texas recruits. Texas State becomes Sun Belt elite.',unlocks:null},
+       {id:'txst_austin_nil',title:'Austin NIL',desc:'Austin\'s tech scene creates a unique collective near Texas State.',dynastyEffects:'NIL doubles from Austin tech community. Program tier increases. San Marcos benefits from Austin spillover.',unlocks:null},
+     ]},
+  ],
+  'Troy': [
+    {id:'troy_trojans_power',title:'Troy\'s Legacy',icon:'⚔️',subtitle:'Pike Road Power',
+     desc:'Win 5 Sun Belt Championships. Troy becomes the most decorated Sun Belt program ever.',
+     prereq:'Win 5 Sun Belt titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'troy_alabama_threat',title:'Alabama Threat',desc:'Troy becomes a legitimate recruiting threat to Alabama and Auburn in the state.',dynastyEffects:'Troy gets +7 AL recruiting bonus. Alabama and Auburn lose some in-state depth recruits. Troy becomes Sun Belt GOAT narrative.',unlocks:null},
+       {id:'troy_p5_invite',title:'Power Invite',desc:'Troy\'s sustained success earns a Power conference invitation.',dynastyEffects:'Troy joins Sun Belt or Big 12. Program tier increases dramatically. National recruiting opens.',unlocks:null},
+     ]},
+  ],
+  'Louisiana Monroe': [
+    {id:'ulm_warhawks',title:'The Warhawks Strike',icon:'🦅',subtitle:'Monroe\'s Moment',
+     desc:'Win 3 Sun Belt Championships. ULM becomes the league\'s surprise story.',
+     prereq:'Win 3 Sun Belt titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ulm_la_pipeline',title:'Northeast Louisiana Pipeline',desc:'ULM locks northeast Louisiana recruiting.',dynastyEffects:'ULM gets +6 NE Louisiana recruiting bonus. LSU loses some Monroe area recruits. ULM becomes Sun Belt contender permanently.',unlocks:null},
+       {id:'ulm_rebuild_legacy',title:'Rebuild Story',desc:'ULM becomes the ultimate rebuild story in college football.',dynastyEffects:'National media covers the ULM rise. NIL from alumni doubles. Program tier increases from basement to mid-tier.',unlocks:null},
+     ]},
+  ],
+  'Coastal Carolina': [
+    {id:'cc_chanticleer',title:'Coastal Rises',icon:'🐓',subtitle:'Myrtle Beach Football',
+     desc:'Win 4 Sun Belt Championships. Coastal Carolina becomes the Sun Belt\'s modern dynasty.',
+     prereq:'Win 4 Sun Belt titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'cc_sc_pipeline',title:'South Carolina Pipeline',desc:'Coastal Carolina recruits compete with Clemson and South Carolina for SC talent.',dynastyEffects:'Coastal gets +7 SC recruiting bonus. Clemson and SC lose some pipeline depth recruits. Myrtle Beach becomes football relevant.',unlocks:null},
+       {id:'cc_beach_nil',title:'Tourism NIL',desc:'Myrtle Beach\'s tourism industry creates a unique collective.',dynastyEffects:'NIL doubles from tourism community. Campus Life A+. National story of geography-unique program.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ C-USA ADDITIONS ═══
+  'Charlotte': [
+    {id:'char_49ers_rise',title:'Queen City Football',icon:'👑',subtitle:'Charlotte Power',
+     desc:'Win 3 C-USA Championships. Charlotte becomes the QC\'s football home.',
+     prereq:'Win 3 C-USA titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'char_nc_pipeline',title:'Charlotte Metro Pipeline',desc:'Charlotte recruits the massive Charlotte metro area.',dynastyEffects:'Charlotte gets +8 Charlotte metro recruiting bonus. Duke, NC State, and UNC lose Charlotte pipeline. City becomes football relevant.',unlocks:null},
+       {id:'char_banking_nil',title:'Banking City NIL',desc:'Charlotte\'s banking industry alumni create a powerful collective.',dynastyEffects:'NIL reaches $8M from banking community. Benefactor triggered from financial sector. Charlotte becomes legitimate program.',unlocks:null},
+     ]},
+  ],
+  'Florida Atlantic': [
+    {id:'fau_boca_rises',title:'Owls of the Sun',icon:'🌞',subtitle:'South Florida Power',
+     desc:'Win 4 C-USA Championships. FAU becomes the premier program in South Florida.',
+     prereq:'Win 4 C-USA titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'fau_sfl_pipeline',title:'South Florida Lock',desc:'FAU recruits South Florida\'s talent against Florida, Miami, and FSU.',dynastyEffects:'FAU gets +8 South FL recruiting bonus. FL, Miami, FSU lose some SFL pipeline recruits. Boca becomes football relevant.',unlocks:null},
+       {id:'fau_lane_train',title:'The Lane Train Legacy',desc:'FAU builds on its Lane Kiffin cultural moment.',dynastyEffects:'National media brand strengthens. Recruiting narrative becomes unique. NIL from Miami-adjacent business doubles.',unlocks:null},
+     ]},
+  ],
+  'Florida International': [
+    {id:'fiu_miami_impact',title:'Miami\'s Other Program',icon:'🌴',subtitle:'Miami Beachhead',
+     desc:'Win 4 C-USA Championships. FIU becomes South Florida\'s alternative to The U.',
+     prereq:'Win 4 C-USA titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'fiu_miami_pipeline',title:'Miami Metro Pipeline',desc:'FIU recruits Miami metro against the University of Miami.',dynastyEffects:'FIU gets +8 Miami metro recruiting bonus. Miami loses 40% of local pipeline. FIU-Miami rivalry becomes genuine.',unlocks:null},
+       {id:'fiu_hispanic_nil',title:'Hispanic Community NIL',desc:'South Florida\'s Hispanic business community creates a unique collective.',dynastyEffects:'FIU gets Latin American recruiting bonus. NIL doubles from community investment. National story of diverse program.',unlocks:null},
+     ]},
+  ],
+  'Middle Tennessee': [
+    {id:'mtsu_blue_raiders',title:'Blue Raider Power',icon:'⚡',subtitle:'Murfreesboro Rising',
+     desc:'Win 4 C-USA Championships. MTSU becomes a consistent mid-major power.',
+     prereq:'Win 4 C-USA titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'mtsu_tennessee_pipeline',title:'Tennessee Pipeline',desc:'MTSU steals recruits from Tennessee and Vanderbilt.',dynastyEffects:'MTSU gets +7 TN recruiting bonus. Tennessee and Vanderbilt lose some in-state depth recruits. Murfreesboro becomes football relevant.',unlocks:null},
+       {id:'mtsu_nashville_nil',title:'Nashville NIL',desc:'Nashville\'s booming music and tech industry creates a powerful collective.',dynastyEffects:'NIL doubles from Nashville business community. MTSU becomes C-USA gold standard.',unlocks:null},
+     ]},
+  ],
+  'North Texas': [
+    {id:'unt_mean_green',title:'Mean Green Machine',icon:'💚',subtitle:'Denton Dominance',
+     desc:'Win 4 C-USA Championships. North Texas becomes DFW\'s alternative power.',
+     prereq:'Win 4 C-USA titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'unt_dfw_pipeline',title:'DFW Alternative',desc:'North Texas recruits DFW area against Texas, TCU, and SMU.',dynastyEffects:'UNT gets +7 DFW recruiting bonus. Texas and TCU lose some DFW depth recruits. Denton becomes part of the DFW football map.',unlocks:null},
+       {id:'unt_dfw_nil',title:'DFW Business NIL',desc:'Dallas-Fort Worth business community creates a powerful collective.',dynastyEffects:'NIL doubles from DFW business sector. Program tier increases. National brand grows.',unlocks:null},
+     ]},
+  ],
+  'UTEP': [
+    {id:'utep_miners_rise',title:'El Paso Football',icon:'⛏️',subtitle:'Border City Power',
+     desc:'Win 4 C-USA Championships. UTEP becomes the El Paso/Juarez metro\'s football program.',
+     prereq:'Win 4 C-USA titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'utep_border_pipeline',title:'Border Corridor Pipeline',desc:'UTEP locks the El Paso/West Texas/New Mexico recruiting corridor.',dynastyEffects:'UTEP gets +8 El Paso, West TX, NM recruiting bonus. New Mexico State loses pipeline. UTEP becomes C-USA powerhouse.',unlocks:null},
+       {id:'utep_border_nil',title:'Border Business NIL',desc:'El Paso\'s business and cross-border trade community creates a collective.',dynastyEffects:'NIL doubles from border business community. International recruiting bonus unlocked.',unlocks:null},
+     ]},
+  ],
+  'UAB': [
+    {id:'uab_blazer_rise',title:'UAB Returns',icon:'🔥',subtitle:'Birmingham Power',
+     desc:'Win 4 C-USA Championships. UAB cements its legacy after fighting to survive.',
+     prereq:'Win 4 C-USA titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'uab_al_pipeline',title:'Alabama Disruptor',desc:'UAB recruits compete with Alabama and Auburn for in-state talent.',dynastyEffects:'UAB gets +7 AL recruiting bonus. Alabama and Auburn lose some in-state depth recruits. Birmingham becomes football city.',unlocks:null},
+       {id:'uab_medical_nil',title:'Medical City NIL',desc:'Birmingham\'s medical and research community creates a unique collective.',dynastyEffects:'NIL doubles from medical community. Academic prestige grows. UAB becomes a model for football and academics.',unlocks:null},
+     ]},
+  ],
+  'Western Kentucky': [
+    {id:'wku_hilltoppers',title:'Top of the Hill',icon:'⛰️',subtitle:'Bowling Green Power',
+     desc:'Win 4 C-USA Championships. WKU becomes a consistent mid-major power.',
+     prereq:'Win 4 C-USA titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'wku_ky_pipeline',title:'Kentucky Pipeline',desc:'WKU recruits compete with Louisville and Kentucky for KY talent.',dynastyEffects:'WKU gets +7 KY recruiting bonus. Louisville and Kentucky lose some in-state depth recruits. Bowling Green becomes football relevant.',unlocks:null},
+       {id:'wku_air_raid_legacy',title:'Air Raid Capital',desc:'WKU becomes known as the Air Raid proving ground for offensive coordinators.',dynastyEffects:'WKU QB recruiting bonus +8. OC talent develops here. WKU becomes coaching carousel source.',unlocks:null},
+     ]},
+  ],
+  'Sam Houston': [
+    {id:'shs_bearkats',title:'Huntsville\'s Team',icon:'🐱',subtitle:'Sam Houston Power',
+     desc:'Win 3 C-USA Championships. Sam Houston completes the FCS to FBS power arc.',
+     prereq:'Win 3 C-USA titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'shs_texas_pipeline',title:'East Texas Pipeline',desc:'Sam Houston locks East Texas recruiting against Texas and A&M.',dynastyEffects:'Sam Houston gets +7 East TX recruiting bonus. Texas and A&M lose some Huntsville area recruits.',unlocks:null},
+       {id:'shs_fcs_legend',title:'FCS to FBS Legend',desc:'Sam Houston completes the ultimate transition story in college football.',dynastyEffects:'National story of the year. NIL doubles from story coverage. Program tier increases significantly.',unlocks:null},
+     ]},
+  ],
+  'Liberty': [
+    {id:'lib_flames_rise',title:'Flames of Liberty',icon:'🕊️',subtitle:'Lynchburg Power',
+     desc:'Win 4 C-USA Championships. Liberty becomes a legitimate mid-major power with unique cultural identity.',
+     prereq:'Win 4 C-USA titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'lib_christian_nil',title:'Faith Community NIL',desc:'Liberty\'s faith-based alumni network creates a uniquely powerful collective.',dynastyEffects:'Liberty gets +9 recruiting bonus from faith-based communities nationally. NIL doubles from faith community. National brand unique.',unlocks:null},
+       {id:'lib_southeast_pipeline',title:'Southeast Pipeline',desc:'Liberty locks the Virginia/North Carolina border recruiting corridor.',dynastyEffects:'Liberty gets +7 VA and NC recruiting bonus. Virginia Tech and Wake Forest lose some pipeline recruits.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ MAC ADDITIONS ═══
+  'Miami (OH)': [
+    {id:'moh_cradle_coaches',title:'Cradle of Coaches',icon:'🏈',subtitle:'Oxford Legacy',
+     desc:'Win 5 MAC Championships. Miami-Ohio honors its legendary coaching tree legacy.',
+     prereq:'Win 5 MAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'moh_coaching_tree',title:'Coaches Factory',desc:'Miami-Ohio produces 3 more head coaches who become P5 leaders.',dynastyEffects:'Miami-Ohio gets XP coaching bonus. 3 Miami assistants become P5 HCs over 5 years. Coaching tree becomes national story.',unlocks:null},
+       {id:'moh_ohio_pipeline',title:'Ohio Pipeline',desc:'Miami-Ohio becomes a serious recruiting threat in Ohio.',dynastyEffects:'Miami-Ohio gets +7 OH recruiting bonus. Ohio State and Cincinnati lose some pipeline recruits. Oxford becomes relevant football destination.',unlocks:null},
+     ]},
+  ],
+  'Toledo': [
+    {id:'tol_rockets_power',title:'Rocket Fuel',icon:'🚀',subtitle:'Glass City Power',
+     desc:'Win 5 MAC Championships. Toledo becomes the MAC\'s most dominant program.',
+     prereq:'Win 5 MAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'tol_ohio_threat',title:'Ohio Threat',desc:'Toledo recruits compete with Ohio State and Michigan for Ohio talent.',dynastyEffects:'Toledo gets +7 NW Ohio and Michigan recruiting bonus. Ohio State loses Toledo metro pipeline. Toledo becomes MAC blue blood.',unlocks:null},
+       {id:'tol_p5_invite',title:'Power Invite',desc:'Toledo\'s sustained MAC dominance earns a Power conference invitation.',dynastyEffects:'Toledo joins Big 12 or AAC. Program tier increases dramatically. National recruiting opens.',unlocks:null},
+     ]},
+  ],
+  'Ohio': [
+    {id:'oh_bobcat_rise',title:'Bobcat Power',icon:'🐱',subtitle:'Athens Ascent',
+     desc:'Win 5 MAC Championships. Ohio becomes the MAC\'s premier program.',
+     prereq:'Win 5 MAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'oh_southeast_ohio',title:'Southeast Ohio Pipeline',desc:'Ohio locks Appalachian Ohio and West Virginia recruiting.',dynastyEffects:'Ohio gets +7 SE Ohio and WV recruiting bonus. Ohio State loses some rural Ohio pipeline. Athens becomes football relevant.',unlocks:null},
+       {id:'oh_mac_dynasty',title:'MAC Dynasty',desc:'Ohio builds the greatest MAC dynasty in conference history.',dynastyEffects:'Ohio becomes MAC\'s all-time winningest program. National mid-major story. Collective grows from alumni network.',unlocks:null},
+     ]},
+  ],
+  'Northern Illinois': [
+    {id:'niu_huskies_rise',title:'DeKalb Power',icon:'🐺',subtitle:'Chicago Market Football',
+     desc:'Win 5 MAC Championships. NIU becomes the Chicago market\'s G5 alternative.',
+     prereq:'Win 5 MAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'niu_chicago_pipeline',title:'Chicago Pipeline',desc:'NIU locks Chicagoland recruits against Illinois and Northwestern.',dynastyEffects:'NIU gets +8 Chicago metro recruiting bonus. Illinois and Northwestern lose some Chicago pipeline. DeKalb becomes relevant football destination.',unlocks:null},
+       {id:'niu_chicago_nil',title:'Chicago Business NIL',desc:'Chicago\'s massive business community creates a powerful collective for NIU.',dynastyEffects:'NIL doubles from Chicago business community. NIU becomes MAC powerhouse with unique market advantage.',unlocks:null},
+     ]},
+  ],
+  'Western Michigan': [
+    {id:'wmu_broncos_rise',title:'Kalamazoo Power',icon:'🐎',subtitle:'Bronco Country',
+     desc:'Win 4 MAC Championships. Western Michigan recreates its 2016 undefeated magic.',
+     prereq:'Win 4 MAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'wmu_michigan_steal',title:'Michigan Steals',desc:'Western Michigan recruits compete with Michigan and Michigan State.',dynastyEffects:'WMU gets +7 MI recruiting bonus. Michigan and MSU lose some Western Michigan pipeline. Kalamazoo becomes football relevant.',unlocks:null},
+       {id:'wmu_cfp_bid',title:'CFP Bid',desc:'Western Michigan makes the CFP as a G5 darling.',dynastyEffects:'National story of the year. NIL triples. Program tier increases dramatically. Kalamazoo becomes national football name.',unlocks:null},
+     ]},
+  ],
+  'Central Michigan': [
+    {id:'cmu_chips_rise',title:'The Chippewa Rise',icon:'🌲',subtitle:'Mount Pleasant Power',
+     desc:'Win 4 MAC Championships. Central Michigan builds its own MAC dynasty.',
+     prereq:'Win 4 MAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'cmu_mi_pipeline',title:'Central Michigan Pipeline',desc:'CMU locks Central Michigan recruiting against MSU and U of M.',dynastyEffects:'CMU gets +7 Central MI recruiting bonus. Michigan programs lose some mid-state pipeline.',unlocks:null},
+       {id:'cmu_mac_identity',title:'MAC Identity',desc:'Central Michigan becomes the MAC\'s cultural ambassador.',dynastyEffects:'CMU\'s MAC identity becomes national brand. Collective doubles from alumni. Coaching carousel value increases.',unlocks:null},
+     ]},
+  ],
+  'Eastern Michigan': [
+    {id:'emu_eagles_rise',title:'Eagle Country',icon:'🦅',subtitle:'Ypsilanti Power',
+     desc:'Win 3 MAC Championships. Eastern Michigan becomes a MAC contender near the big programs.',
+     prereq:'Win 3 MAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'emu_detroit_pipeline',title:'Detroit Pipeline',desc:'Eastern Michigan recruits Detroit metro against Michigan and MSU.',dynastyEffects:'EMU gets +7 Detroit metro recruiting bonus. Michigan and MSU lose some Detroit pipeline. Ypsilanti proximity to Ann Arbor leveraged.',unlocks:null},
+       {id:'emu_detroit_nil',title:'Detroit Industry NIL',desc:'Detroit\'s automotive and tech industry creates a surprising collective.',dynastyEffects:'NIL doubles from Detroit industry community. Program tier increases.',unlocks:null},
+     ]},
+  ],
+  'Ball State': [
+    {id:'bsu_cardinals_rise',title:'Cardinal Red Rising',icon:'🔴',subtitle:'Muncie Power',
+     desc:'Win 3 MAC Championships. Ball State builds on its David Letterman legacy city.',
+     prereq:'Win 3 MAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'bsu_indiana_pipeline',title:'Indiana Pipeline',desc:'Ball State recruits Indiana against Purdue and Indiana University.',dynastyEffects:'Ball State gets +7 IN recruiting bonus. Purdue and IU lose some in-state depth recruits. Muncie becomes relevant.',unlocks:null},
+       {id:'bsu_media_nil',title:'Media Industry NIL',desc:'Ball State\'s media arts program alumni create a unique collective.',dynastyEffects:'NIL from media industry alumni. Unique brand identity. Ball State becomes MAC contender.',unlocks:null},
+     ]},
+  ],
+  'Bowling Green': [
+    {id:'bg_falcons_rise',title:'Falcon Power',icon:'🦅',subtitle:'Bowling Green Rises',
+     desc:'Win 3 MAC Championships. Bowling Green becomes a consistent MAC force.',
+     prereq:'Win 3 MAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'bg_ohio_pipeline',title:'Northwest Ohio Pipeline',desc:'Bowling Green locks Northwest Ohio recruiting.',dynastyEffects:'Bowling Green gets +7 NW Ohio recruiting bonus. Toledo and Ohio State lose some NW Ohio pipeline.',unlocks:null},
+       {id:'bg_mac_identity',title:'MAC Contender Forever',desc:'Bowling Green becomes an annual MAC title contender.',dynastyEffects:'Collective doubles from alumni. Coaching carousel value increases. Annual MAC top tier program.',unlocks:null},
+     ]},
+  ],
+  'Buffalo': [
+    {id:'buf_bulls_rise',title:'Bull Run in Buffalo',icon:'🐂',subtitle:'Western New York Power',
+     desc:'Win 3 MAC Championships. Buffalo becomes a legitimate G5 power in the Northeast.',
+     prereq:'Win 3 MAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'buf_ny_pipeline',title:'Western New York Pipeline',desc:'Buffalo locks Western New York recruiting against Syracuse and Penn State.',dynastyEffects:'Buffalo gets +8 WNY and Ontario recruiting bonus. Syracuse loses WNY pipeline. Buffalo becomes Northeast G5 story.',unlocks:null},
+       {id:'buf_bills_nil',title:'Bills Country NIL',desc:'Buffalo\'s NFL Bills fan base creates surprising football energy for UB.',dynastyEffects:'NIL grows from Bills-connected business community. Campus Life improves. Buffalo becomes unique Northeast football destination.',unlocks:null},
+     ]},
+  ],
+  'Kent State': [
+    {id:'ksu_golden_flash',title:'Golden Flash Power',icon:'⚡',subtitle:'Kent Rising',
+     desc:'Win 3 MAC Championships. Kent State builds its own identity beyond tragedy history.',
+     prereq:'Win 3 MAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ksu_ohio_threat',title:'Northeast Ohio Threat',desc:'Kent State recruits Northeast Ohio against Ohio State.',dynastyEffects:'Kent State gets +7 NE Ohio recruiting bonus. Ohio State loses some NE Ohio pipeline. Kent becomes relevant football name.',unlocks:null},
+       {id:'ksu_identity',title:'Kent State Identity',desc:'Kent State builds a new positive identity through football success.',dynastyEffects:'National story of redemption through athletics. NIL doubles from alumni community. Program tier increases.',unlocks:null},
+     ]},
+  ],
+  'Akron': [
+    {id:'ak_zips_rise',title:'Zip City Power',icon:'⚡',subtitle:'Akron Football',
+     desc:'Win 3 MAC Championships. Akron becomes a surprising MAC power.',
+     prereq:'Win 3 MAC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ak_northeast_ohio',title:'LeBron Country Pipeline',desc:'Akron recruits Northeast Ohio with LeBron\'s hometown narrative.',dynastyEffects:'Akron gets +7 NE Ohio recruiting bonus. The LeBron hometown connection becomes recruiting narrative. NIL grows.',unlocks:null},
+       {id:'ak_rubber_city',title:'Rubber City Rising',desc:'Akron\'s industrial heritage becomes a football identity.',dynastyEffects:'NIL from Akron business community doubles. Unique blue collar identity attracts certain recruit profiles.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ MWC ADDITIONS ═══
+  'Air Force': [
+    {id:'af_falcons_power',title:'Falcon Force',icon:'✈️',subtitle:'Triple Option Excellence',
+     desc:'Win 5 MWC Championships. Air Force becomes the definitive triple option power.',
+     prereq:'Win 5 MWC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'af_option_brand',title:'Option Football Legacy',desc:'Air Force becomes the nation\'s premier option football program.',dynastyEffects:'Air Force option specialist recruiting bonus +12. National media celebrates the unique style. Service academy prestige increases.',unlocks:null},
+       {id:'af_military_pipeline',title:'Military Pipeline',desc:'Air Force locks military-connected recruits from across the country.',dynastyEffects:'Air Force gets national military community recruiting bonus. Unique student-athlete profile attracts patriotic-narrative recruits.',unlocks:null},
+     ]},
+  ],
+  'Colorado State': [
+    {id:'csu_rams_rise',title:'Ram Power',icon:'🐏',subtitle:'Fort Collins Football',
+     desc:'Win 4 MWC Championships. Colorado State builds a real rivalry with Colorado in the Big 12.',
+     prereq:'Win 4 MWC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'csu_co_pipeline',title:'Colorado Pipeline',desc:'Colorado State locks Colorado recruits against Colorado.',dynastyEffects:'CSU gets +8 CO recruiting bonus. Colorado loses in-state pipeline. Rocky Mountain rivalry intensifies.',unlocks:null},
+       {id:'csu_mountain_nil',title:'Mountain West NIL',desc:'Fort Collins tech and agriculture community creates a unique collective.',dynastyEffects:'NIL doubles from Fort Collins community. Program tier increases. Rocky Mountain brand grows.',unlocks:null},
+     ]},
+  ],
+  'Nevada': [
+    {id:'nev_wolf_pack',title:'Pack Attack',icon:'🐺',subtitle:'Reno Rising',
+     desc:'Win 4 MWC Championships. Nevada becomes Reno\'s football powerhouse.',
+     prereq:'Win 4 MWC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'nev_norcal_pipeline',title:'Northern California Pipeline',desc:'Nevada recruits NorCal against Cal and Stanford.',dynastyEffects:'Nevada gets +7 NorCal recruiting bonus. Cal and Stanford lose some NorCal depth recruits. Reno becomes western football hub.',unlocks:null},
+       {id:'nev_gaming_nil',title:'Gaming Industry NIL',desc:'Reno\'s gaming and hospitality industry creates a unique collective.',dynastyEffects:'NIL doubles from gaming industry. Las Vegas pipeline opens. Nevada becomes unique NIL destination.',unlocks:null},
+     ]},
+  ],
+  'New Mexico': [
+    {id:'nm_lobos_rise',title:'The Lobos Rise',icon:'🐺',subtitle:'Albuquerque Power',
+     desc:'Win 4 MWC Championships. New Mexico becomes the Southwest\'s mid-major power.',
+     prereq:'Win 4 MWC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'nm_southwest_pipeline',title:'Southwest Pipeline',desc:'New Mexico locks New Mexico and El Paso recruiting against UTEP.',dynastyEffects:'New Mexico gets +8 NM and El Paso recruiting bonus. UTEP loses pipeline. Albuquerque becomes football city.',unlocks:null},
+       {id:'nm_gaming_nil',title:'New Mexico NIL',desc:'New Mexico\'s gaming and tourism community creates a unique collective.',dynastyEffects:'NIL doubles from state community. Program tier increases. Unique Southwest brand develops.',unlocks:null},
+     ]},
+  ],
+  'San Diego State': [
+    {id:'sdsu_aztecs',title:'Aztec Power',icon:'⚔️',subtitle:'San Diego Football',
+     desc:'Win 5 MWC Championships. SDSU becomes America\'s military city football program.',
+     prereq:'Win 5 MWC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'sdsu_socal_pipeline',title:'SoCal Alternative',desc:'SDSU recruits Southern California against USC and UCLA.',dynastyEffects:'SDSU gets +7 SoCal recruiting bonus. USC and UCLA lose some San Diego pipeline. Military community engaged.',unlocks:null},
+       {id:'sdsu_military_nil',title:'Military City NIL',desc:'San Diego\'s massive military presence creates a unique community collective.',dynastyEffects:'NIL from military-adjacent community doubles. Patriotic narrative attracts national recruits. Program tier increases.',unlocks:null},
+     ]},
+  ],
+  'San Jose State': [
+    {id:'sjsu_spartans_rise',title:'Silicon Spartans',icon:'⚡',subtitle:'Bay Area Power',
+     desc:'Win 4 MWC Championships. San Jose State becomes Silicon Valley\'s football program.',
+     prereq:'Win 4 MWC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'sjsu_silicon_nil',title:'Silicon Valley NIL',desc:'San Jose\'s tech industry creates a massive collective.',dynastyEffects:'Benefactor triggered from tech sector. NIL reaches $15M. SJSU becomes most resourced G5 program. National story of tech funding football.',unlocks:null},
+       {id:'sjsu_bay_pipeline',title:'Bay Area Pipeline',desc:'SJSU locks Bay Area recruits against Cal and Stanford.',dynastyEffects:'SJSU gets +8 Bay Area recruiting bonus. Cal and Stanford lose some pipeline. San Jose becomes football relevant.',unlocks:null},
+     ]},
+  ],
+  'UNLV': [
+    {id:'unlv_rebels_rise',title:'Sin City Football',icon:'🃏',subtitle:'Las Vegas Power',
+     desc:'Win 4 MWC Championships. UNLV becomes the entertainment capital\'s football team.',
+     prereq:'Win 4 MWC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'unlv_vegas_nil',title:'Vegas Money',desc:'Las Vegas\'s entertainment and gaming industry creates the most unique collective in college football.',dynastyEffects:'Benefactor triggered from Vegas entertainment. NIL reaches $18M. UNLV becomes national brand. Campus Life A+.',unlocks:null},
+       {id:'unlv_socal_pipeline',title:'SoCal Rebels',desc:'UNLV recruits Southern California against USC and UCLA with the Vegas lifestyle.',dynastyEffects:'UNLV gets +7 SoCal recruiting bonus. Vegas lifestyle attracts skill position players. UNLV becomes G5 elite.',unlocks:null},
+     ]},
+  ],
+  'Utah State': [
+    {id:'ust_aggies_rise',title:'Aggies of Logan',icon:'🌾',subtitle:'Cache Valley Power',
+     desc:'Win 4 MWC Championships. Utah State builds its own identity separate from Utah and BYU.',
+     prereq:'Win 4 MWC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'ust_utah_steal',title:'Utah Steals',desc:'Utah State recruits against Utah and BYU for in-state talent.',dynastyEffects:'Utah State gets +7 UT recruiting bonus. Utah and BYU lose some in-state pipeline. Cache Valley becomes football relevant.',unlocks:null},
+       {id:'ust_qb_factory',title:'QB Factory',desc:'Utah State becomes known as the nation\'s premier QB development program.',dynastyEffects:'QB recruiting bonus +10. National QB recruits choose Utah State for development path. NFL QB pipeline develops.',unlocks:null},
+     ]},
+  ],
+  'Wyoming': [
+    {id:'wyo_cowboys_rise',title:'Cowboy Up',icon:'🤠',subtitle:'Laramie Power',
+     desc:'Win 5 MWC Championships. Wyoming becomes the Big Sky country\'s football powerhouse.',
+     prereq:'Win 5 MWC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'wyo_mountain_west_pipeline',title:'Mountain West Pipeline',desc:'Wyoming locks Wyoming, Montana, and Idaho recruiting.',dynastyEffects:'Wyoming gets +8 WY, MT, ID recruiting bonus. Unique recruiting territory with no serious competition. Cowboys become regional destination.',unlocks:null},
+       {id:'wyo_oil_nil',title:'Wyoming Oil NIL',desc:'Wyoming\'s oil and gas industry creates a surprisingly powerful collective.',dynastyEffects:'NIL doubles from oil industry. Benefactor from energy sector triggered. Wyoming becomes MWC powerhouse.',unlocks:null},
+     ]},
+  ],
+  'Fresno State': [
+    {id:'fsu_bulldogs_rise',title:'Valley Power',icon:'🐕',subtitle:'Central Valley Dominance',
+     desc:'Win 5 MWC Championships. Fresno State becomes the San Joaquin Valley\'s pride.',
+     prereq:'Win 5 MWC titles',prereqMet:false,claimed:false,
+     branches:[
+       {id:'fsu_central_ca_pipeline',title:'Central California Pipeline',desc:'Fresno locks Central California recruiting against USC and Cal.',dynastyEffects:'Fresno State gets +8 Central CA recruiting bonus. USC and Cal lose some Central Valley pipeline. Fresno becomes regional destination.',unlocks:null},
+       {id:'fsu_valley_nil',title:'Agriculture Valley NIL',desc:'Central California\'s agricultural industry creates a unique collective.',dynastyEffects:'NIL doubles from ag industry community. Program tier increases. Unique California identity separate from LA and Bay Area.',unlocks:null},
+     ]},
+  ],
+
+  // ═══ INDEPENDENT ADDITIONS ═══
+  'Connecticut': [
+    {id:'uconn_huskies_rise',title:'Husky Football',icon:'🐺',subtitle:'New England Power',
+     desc:'Win 8+ games 3 straight seasons. UConn establishes itself as New England\'s football program.',
+     prereq:'Win 8+ games 3 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'uconn_new_england_lock',title:'New England Lock',desc:'UConn locks Connecticut and New England recruiting.',dynastyEffects:'UConn gets +9 CT, MA, RI, NH recruiting bonus. Boston College loses New England pipeline. Hartford becomes football city.',unlocks:null},
+       {id:'uconn_basketball_nil',title:'Basketball NIL Crossover',desc:'UConn basketball\'s national brand funds football.',dynastyEffects:'NIL doubles from basketball donor crossover. UConn becomes New England\'s program. Unique dual sport prestige.',unlocks:null},
+     ]},
+  ],
+  'Massachusetts': [
+    {id:'umass_minutemen',title:'Minutemen Rise',icon:'🏛️',subtitle:'Amherst Power',
+     desc:'Win 8+ games 3 straight seasons as an FBS independent. UMass proves New England football works.',
+     prereq:'Win 8+ games 3 straight years',prereqMet:false,claimed:false,
+     branches:[
+       {id:'umass_new_england',title:'New England Football',desc:'UMass becomes the Northeast\'s most recognizable G5 program.',dynastyEffects:'UMass gets +8 New England recruiting bonus. Syracuse and Boston College lose some pipeline. UMass becomes independent power.',unlocks:null},
+       {id:'umass_conf_invite',title:'Conference Membership',desc:'UMass\'s success earns a conference invitation.',dynastyEffects:'UMass joins AAC or MAC. Program tier increases. Scheduling strengthens.',unlocks:null},
+     ]},
+  ],
+};
+
+
+// Generic events available to all schools regardless of conference
+const GENERIC_EVENTS = [
+  {
+    id:'rival_domination',
+    title:'Establish the Rivalry',
+    icon:'S',
+    subtitle:'3 Straight Rivalry Wins',
+    desc:'Win your biggest rivalry game 3 years in a row. The narrative shifts permanently in your direction.',
+    prereq:'Win rivalry game 3 consecutive years',
+    prereqMet: false,
+    claimed: false,
+    branches:[
+      {id:'rival_recruit',title:'Pipeline Control',desc:'Your dominance translates to regional recruiting dominance.',dynastyEffects:'Regional recruiting bonus +6. Rival\'s recruiting in shared states weakens for 3 years.',unlocks:null},
+      {id:'rival_pressure',title:'Pressure the Rival',desc:'Your consistent wins put the rival\'s coach on the hot seat.',dynastyEffects:'50% chance rival coach gets fired. Their collective happiness drops 20 points. One commit flips.',unlocks:null},
+    ],
+  },
+  {
+    id:'portal_dominance',
+    title:'Portal Power',
+    icon:'P',
+    subtitle:'Transfer Portal Mastery',
+    desc:'Sign top-10 transfer portal classes 3 years in a row. Your program becomes the destination for players seeking reinvention.',
+    prereq:'Top-10 transfer class 3 straight years',
+    prereqMet: false,
+    claimed: false,
+    branches:[
+      {id:'portal_brand',title:'The Portal Brand',desc:'Players nationally see your program as the best place to revive their careers.',dynastyEffects:'Portal recruiting bonus +10 permanently. 4-star transfers prioritize your program. Program gains portal reputation grade A+.',unlocks:null},
+      {id:'portal_development',title:'Development Reputation',desc:'Your development staff becomes nationally recognized.',dynastyEffects:'Developer skill tree nodes unlock faster. Player OVR growth +2% annually. High-ceiling recruits prioritize your program.',unlocks:null},
+    ],
+  },
+  {
+    id:'heisman_factory',
+    title:'Heisman Factory',
+    icon:'H',
+    subtitle:'Award Program',
+    desc:'Produce 2 Heisman Trophy winners. Your program becomes the destination for players chasing individual greatness.',
+    prereq:'Produce 2 Heisman winners',
+    prereqMet: false,
+    claimed: false,
+    branches:[
+      {id:'heisman_qb',title:'QB Destination',desc:'Elite QBs choose your program specifically for the Heisman opportunity.',dynastyEffects:'QB recruiting bonus +8 nationally. 5-star QBs consider your program automatically. QB OVR development rate increases.',unlocks:null},
+      {id:'heisman_skill',title:'Skill Position Mecca',desc:'All skill positions come for the exposure and draft positioning.',dynastyEffects:'WR and RB recruiting bonus +6 nationally. Skill position OVR development increases. NFL pipeline grade upgrades.',unlocks:null},
+    ],
+  },
+];
     {
       id:'gt_rivalry',
       title:'Upset the Neighborhood',
@@ -410,36 +1732,34 @@ function renderSchoolGoals() {
   document.getElementById('school-happiness-bar').style.background = happinessColor;
   document.getElementById('school-happiness-label').textContent = happinessLabel;
 
-  document.getElementById('school-goals-list').innerHTML = goals.map(g=>`
-    <div class="goal-card ${g.status==='completed'?'completed':g.status==='failed'?'failed':'active-goal'}">
-      <div class="goal-header">
-        <div class="goal-title">${g.title}</div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-          <span class="goal-status-chip ${g.status==='completed'?'status-completed':g.status==='failed'?'status-failed':'status-active'}">${g.status}</span>
-          <span class="goal-deadline">${g.deadline}</span>
+  document.getElementById('school-goals-list').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">`+goals.map(g=>`
+    <div style="background:var(--surface-2);border:1px solid ${g.status==='completed'?'var(--green)':g.status==='failed'?'var(--border-2)':'var(--accent)'};border-radius:var(--r-lg);padding:14px;display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="font-size:0.9rem;font-weight:700;color:var(--text-1);line-height:1.3;">${g.title}</div>
+        <span class="goal-status-chip ${g.status==='completed'?'status-completed':g.status==='failed'?'status-failed':'status-active'}" style="flex-shrink:0;">${g.status}</span>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-4);">${g.deadline}</div>
+      <div style="font-size:0.75rem;color:var(--text-3);line-height:1.45;flex:1;">${g.desc}</div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-4);">Progress</span>
+          <span style="font-family:var(--font-mono);font-size:0.6875rem;font-weight:500;color:var(--accent);">${Math.round(g.progress)}%</span>
+        </div>
+        <div class="progress-track" style="height:5px;">
+          <div style="height:100%;border-radius:2px;width:${g.progress}%;background:${g.progress>=100?'var(--green)':g.progress>=50?'var(--accent)':'var(--amber)'};" ></div>
         </div>
       </div>
-      <div class="goal-desc">${g.desc}</div>
-      <div class="goal-progress">
-        <div class="goal-progress-label">
-          <span class="goal-progress-text">Progress</span>
-          <span class="goal-progress-val">${Math.round(g.progress)}%</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+        <div style="padding:5px 7px;background:var(--green-bg);border-radius:var(--r-sm);">
+          <div style="font-family:var(--font-mono);font-size:0.45rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--green);margin-bottom:2px;">If met</div>
+          <div style="font-size:0.6875rem;color:var(--green);font-weight:500;">+${g.happinessGain||8}% happiness</div>
         </div>
-        <div class="progress-track" style="height:6px;">
-          <div class="progress-fill" style="width:${g.progress}%;background:${g.progress>=100?'var(--green)':g.progress>=50?'var(--accent)':'var(--amber)'};"></div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <div style="flex:1;padding:6px 10px;background:var(--green-bg);border-radius:var(--r-sm);font-size:0.6875rem;color:var(--green);">
-          <span style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;display:block;color:var(--green);opacity:0.7;margin-bottom:1px;">If met</span>
-          School happiness +${g.happinessGain||8}%
-        </div>
-        <div style="flex:1;padding:6px 10px;background:var(--red-bg);border-radius:var(--r-sm);font-size:0.6875rem;color:var(--red);">
-          <span style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;display:block;color:var(--red);opacity:0.7;margin-bottom:1px;">If missed</span>
-          School happiness ${g.happinessPenalty||'-12'}%
+        <div style="padding:5px 7px;background:var(--red-bg);border-radius:var(--r-sm);">
+          <div style="font-family:var(--font-mono);font-size:0.45rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--red);margin-bottom:2px;">If missed</div>
+          <div style="font-size:0.6875rem;color:var(--red);font-weight:500;">${g.happinessPenalty||'-12'}% happiness</div>
         </div>
       </div>
-    </div>`).join('');
+    </div>`).join('')+'</div>';
 }
 
 function renderCollectiveGoals() {
