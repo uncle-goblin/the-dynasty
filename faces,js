@@ -1,0 +1,159 @@
+// THE DYNASTY — Player Face Helper
+// Uses facesjs (Apache 2.0) from jsDelivr
+// Generates consistent cartoon faces per player based on their ID seed
+
+(function() {
+  // Cache generated faces
+  const faceCache = {};
+
+  // Seeded random for consistent faces per player
+  function seededRng(seed) {
+    let s = Math.abs(seed) >>> 0;
+    return function() {
+      s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+  }
+
+  function hashId(id) {
+    if (!id) return 12345;
+    let h = 0;
+    const str = String(id);
+    for (let i = 0; i < str.length; i++) {
+      h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+    }
+    return Math.abs(h);
+  }
+
+  // Generate a face object without facesjs (fallback SVG)
+  function generateFallbackFace(seed) {
+    const r = seededRng(seed);
+    const skinTones = ['#FDBCB4','#F1C27D','#E0AC69','#C68642','#8D5524','#4A2912'];
+    const hairColors = ['#090806','#433D37','#6B4226','#A0522D','#C4A882','#D4AF37','#B22222','#DC143C'];
+    const eyeColors  = ['#3B2314','#2C1A0E','#4E3B2D','#6B8E23','#4169E1','#708090'];
+
+    const skin  = skinTones[Math.floor(r() * skinTones.length)];
+    const hair  = hairColors[Math.floor(r() * hairColors.length)];
+    const eyes  = eyeColors[Math.floor(r() * eyeColors.length)];
+    const jawW  = 64 + Math.floor(r() * 16);
+    const jawH  = 70 + Math.floor(r() * 16);
+    const eyeY  = 38 + Math.floor(r() * 8);
+    const eyeSpacing = 10 + Math.floor(r() * 8);
+    const noseW = 6 + Math.floor(r() * 5);
+    const hairStyle = Math.floor(r() * 5);
+    const beard = r() < 0.3;
+    const beardColor = hair;
+
+    const hairPaths = [
+      // Close crop
+      `<rect x="${50-jawW/2-2}" y="12" width="${jawW+4}" height="18" rx="4" fill="${hair}"/>`,
+      // Fade
+      `<rect x="${50-jawW/2}" y="10" width="${jawW}" height="20" rx="6" fill="${hair}"/>
+       <rect x="${50-jawW/2-2}" y="18" width="${jawW+4}" height="8" rx="2" fill="${hair}" opacity="0.5"/>`,
+      // Longer top
+      `<rect x="${50-jawW/2-1}" y="8" width="${jawW+2}" height="22" rx="5" fill="${hair}"/>`,
+      // Bald / very short
+      `<ellipse cx="50" cy="20" rx="${jawW/2+1}" ry="12" fill="${hair}" opacity="0.6"/>`,
+      // Afro-style
+      `<ellipse cx="50" cy="16" rx="${jawW/2+8}" ry="18" fill="${hair}"/>`,
+    ];
+
+    return `<svg viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+      <!-- Neck -->
+      <rect x="${50-10}" y="${10+jawH-5}" width="20" height="20" fill="${skin}" rx="3"/>
+      <!-- Body (jersey) -->
+      <rect x="15" y="${10+jawH+12}" width="70" height="40" fill="#333" rx="4"/>
+      <rect x="15" y="${10+jawH+12}" width="70" height="8" fill="#555" rx="4"/>
+      <!-- Hair (drawn first, behind face) -->
+      ${hairPaths[hairStyle]}
+      <!-- Face -->
+      <ellipse cx="50" cy="${10+jawH/2}" rx="${jawW/2}" ry="${jawH/2}" fill="${skin}"/>
+      <!-- Eyes -->
+      <ellipse cx="${50-eyeSpacing}" cy="${eyeY}" rx="5" ry="4" fill="white"/>
+      <ellipse cx="${50+eyeSpacing}" cy="${eyeY}" rx="5" ry="4" fill="white"/>
+      <ellipse cx="${50-eyeSpacing}" cy="${eyeY}" rx="3" ry="3" fill="${eyes}"/>
+      <ellipse cx="${50+eyeSpacing}" cy="${eyeY}" rx="3" ry="3" fill="${eyes}"/>
+      <ellipse cx="${50-eyeSpacing-1}" cy="${eyeY-1}" rx="1.5" ry="1.5" fill="black"/>
+      <ellipse cx="${50+eyeSpacing-1}" cy="${eyeY-1}" rx="1.5" ry="1.5" fill="black"/>
+      <!-- Eyebrows -->
+      <path d="M${50-eyeSpacing-5} ${eyeY-6} Q${50-eyeSpacing} ${eyeY-8} ${50-eyeSpacing+5} ${eyeY-6}" stroke="${hair}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M${50+eyeSpacing-5} ${eyeY-6} Q${50+eyeSpacing} ${eyeY-8} ${50+eyeSpacing+5} ${eyeY-6}" stroke="${hair}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- Nose -->
+      <ellipse cx="50" cy="${eyeY+14}" rx="${noseW/2}" ry="${noseW/2-1}" fill="${skin}" stroke="#0002" stroke-width="0.8"/>
+      <!-- Mouth -->
+      <path d="M${50-7} ${eyeY+22} Q50 ${eyeY+27} ${50+7} ${eyeY+22}" stroke="#8B4513" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <!-- Beard -->
+      ${beard ? `<ellipse cx="50" cy="${10+jawH-8}" rx="${jawW/2-4}" ry="8" fill="${beardColor}" opacity="0.4"/>` : ''}
+    </svg>`;
+  }
+
+  // Main export
+  window.DynastyFaces = {
+    /**
+     * Get or generate an SVG string for a player
+     * @param {string|number} playerId - Unique player ID
+     * @returns {string} SVG string
+     */
+    getSVG(playerId) {
+      const seed = hashId(playerId);
+      if (!faceCache[seed]) {
+        faceCache[seed] = generateFallbackFace(seed);
+      }
+      return faceCache[seed];
+    },
+
+    /**
+     * Render a face into an element
+     * @param {HTMLElement} el - Target element
+     * @param {string|number} playerId - Player ID
+     */
+    render(el, playerId) {
+      if (!el) return;
+      el.innerHTML = this.getSVG(playerId);
+    },
+
+    /**
+     * Generate an img-style face element
+     * @param {string|number} playerId
+     * @param {string} size - 'sm' | 'md' | 'lg'
+     * @returns {string} HTML string
+     */
+    html(playerId, size='md') {
+      const svg = this.getSVG(playerId);
+      const cls = size==='sm'?'player-face-sm':size==='lg'?'player-face-lg':'';
+      return `<div class="player-face ${cls}">${svg}</div>`;
+    }
+  };
+
+  // Try to load facesjs from CDN for better faces
+  // If it loads, override the fallback with real facesjs
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/facesjs@5/build/faces.js';
+  script.onload = function() {
+    if (typeof window.faces !== 'undefined' && window.faces.generate) {
+      const origGetSVG = window.DynastyFaces.getSVG.bind(window.DynastyFaces);
+      window.DynastyFaces.getSVG = function(playerId) {
+        const seed = hashId(playerId);
+        if (!faceCache['fjs_'+seed]) {
+          try {
+            // Use facesjs for better quality faces
+            const face = window.faces.generate();
+            const div = document.createElement('div');
+            div.style.width = '100px';
+            div.style.height = '100px';
+            window.faces.display(div, face);
+            faceCache['fjs_'+seed] = div.innerHTML || origGetSVG(playerId);
+          } catch(e) {
+            faceCache['fjs_'+seed] = origGetSVG(playerId);
+          }
+        }
+        return faceCache['fjs_'+seed];
+      };
+      console.log('facesjs loaded — using high quality faces');
+    }
+  };
+  script.onerror = function() {
+    console.log('facesjs CDN unavailable — using built-in faces');
+  };
+  document.head.appendChild(script);
+})();
