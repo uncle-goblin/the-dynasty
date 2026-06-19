@@ -3,262 +3,289 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Dynasty — Hub</title>
+<title>The Dynasty — Dashboard</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.hub-layout { display: grid; grid-template-columns: 252px 1fr 288px; height: calc(100vh - 48px); }
-.hub-left { background: var(--surface-1); border-right: 1px solid var(--border-1); overflow-y: auto; display: flex; flex-direction: column; }
-.hub-center { background: var(--bg); overflow-y: auto; padding: 20px; }
-.hub-right { background: var(--surface-1); border-left: 1px solid var(--border-1); display: flex; flex-direction: column; overflow: hidden; }
-.cal-header { padding: 14px 16px 10px; display: flex; justify-content: space-between; align-items: flex-start; }
-.cal-month { font-size: 0.9375rem; font-weight: 700; color: var(--text-1); }
-.cal-year { font-size: 0.75rem; color: var(--text-4); margin-top: 1px; }
-.cal-week-big { font-family: var(--font-mono); font-size: 1.75rem; font-weight: 500; color: var(--accent); line-height: 1; }
-.cal-week-sub { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); }
-.advance-wrap { padding: 12px 16px; margin-top: auto; border-top: 1px solid var(--border-1); }
-.advance-sub { font-family: var(--font-mono); font-size: 0.5625rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); text-align: center; margin-top: 6px; }
-.hub-section-label { font-family: var(--font-mono); font-size: 0.5625rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); margin-bottom: 8px; margin-top: 20px; }
-.hub-section-label:first-child { margin-top: 0; }
-.nav-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-.nav-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-.nav-card-badge { font-family: var(--font-mono); font-size: 0.5625rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; display: inline-block; margin-top: 6px; }
-.badge-hours { color: var(--blue); }
-.badge-nil   { color: var(--green); }
-.badge-free  { color: var(--text-5); }
-.feed-header { padding: 10px 16px; border-bottom: 1px solid var(--border-1); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-.feed-refresh { font-family: var(--font-mono); font-size: 0.625rem; color: var(--text-4); cursor: pointer; border: 1px solid var(--border-1); border-radius: var(--r-sm); padding: 2px 7px; transition: all 0.1s; }
-.feed-refresh:hover { border-color: var(--accent); color: var(--accent); }
-.feed-tag { font-family: var(--font-mono); font-size: 0.5rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; padding: 1px 5px; border-radius: var(--r-sm); }
-.ftag-recruiting { background: var(--green-bg); color: var(--green); }
-.ftag-coaching   { background: var(--blue-bg); color: var(--blue); }
-.ftag-rankings   { background: var(--amber-bg); color: var(--amber); }
-.ftag-awards     { background: #F3E8FF; color: #6B21A8; }
-.ftag-transfer   { background: #E8F5F5; color: #1B6B6B; }
-.ftag-nil        { background: var(--red-bg); color: var(--red); }
+.dash-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  height: calc(100vh - 44px);
+  overflow: hidden;
+}
+.dash-center { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.dash-right  { border-left: 1px solid var(--border-1); background: var(--surface-2); display: flex; flex-direction: column; overflow: hidden; }
+
+/* Week tasks */
+.task-list { padding: 4px 0; }
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--border-1);
+  cursor: pointer;
+  transition: background 0.07s;
+}
+.task-row:hover { background: var(--surface-1); }
+.task-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.task-dot.done { background: var(--green); }
+.task-label { font-size: 0.8125rem; color: var(--text-2); flex: 1; }
+.task-cost  { font-family: var(--font-mono); font-size: 0.5625rem; color: var(--text-5); }
+.task-cost.free { color: var(--green-bg); }
+
+/* Next game card */
+.next-game-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+.ng-vs { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); }
+.ng-opp { font-size: 0.9375rem; font-weight: 700; color: var(--text-1); }
+.ng-meta { font-size: 0.6875rem; color: var(--text-4); margin-top: 2px; }
+
+/* Record row */
+.record-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.record-cell {
+  flex: 1;
+  padding: 12px 14px;
+  text-align: center;
+  border-right: 1px solid var(--border-1);
+}
+.record-cell:last-child { border-right: none; }
+.record-num {
+  font-family: var(--font-mono);
+  font-size: 1.625rem;
+  font-weight: 500;
+  line-height: 1;
+}
+.record-label {
+  font-family: var(--font-mono);
+  font-size: 0.45rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-4);
+  margin-top: 3px;
+}
+
+/* Actions grid */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.action-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-lg);
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.1s;
+  text-align: left;
+  text-decoration: none;
+  display: block;
+}
+.action-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+.action-btn.primary-action { border-color: var(--accent); }
+.ab-label { font-size: 0.8125rem; font-weight: 600; color: var(--text-1); margin-bottom: 2px; }
+.ab-meta  { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.ab-meta.hours { color: var(--blue); }
+.ab-meta.nil   { color: var(--green); }
+.ab-meta.free  { color: var(--text-5); }
+
+/* Feed */
+.feed-tabs { display: flex; border-bottom: 1px solid var(--border-1); flex-shrink: 0; }
+.feed-tab  {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 4px;
+  color: var(--text-4);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.1s;
+}
+.feed-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 .feed-list { flex: 1; overflow-y: auto; }
-.feed-loading { padding: 24px 16px; text-align: center; font-size: 0.8125rem; color: var(--text-4); }
+.feed-refresh-btn {
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-4);
+  cursor: pointer;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border-1);
+  width: 100%;
+  text-align: center;
+  transition: color 0.1s;
+  flex-shrink: 0;
+}
+.feed-refresh-btn:hover { color: var(--accent); }
+.feed-loading { padding: 20px; text-align: center; font-size: 0.8125rem; color: var(--text-4); }
+
+/* Dot loading */
 .dot-pulse { display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--text-4); margin: 0 2px; animation: dp 1.2s infinite; }
 .dot-pulse:nth-child(2){animation-delay:.2s} .dot-pulse:nth-child(3){animation-delay:.4s}
 @keyframes dp{0%,100%{opacity:.2}50%{opacity:1}}
-.hb-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 0.8125rem; }
-.hb-label { color: var(--text-3); font-size: 0.75rem; }
-.hb-val { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; color: var(--text-2); }
-.greeting-title { font-size: 1.125rem; font-weight: 700; color: var(--text-1); letter-spacing: -0.01em; }
-.greeting-sub { font-size: 0.8125rem; color: var(--text-3); margin-top: 3px; margin-bottom: 16px; }
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
+<!-- TOPBAR -->
 <div class="topbar">
-  <span class="topbar-logo" id="tb-logo">The Dynasty</span>
-  <div class="topbar-sep"></div>
-  <div>
-    <div class="topbar-school" id="tb-school">—</div>
-    <div class="topbar-role" id="tb-role">—</div>
-  </div>
-  <div class="topbar-sep"></div>
-  <span class="week-badge" id="tb-week">Week 1</span>
-  <div class="topbar-stat">
-    <span class="topbar-stat-label">Season</span>
-    <span class="topbar-stat-val" id="tb-year">2026</span>
-  </div>
-  <div class="topbar-spacer"></div>
-  <div class="tb-hours-wrap">
-    <div class="tb-hours-top">
-      <span class="t-label">Staff Hours</span>
-      <span style="font-family:var(--font-mono);font-size:0.6875rem;color:var(--accent);font-weight:500;"><span id="tb-hours">100</span>/100</span>
-    </div>
-    <div class="tb-hours-track">
-      <div class="tb-hours-fill" id="tb-hours-bar" style="width:100%;"></div>
-    </div>
-  </div>
-  <div class="topbar-sep"></div>
-  <div class="topbar-stat">
-    <span class="topbar-stat-label">NIL Budget</span>
-    <span class="topbar-stat-val" id="tb-nil">—</span>
-  </div>
-  <div class="topbar-sep"></div>
-  <a href="setup.html" class="btn btn-ghost btn-sm">New Career</a>
-</div>
-
-<div class="hub-layout">
-
-<!-- LEFT -->
-<div class="hub-left">
-  <div style="border-bottom:1px solid var(--border-1);">
-    <div class="cal-header">
-      <div>
-        <div class="cal-month" id="cal-month">January</div>
-        <div class="cal-year" id="cal-year-label">2026</div>
-      </div>
-      <div style="text-align:right;">
-        <div class="cal-week-big" id="cal-week-num">1</div>
-        <div class="cal-week-sub">of 52</div>
-      </div>
-    </div>
-    <div class="phase-pill" id="cal-phase">Early Signing Period</div>
-  </div>
-
-  <div style="border-bottom:1px solid var(--border-1);">
-    <div class="section-head">This Week</div>
-    <div id="task-list" style="padding:4px 0;"></div>
-  </div>
-
-  <div style="border-bottom:1px solid var(--border-1);padding:12px 16px;">
-    <div class="section-head" style="padding:0 0 8px;border:none;">Hours This Week</div>
-    <div id="hours-breakdown">
-      <div class="hb-row"><span class="hb-label">Remaining</span><span class="hb-val" id="hb-remaining">100 hrs</span></div>
-    </div>
-  </div>
-
-  <div class="advance-wrap">
-    <button class="advance-btn" onclick="advanceWeek()">Advance to Week <span id="next-week-num">2</span></button>
-    <div class="advance-sub" id="advance-sub">No hours spent this week</div>
+  <span class="tb-title" id="tb-phase">Dashboard</span>
+  <div class="tb-sep"></div>
+  <span class="tb-breadcrumb" id="tb-sub">2026 Season</span>
+  <div class="tb-spacer"></div>
+  <div class="tb-stat">
+    <span class="tb-stat-label">NIL Budget</span>
+    <span class="tb-stat-val" id="tb-nil">—</span>
   </div>
 </div>
+
+<div class="dash-layout">
 
 <!-- CENTER -->
-<div class="hub-center">
-  <div class="greeting-title" id="greeting-title">Week 1 — Early Signing Period</div>
-  <div class="greeting-sub" id="greeting-sub">2026 Season</div>
+<div class="dash-center">
 
-  <div class="record-bar" style="margin-bottom:16px;">
-    <div style="text-align:center;">
-      <div class="record-num wins" id="rec-wins">0</div>
+  <!-- Record -->
+  <div class="record-row" id="record-row">
+    <div class="record-cell">
+      <div class="record-num text-green" id="rc-wins">0</div>
       <div class="record-label">Wins</div>
     </div>
-    <div class="record-sep"></div>
-    <div style="text-align:center;">
-      <div class="record-num losses" id="rec-losses">0</div>
+    <div class="record-cell">
+      <div class="record-num text-red" id="rc-losses">0</div>
       <div class="record-label">Losses</div>
     </div>
-    <div class="record-sep"></div>
-    <div style="text-align:center;">
-      <div class="record-num rank" id="rec-rank">—</div>
-      <div class="record-label">Ranking</div>
+    <div class="record-cell">
+      <div class="record-num text-accent" id="rc-rank">—</div>
+      <div class="record-label">AP Rank</div>
     </div>
-    <div class="record-sep"></div>
-    <div style="flex:1;">
-      <div class="t-label" style="margin-bottom:3px;">Next Game</div>
-      <div style="font-weight:600;font-size:0.875rem;" id="next-game">Preseason</div>
-      <div style="font-size:0.6875rem;color:var(--text-4);margin-top:1px;" id="next-game-detail">Season begins Week 28</div>
+    <div class="record-cell" style="flex:2;text-align:left;">
+      <div style="font-family:var(--font-mono);font-size:0.45rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-4);margin-bottom:3px;">Next Game</div>
+      <div style="font-weight:600;font-size:0.875rem;" id="rc-next-game">—</div>
+      <div style="font-size:0.6875rem;color:var(--text-4);" id="rc-next-detail">Season begins Week 28</div>
     </div>
   </div>
 
-  <div class="hub-section-label">Primary Actions</div>
-  <div class="nav-grid-2">
-    <a class="nav-card primary" href="recruiting.html">
-      <div class="nav-card-title">Recruiting</div>
-      <div class="nav-card-badge badge-hours">Uses Staff Hours</div>
-    </a>
-    <div class="nav-card primary" onclick="comingSoon('Game Plan')">
-      <div class="nav-card-title">Game Plan</div>
-      <div class="nav-card-badge badge-hours">Uses Staff Hours</div>
+  <!-- This Week Tasks -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">This Week</span>
+      <span class="phase-pill" id="phase-pill" style="font-size:0.45rem;padding:1px 6px;">Early Signing Period</span>
     </div>
+    <div class="task-list" id="task-list"></div>
   </div>
 
-  <!-- POLLS + STANDINGS ROW -->
-  <div class="nav-grid-2" style="margin-bottom:16px;">
-    <div style="background:var(--surface-2);border:1px solid var(--border-1);border-radius:var(--r-lg);padding:12px 14px;">
-      <div style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);margin-bottom:8px;">Conference Standings</div>
-      <div id="hub-standings" style="font-size:0.75rem;color:var(--text-4);">Standings update during season</div>
-    </div>
-    <div style="background:var(--surface-2);border:1px solid var(--border-1);border-radius:var(--r-lg);padding:12px 14px;">
-      <div style="display:flex;gap:8px;margin-bottom:6px;">
-        <span id="poll-tab-ap" class="hub-poll-tab active" onclick="switchPollTab('AP')" style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);cursor:pointer;padding-bottom:2px;border-bottom:1px solid var(--accent);">AP</span>
-        <span id="poll-tab-coaches" class="hub-poll-tab" onclick="switchPollTab('Coaches')" style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-4);cursor:pointer;">Coaches</span>
-        <span id="poll-tab-cfp" class="hub-poll-tab" onclick="switchPollTab('CFP')" style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-4);cursor:pointer;">CFP</span>
+  <!-- Primary Actions -->
+  <div>
+    <div class="section-label">Primary Actions</div>
+    <div class="actions-grid">
+      <a class="action-btn primary-action" href="recruiting.html">
+        <div class="ab-label">Recruiting</div>
+        <div class="ab-meta hours">Staff Hours</div>
+      </a>
+      <div class="action-btn" onclick="comingSoon('Game Plan')">
+        <div class="ab-label">Game Plan</div>
+        <div class="ab-meta hours">Staff Hours</div>
       </div>
-      <div id="hub-polls" style="font-size:0.75rem;color:var(--text-4);">Polls release Week 22</div>
+      <a class="action-btn" href="schedule.html">
+        <div class="ab-label">Schedule</div>
+        <div class="ab-meta free">Free Action</div>
+      </a>
     </div>
   </div>
 
-  <div class="hub-section-label">Coaching</div>
-  <div class="nav-grid-3">
-    <a class="nav-card" href="schedule.html">
-      <div class="nav-card-title">Schedule</div>
-      <div class="nav-card-badge badge-free">Free Action</div>
-    </a>
-    <a class="nav-card" href="roster.html">
-      <div class="nav-card-title">Depth Chart & Roster</div>
-      <div class="nav-card-badge badge-free">Free Action</div>
-    </a>
-    <div class="nav-card" onclick="comingSoon('Scouting')">
-      <div class="nav-card-title">Scouting</div>
-      <div class="nav-card-badge badge-hours">Uses Staff Hours</div>
+  <!-- Program Actions -->
+  <div>
+    <div class="section-label">Program</div>
+    <div class="actions-grid">
+      <a class="action-btn" href="roster.html">
+        <div class="ab-label">Depth Chart</div>
+        <div class="ab-meta free">Free Action</div>
+      </a>
+      <a class="action-btn" href="goals.html">
+        <div class="ab-label">Goals & Events</div>
+        <div class="ab-meta free">Free Action</div>
+      </a>
+      <a class="action-btn" href="nil.html">
+        <div class="ab-label">Collective & NIL</div>
+        <div class="ab-meta nil">NIL Currency</div>
+      </a>
+      <a class="action-btn" href="budget.html">
+        <div class="ab-label">Budget</div>
+        <div class="ab-meta free">Free Action</div>
+      </a>
+      <div class="action-btn" onclick="comingSoon('Facilities')">
+        <div class="ab-label">Facilities</div>
+        <div class="ab-meta nil">NIL Currency</div>
+      </div>
+      <div class="action-btn" onclick="comingSoon('Scouting')">
+        <div class="ab-label">Scouting</div>
+        <div class="ab-meta hours">Staff Hours</div>
+      </div>
     </div>
   </div>
 
-  <div class="hub-section-label">Program</div>
-  <div class="nav-grid-3">
-    <a class="nav-card" href="goals.html">
-      <div class="nav-card-title">Goals & Events</div>
-      <div class="nav-card-badge badge-free">Free Action</div>
-    </a>
-      
-      <div class="nav-card-badge badge-free">Free Action</div>
+  <!-- Standings + Polls -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Conference Standings</span>
+        <span id="conf-name" style="font-family:var(--font-mono);font-size:0.5rem;color:var(--text-4);">—</span>
+      </div>
+      <div id="standings-panel" style="font-size:0.8125rem;color:var(--text-4);padding:12px 14px;">
+        Standings update during season.
+      </div>
     </div>
-    <div class="nav-card" onclick="comingSoon('Collective & NIL')">
-      <div class="nav-card-title">Collective & NIL</div>
-      
-      <div class="nav-card-badge badge-nil">NIL Currency</div>
-    </div>
-    <div class="nav-card" onclick="comingSoon('Facilities')">
-      <div class="nav-card-title">Facilities</div>
-      
-      <div class="nav-card-badge badge-nil">NIL Currency</div>
-    </div>
-  </div>
-  <div class="nav-grid-2">
-    <a class="nav-card" href="budget.html">
-      <div class="nav-card-title">School Grades</div>
-      
-      <div class="nav-card-badge badge-free">Free Action</div>
-    </div>
-    <div class="nav-card" href="nil.html">
-      <div class="nav-card-title">Fundraising</div>
-      
-      <div class="nav-card-badge badge-hours">Uses Staff Hours</div>
+    <div class="card">
+      <div class="poll-tabs" id="poll-tabs">
+        <div class="poll-tab active" onclick="switchPoll('AP',this)">AP Poll</div>
+        <div class="poll-tab" onclick="switchPoll('Coaches',this)">Coaches</div>
+        <div class="poll-tab" onclick="switchPoll('CFP',this)">CFP</div>
+      </div>
+      <div id="poll-panel" style="font-size:0.8125rem;color:var(--text-4);padding:12px 14px;">
+        Polls release Week 22.
+      </div>
     </div>
   </div>
 
-  <div class="hub-section-label">Staff</div>
-  <div class="nav-grid-3">
-    <div class="nav-card" onclick="comingSoon('Skill Trees')">
-      <div class="nav-card-title">Skill Trees</div>
-      
-      <div class="nav-card-badge badge-free">Free Action</div>
-    </div>
-    <div class="nav-card" onclick="comingSoon('Coaching Staff')">
-      <div class="nav-card-title">Coaching Staff</div>
-      
-      <div class="nav-card-badge badge-free">Free Action</div>
-    </div>
-    <div class="nav-card" onclick="comingSoon('Coach Profile')">
-      <div class="nav-card-title">Coach Profile</div>
-      
-      <div class="nav-card-badge badge-free">Free Action</div>
-    </div>
-  </div>
 </div>
 
 <!-- RIGHT: Feed -->
-<div class="hub-right">
-  <div class="feed-header">
-    <span class="t-label">CFB Feed</span>
-    <span class="feed-refresh" onclick="loadFeed()">Refresh</span>
+<div class="dash-right">
+  <div style="padding:10px 12px;border-bottom:1px solid var(--border-1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <span style="font-family:var(--font-mono);font-size:0.5rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);">CFB Feed</span>
   </div>
-  <div class="tabs" style="flex-shrink:0;">
-    <div class="tab active" data-tab="all" onclick="switchFeedTab(this)">All</div>
-    <div class="tab" data-tab="recruiting" onclick="switchFeedTab(this)">Recruiting</div>
-    <div class="tab" data-tab="coaching" onclick="switchFeedTab(this)">Coaching</div>
-    <div class="tab" data-tab="rankings" onclick="switchFeedTab(this)">Rankings</div>
+  <div class="feed-tabs" id="feed-tabs">
+    <div class="feed-tab active" onclick="switchFeedTab('all',this)">All</div>
+    <div class="feed-tab" onclick="switchFeedTab('recruiting',this)">Recruiting</div>
+    <div class="feed-tab" onclick="switchFeedTab('coaching',this)">Coaching</div>
+    <div class="feed-tab" onclick="switchFeedTab('rankings',this)">Rankings</div>
   </div>
+  <button class="feed-refresh-btn" onclick="loadFeed()">↻ Refresh Feed</button>
   <div class="feed-list" id="feed-list">
     <div class="feed-loading">
-      Loading feed<br>
-      <div class="dot-pulse"></div><div class="dot-pulse"></div><div class="dot-pulse"></div>
+      Loading<span class="dot-pulse"></span><span class="dot-pulse"></span><span class="dot-pulse"></span>
     </div>
   </div>
 </div>
@@ -266,55 +293,48 @@
 </div>
 
 <script src="schools.js"></script>
+<script src="simulation.js"></script>
 <script>
-// ═══ GEMINI ═══
-const GEMINI_KEY = 'YOUR_GEMINI_KEY_HERE';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
-
 // ═══ CAREER ═══
 const careerRaw = sessionStorage.getItem('dynastyCareer');
-const career = careerRaw ? JSON.parse(careerRaw) : {
-  coachName:'Coach',school:{name:'Your School',conf:'—',nilBudget:50,primary:'#1A1714',secondary:'#4A4540'},
-  role:'HC',offScheme:'Spread RPO',defScheme:'4-3 Base',year:2026,season:1,week:1
-};
+const career = careerRaw ? JSON.parse(careerRaw) : null;
+if(!career){ window.location.href='setup.html'; }
 
-// Apply school colors
-function applyColors(school) {
-  if(!school) return;
-  const hex = school.primary || '#1A1714';
-  document.documentElement.style.setProperty('--accent', hex);
-  const r=parseInt(hex.slice(1,3),16)||26, g=parseInt(hex.slice(3,5),16)||23, b=parseInt(hex.slice(5,7),16)||20;
-  document.documentElement.style.setProperty('--accent-mid', `rgba(${r},${g},${b},0.15)`);
-  document.documentElement.style.setProperty('--accent-light', `rgba(${r},${g},${b},0.06)`);
-  document.documentElement.style.setProperty('--accent-2', school.secondary || '#4A4540');
+const simRaw = sessionStorage.getItem('dynastySim');
+const simData = simRaw ? JSON.parse(simRaw) : null;
+
+const mySchool = career.school;
+const week = career.week || 1;
+const year = career.year || 2026;
+
+// Nil label
+function nilLabel(v){
+  if(!v) return '—';
+  if(v>=1000000) return '$'+(v/1000000).toFixed(1)+'M';
+  if(v>=1000) return '$'+(v/1000).toFixed(0)+'K';
+  return '$'+v;
 }
-applyColors(career.school);
 
-// ═══ GAME STATE ═══
-let gs = {
-  week: career.week || 1,
-  year: career.year || 2026,
-  hoursTotal: 100,
-  hoursUsed: 0,
-  wins: 0, losses: 0, ranking: null,
-  hoursLog: [],
-};
+function getNilBudget(grade){
+  return grade>=90?10000000:grade>=80?7000000:grade>=70?4500000:grade>=60?2500000:grade>=50?1200000:500000;
+}
 
 // ═══ WEEK DATA ═══
-const WEEK_DATA = [
+const TASK_COSTS={'Set weekly game plan':15,'Scout opponent':20,'Recruit calls':10,'Host official visits':25,'Fundraise':15,'Bowl game prep':20,'Playoff game prep':25};
+const WEEK_DATA=[
   {w:1,month:'January',phase:'Early Signing Period',cls:'phase-signing',tasks:['Sign recruiting class','Review transfer portal','Renew staff contracts'],game:false},
   {w:2,month:'January',phase:'Early Signing Period',cls:'phase-signing',tasks:['Sign recruiting class','Contact unsigned commits','Evaluate portal additions'],game:false},
-  {w:3,month:'January',phase:'Transfer Portal',cls:'phase-portal',tasks:['Recruit transfer portal','Evaluate portal fits','NIL outreach to portal targets'],game:false},
+  {w:3,month:'January',phase:'Transfer Portal',cls:'phase-portal',tasks:['Recruit transfer portal','Evaluate portal fits','NIL outreach'],game:false},
   {w:4,month:'January',phase:'Transfer Portal',cls:'phase-portal',tasks:['Recruit transfer portal','Finalize portal offers','Coaching staff review'],game:false},
   {w:5,month:'February',phase:'Coaching Carousel',cls:'phase-signing',tasks:['Review assistant staff','Evaluate open positions','Scout spring recruits'],game:false},
-  {w:6,month:'February',phase:'Coaching Carousel',cls:'phase-signing',tasks:['Finalize coaching staff','Begin spring recruit outreach','Fundraise'],game:false},
-  {w:7,month:'February',phase:'Spring Prep',cls:'phase-spring',tasks:['Install spring playbook','Set spring depth chart','Begin spring recruit outreach'],game:false},
+  {w:6,month:'February',phase:'Coaching Carousel',cls:'phase-signing',tasks:['Finalize coaching staff','Spring recruit outreach','Fundraise'],game:false},
+  {w:7,month:'February',phase:'Spring Prep',cls:'phase-spring',tasks:['Install spring playbook','Set spring depth chart','Spring recruit outreach'],game:false},
   {w:8,month:'February',phase:'Spring Prep',cls:'phase-spring',tasks:['Spring practice prep','Evaluate returning roster','Contact spring recruits'],game:false},
   {w:9,month:'March',phase:'Spring Practice',cls:'phase-spring',tasks:['Spring practice','Evaluate position battles','Official visits'],game:false},
   {w:10,month:'March',phase:'Spring Practice',cls:'phase-spring',tasks:['Spring practice','Host official visits','Scout junior class'],game:false},
   {w:11,month:'March',phase:'Spring Practice',cls:'phase-spring',tasks:['Spring practice','Recruiting calls','Fundraise'],game:false},
   {w:12,month:'March',phase:'Spring Practice',cls:'phase-spring',tasks:['Spring practice','Host official visits','Evaluate portal options'],game:false},
-  {w:13,month:'April',phase:'Spring Game',cls:'phase-spring',tasks:['Finalize spring game roster','Host spring game','Contact recruits post-spring'],game:false},
+  {w:13,month:'April',phase:'Spring Game',cls:'phase-spring',tasks:['Spring game roster','Host spring game','Contact recruits post-spring'],game:false},
   {w:14,month:'April',phase:'Post Spring',cls:'phase-spring',tasks:['Debrief spring game','Facility planning','Recruit calls'],game:false},
   {w:15,month:'May',phase:'Summer Recruiting',cls:'phase-summer',tasks:['Schedule 7-on-7 camp','Recruit calls','Host unofficial visits'],game:false},
   {w:16,month:'May',phase:'Summer Recruiting',cls:'phase-summer',tasks:['Host 7-on-7 camp','Recruit calls','Fundraise'],game:false},
@@ -329,7 +349,7 @@ const WEEK_DATA = [
   {w:25,month:'August',phase:'Fall Camp',cls:'phase-camp',tasks:['Fall camp','Set depth chart','Scout Week 1 opponent'],game:false},
   {w:26,month:'August',phase:'Fall Camp',cls:'phase-camp',tasks:['Fall camp','Game plan Week 1','Finalize depth chart'],game:false},
   {w:27,month:'August',phase:'Fall Camp',cls:'phase-camp',tasks:['Fall camp','Game plan Week 1','Recruit calls'],game:false},
-  {w:28,month:'August',phase:'Week 1 Prep',cls:'phase-season',tasks:['Set weekly game plan','Scout opponent','Recruit calls'],game:true},
+  {w:28,month:'August',phase:'Week 1',cls:'phase-season',tasks:['Set weekly game plan','Scout opponent','Recruit calls'],game:true},
   {w:29,month:'September',phase:'Regular Season Wk 1',cls:'phase-season',tasks:['Set weekly game plan','Scout opponent','Recruit calls'],game:true},
   {w:30,month:'September',phase:'Regular Season Wk 2',cls:'phase-season',tasks:['Set weekly game plan','Scout opponent','Recruit calls'],game:true},
   {w:31,month:'September',phase:'Regular Season Wk 3',cls:'phase-season',tasks:['Set weekly game plan','Scout opponent','Recruit calls'],game:true},
@@ -344,8 +364,8 @@ const WEEK_DATA = [
   {w:40,month:'November',phase:'Regular Season Wk 12',cls:'phase-season',tasks:['Set weekly game plan','Scout opponent','Early signing prep'],game:true},
   {w:41,month:'November',phase:'Conference Championship',cls:'phase-bowl',tasks:['Set weekly game plan','Scout opponent','Recruit calls'],game:true},
   {w:42,month:'December',phase:'Bowl Season',cls:'phase-bowl',tasks:['Bowl game prep','Recruit calls','Evaluate transfer portal'],game:true},
-  {w:43,month:'December',phase:'Bowl Season',cls:'phase-bowl',tasks:['Bowl game prep','Recruit calls','NIL retention negotiations'],game:true},
-  {w:44,month:'December',phase:'Playoff / Bowl',cls:'phase-bowl',tasks:['Playoff game prep','Recruit calls','Portal watch'],game:true},
+  {w:43,month:'December',phase:'Bowl Season',cls:'phase-bowl',tasks:['Bowl game prep','Recruit calls','NIL retention'],game:true},
+  {w:44,month:'December',phase:'Playoff',cls:'phase-bowl',tasks:['Playoff game prep','Recruit calls','Portal watch'],game:true},
   {w:45,month:'December',phase:'Early Signing Period',cls:'phase-signing',tasks:['Sign recruiting class','Contact unsigned commits','Portal opens soon'],game:false},
   {w:46,month:'December',phase:'Early Signing Period',cls:'phase-signing',tasks:['Sign recruiting class','Finalize portal list','Coaching staff review'],game:false},
   {w:47,month:'December',phase:'Transfer Portal',cls:'phase-portal',tasks:['Recruit transfer portal','NIL outreach','Coaching carousel watch'],game:false},
@@ -356,147 +376,122 @@ const WEEK_DATA = [
   {w:52,month:'January',phase:'Season End',cls:'phase-signing',tasks:['Prepare for new season','Final portal review','Set program goals'],game:false},
 ];
 
-const TASK_COSTS = {
-  'Set weekly game plan':15,'Scout opponent':20,'Recruit calls':10,
-  'Host official visits':25,'Schedule 7-on-7 camp':20,'Host 7-on-7 camp':30,
-  'Fundraise':15,'Coaching clinic':20,'Review transfer portal':10,
-  'Recruit transfer portal':15,'NIL outreach':10,'Bowl game prep':20,
-  'Playoff game prep':25,'Championship prep':25,'NIL outreach to portal targets':12,
-  'NIL retention negotiations':10,'Evaluate portal additions':8,'Finalize portal offers':10,
-};
-
 function getWd(w){ return WEEK_DATA.find(d=>d.w===w)||WEEK_DATA[0]; }
-function nilLabel(v){ return v>=90?'$10M+':v>=80?'$6-10M':v>=70?'$4-6M':v>=60?'$2-4M':v>=50?'$1-2M':'<$1M'; }
 
-// ═══ UI ═══
-function updateTopBar() {
-  document.getElementById('tb-school').textContent = career.school?.name||'—';
-  document.getElementById('tb-role').textContent = `${career.role||'HC'} · ${career.offScheme||'—'} / ${career.defScheme||'—'}`;
-  document.getElementById('tb-week').textContent = `Week ${gs.week}`;
-  document.getElementById('tb-year').textContent = gs.year;
-  document.getElementById('tb-nil').textContent = nilLabel(career.school?.nilBudget||50);
-  const rem = gs.hoursTotal - gs.hoursUsed;
-  const pct = Math.max(0, rem/gs.hoursTotal*100);
-  document.getElementById('tb-hours').textContent = rem;
-  const bar = document.getElementById('tb-hours-bar');
-  bar.style.width = pct+'%';
-  bar.className = 'tb-hours-fill'+(pct<25?' low':'');
-}
+// ═══ RENDER ═══
+function render() {
+  const wd = getWd(week);
+  const wins = simData?.playerRecord?.w || 0;
+  const losses = simData?.playerRecord?.l || 0;
+  const nilBudget = getNilBudget(mySchool?.nilBudget||50);
+  const apPoll = simData?.polls?.AP || [];
+  const myRank = apPoll.find(t=>t.name===mySchool?.name)?.rank;
 
-function updateCalendar() {
-  const wd = getWd(gs.week);
-  document.getElementById('cal-month').textContent = wd.month;
-  document.getElementById('cal-year-label').textContent = gs.year;
-  document.getElementById('cal-week-num').textContent = gs.week;
-  document.getElementById('next-week-num').textContent = gs.week<52?gs.week+1:1;
-  const ph = document.getElementById('cal-phase');
-  ph.textContent = wd.phase;
-  ph.className = 'phase-pill '+wd.cls;
-  const rem = gs.hoursTotal - gs.hoursUsed;
-  document.getElementById('advance-sub').textContent = gs.hoursUsed===0?'No hours spent this week':`${gs.hoursUsed} hrs spent · ${rem} remaining`;
-}
+  // Topbar
+  document.getElementById('tb-phase').textContent = wd.phase;
+  document.getElementById('tb-sub').textContent = `${wd.month} · ${year} Season`;
+  document.getElementById('tb-nil').textContent = nilLabel(nilBudget);
 
-function updateTasks() {
-  const wd = getWd(gs.week);
+  // Record
+  document.getElementById('rc-wins').textContent = wins;
+  document.getElementById('rc-losses').textContent = losses;
+  document.getElementById('rc-rank').textContent = myRank ? `#${myRank}` : '—';
+  document.getElementById('rc-next-game').textContent = wd.game ? 'This Saturday' : 'No game this week';
+  document.getElementById('rc-next-detail').textContent = wd.game ? wd.phase : 'Regular season begins Week 28';
+
+  // Phase pill
+  const pp = document.getElementById('phase-pill');
+  pp.textContent = wd.phase;
+  pp.className = 'phase-pill '+wd.cls;
+  pp.style.fontSize = '0.45rem';
+  pp.style.padding = '1px 6px';
+
+  // Tasks
   document.getElementById('task-list').innerHTML = wd.tasks.map(t=>{
     const cost = TASK_COSTS[t]||0;
-    return `<div class="task-item">
-      <div class="task-marker"></div>
-      <div>
-        <div class="task-text">${t}</div>
-        <div class="task-cost">${cost>0?cost+' staff hours':'Free action'}</div>
-      </div>
+    return `<div class="task-row">
+      <div class="task-dot"></div>
+      <span class="task-label">${t}</span>
+      <span class="task-cost">${cost>0?cost+'h':'free'}</span>
     </div>`;
   }).join('');
+
+  // Standings
+  renderStandings();
+  renderPoll('AP');
 }
 
-function updateHours() {
-  const rem = gs.hoursTotal - gs.hoursUsed;
-  let html = `<div class="hb-row"><span class="hb-label">Remaining</span><span class="hb-val" style="color:${rem<20?'var(--red)':'var(--accent)'};">${rem} hrs</span></div>`;
-  gs.hoursLog.forEach(l=>{ html+=`<div class="hb-row"><span class="hb-label">${l.action}</span><span class="hb-val">${l.hours} hrs</span></div>`; });
-  document.getElementById('hours-breakdown').innerHTML = html;
-  document.getElementById('hb-remaining').textContent = rem+' hrs';
-}
-
-function updateGreeting() {
-  const wd = getWd(gs.week);
-  document.getElementById('greeting-title').textContent = `Week ${gs.week} — ${wd.phase}`;
-  document.getElementById('greeting-sub').textContent = `${gs.year} Season · ${career.school?.name||'Your School'} · ${career.coachName||'Coach'}`;
-  document.getElementById('rec-wins').textContent = gs.wins;
-  document.getElementById('rec-losses').textContent = gs.losses;
-  document.getElementById('rec-rank').textContent = gs.ranking||'—';
-  document.getElementById('next-game').textContent = wd.game?'This Saturday':'Preseason';
-  document.getElementById('next-game-detail').textContent = wd.game?wd.phase:'Regular season begins Week 28';
-}
-
-// ═══ ADVANCE ═══
-function advanceWeek() {
-  gs.week = gs.week<52?gs.week+1:1;
-  if(gs.week===1) gs.year++;
-  gs.hoursUsed=0; gs.hoursLog=[];
-  career.week=gs.week; career.year=gs.year;
-  sessionStorage.setItem('dynastyCareer',JSON.stringify(career));
-
-  // Advance simulation
-  const simRaw = sessionStorage.getItem('dynastySim');
-  if(simRaw && window.DYNASTY_SCHOOLS && window.DynastySimulation) {
-    try {
-      const simData = JSON.parse(simRaw);
-      // Re-create sim from saved data and advance
-      const sim = new DynastySimulation(window.DYNASTY_SCHOOLS, career.school?.name, career.year||2026);
-      sim.rosters = {}; // Will regenerate
-      sim.gamePool = simData.gamePool || [];
-      sim.schedules = simData.schedules || {};
-      sim.polls = simData.polls || {};
-      sim.playerRecord = simData.playerRecord || {w:0,l:0,confW:0,confL:0};
-      sim.currentWeek = simData.currentWeek || 1;
-      sim.initialized = true;
-      sim.advanceToWeek(gs.week);
-      const newSimData = sim.toJSON();
-      sessionStorage.setItem('dynastySim', JSON.stringify(newSimData));
-      // If this week had a player game, redirect to result screen
-      if(newSimData.lastGameResult) {
-        sessionStorage.setItem('lastGameResult', JSON.stringify(newSimData.lastGameResult));
-        window.location.href = 'gameresult.html';
-        return;
-      }
-      updateHubFromSim(newSimData);
-      gs.wins = newSimData.playerRecord?.w || 0;
-      gs.losses = newSimData.playerRecord?.l || 0;
-    } catch(e) { console.error('Sim advance error:', e); }
+function renderStandings() {
+  const el = document.getElementById('standings-panel');
+  if(!simData?.gamePool?.filter(g=>g.played).length) {
+    el.innerHTML = '<div style="padding:10px 0;font-size:0.75rem;color:var(--text-5);">Standings update during season.</div>';
+    return;
   }
+  const schools = window.DYNASTY_SCHOOLS || [];
+  const conf = mySchool?.conf;
+  document.getElementById('conf-name').textContent = conf || '';
+  try {
+    const standings = calcStandings(schools, simData.gamePool, conf);
+    el.innerHTML = `<table class="standings-table">
+      <thead><tr><th>Team</th><th>Conf</th><th>W</th><th>L</th></tr></thead>
+      <tbody>${standings.slice(0,8).map(s=>`
+        <tr class="${s.name===mySchool?.name?'my-team':''}">
+          <td>${s.name}</td>
+          <td>${s.confW}-${s.confL}</td>
+          <td>${s.w}</td>
+          <td>${s.l}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  } catch(e) {
+    el.innerHTML = '<div style="padding:10px 0;font-size:0.75rem;color:var(--text-5);">Loading standings...</div>';
+  }
+}
 
-  updateTopBar(); updateCalendar(); updateTasks(); updateHours(); updateGreeting();
-  loadFeed();
+let activePoll = 'AP';
+function switchPoll(type, tab) {
+  activePoll = type;
+  document.querySelectorAll('.poll-tab').forEach(t=>t.classList.remove('active'));
+  if(tab) tab.classList.add('active');
+  renderPoll(type);
+}
+
+function renderPoll(type) {
+  const el = document.getElementById('poll-panel');
+  const poll = simData?.polls?.[type] || [];
+  if(!poll.length) {
+    el.innerHTML = `<div style="padding:10px 0;font-size:0.75rem;color:var(--text-5);">${type==='CFP'?'CFP releases Week 33.':'Polls release Week 22.'}</div>`;
+    return;
+  }
+  el.innerHTML = poll.slice(0,10).map(t=>`
+    <div class="poll-row ${t.name===mySchool?.name?'my-school':''}">
+      <span class="poll-rank">${t.rank}</span>
+      <span class="poll-name">${t.name}</span>
+      <span class="poll-record">${t.record}</span>
+    </div>`).join('');
 }
 
 // ═══ FEED ═══
+const GEMINI_KEY = '';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
 const REPORTERS = ['@CFBInsider','@RecruitingBeat','@CoachingCarousel','@HeimanWatch','@TransferWire','@NILReport','@ConfidentialCFB','@RankingsDesk'];
 const FEED_TAGS = {recruiting:'ftag-recruiting',coaching:'ftag-coaching',rankings:'ftag-rankings',awards:'ftag-awards',transfer:'ftag-transfer',nil:'ftag-nil'};
-let allArticles=[]; let feedTab='all';
+let allArticles = [], feedTab = 'all';
 
 async function loadFeed() {
-  const el=document.getElementById('feed-list');
-  el.innerHTML=`<div class="feed-loading">Loading feed<br><div class="dot-pulse"></div><div class="dot-pulse"></div><div class="dot-pulse"></div></div>`;
-  const wd=getWd(gs.week);
-  const school=career.school?.name||'your school';
-  const conf=career.school?.conf||'your conference';
-
-  if(!GEMINI_KEY||GEMINI_KEY==='YOUR_GEMINI_KEY_HERE'){
-    allArticles=proceduralFeed(school,conf,wd.phase,gs.week,gs.year);
-    renderFeed(); return;
-  }
-  const prompt=`Generate 8 college football social media posts for a coaching sim game. Each under 256 chars. Mix of: recruiting, coaching rumors, rankings, awards, transfer portal, NIL. Context: Week ${gs.week} of ${gs.year}, phase "${wd.phase}", coach at ${school} in ${conf}. Reference ${school} in 2-3 posts. Return JSON only: [{"handle":"@x","tag":"recruiting|coaching|rankings|awards|transfer|nil","text":"...","time":"Xm ago"}]. Handles: ${REPORTERS.join(', ')}`;
+  document.getElementById('feed-list').innerHTML = '<div class="feed-loading">Loading<span class="dot-pulse"></span><span class="dot-pulse"></span><span class="dot-pulse"></span></div>';
+  const wd = getWd(week);
+  const school = mySchool?.name||'your school';
+  const conf = mySchool?.conf||'your conference';
+  if(!GEMINI_KEY) { allArticles = proceduralFeed(school,conf,wd.phase,week,year); renderFeed(); return; }
+  const prompt = `Generate 8 college football social media posts for a coaching sim. Each under 256 chars. Mix: recruiting, coaching rumors, rankings, awards, transfer portal, NIL. Context: Week ${week} ${year}, phase "${wd.phase}", coach at ${school} ${conf}. Reference ${school} in 2-3 posts. Return JSON only: [{"handle":"@x","tag":"recruiting|coaching|rankings|awards|transfer|nil","text":"...","time":"Xm ago"}]. Handles: ${REPORTERS.join(', ')}`;
   try {
-    const res=await fetch(GEMINI_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:1500}})});
-    const data=await res.json();
-    const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'[]';
-    allArticles=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    renderFeed();
-  } catch(e) {
-    allArticles=proceduralFeed(school,conf,wd.phase,gs.week,gs.year);
-    renderFeed();
-  }
+    const res = await fetch(GEMINI_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:1500}})});
+    const data = await res.json();
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text||'[]';
+    allArticles = JSON.parse(raw.replace(/```json|```/g,'').trim());
+  } catch(e) { allArticles = proceduralFeed(school,conf,wd.phase,week,year); }
+  renderFeed();
 }
 
 function proceduralFeed(school,conf,phase,week,year) {
@@ -505,156 +500,60 @@ function proceduralFeed(school,conf,phase,week,year) {
   const rival=r(schools.filter(s=>s!==school));
   const rival2=r(schools.filter(s=>s!==school&&s!==rival));
   const names=['Malik Johnson','Darius Williams','Jordan Thomas','Marcus Davis','Tyrese Brown'];
-  const positions=['QB','WR','EDGE','OT','CB','RB'];
+  const pos=['QB','WR','EDGE','OT','CB','RB'];
   const stars=['5-star','4-star','3-star'];
   return [
-    {handle:'@RecruitingBeat',tag:'recruiting',time:'12m ago',text:`${r(stars)} ${r(positions)} ${r(names)} drops ${school} from top schools. NIL gap reportedly a factor. #Recruiting #${conf}`},
-    {handle:'@CoachingCarousel',tag:'coaching',time:'34m ago',text:`Sources: multiple P4 programs monitoring ${rival2}'s coordinator situation heading into ${phase}. #CoachingCarousel`},
-    {handle:'@RankingsDesk',tag:'rankings',time:'1h ago',text:`New poll drops Tuesday. ${rival} expected to rise. ${school}'s situation worth watching. Week ${week} results reshaping the board. #CFBRankings`},
-    {handle:'@HeimanWatch',tag:'awards',time:'1h ago',text:`Heisman frontrunners through Week ${week}: Three QBs, one RB in the conversation. Wide open race heading into November. #Heisman`},
-    {handle:'@TransferWire',tag:'transfer',time:'2h ago',text:`${r(stars)} ${r(positions)} from ${rival2} has entered the portal. ${school} among programs expected to show interest. #TransferPortal`},
-    {handle:'@NILReport',tag:'nil',time:'2h ago',text:`NIL collectives at ${rival} and ${rival2} expanding war chests ahead of ${phase}. Arms race continues. #NIL`},
-    {handle:'@CFBInsider',tag:'coaching',time:'3h ago',text:`${school} building momentum in the ${conf} during ${phase}. Staff making noise on the recruiting trail. #${conf.replace(/\s/g,'')} #CFB`},
-    {handle:'@ConfidentialCFB',tag:'recruiting',time:'4h ago',text:`${r(stars)} ${r(positions)} ${r(names)} announcing a decision date soon. ${school}, ${rival}, and ${rival2} all in the mix. #Recruiting`},
+    {handle:'@RecruitingBeat',tag:'recruiting',time:'12m',text:`${r(stars)} ${r(pos)} ${r(names)} drops ${school} from top schools. NIL gap reportedly a factor. #Recruiting`},
+    {handle:'@CoachingCarousel',tag:'coaching',time:'34m',text:`Sources: multiple P4 programs monitoring ${rival2}'s coordinator situation heading into ${phase}. #CoachingCarousel`},
+    {handle:'@RankingsDesk',tag:'rankings',time:'1h',text:`New poll drops Tuesday. ${rival} expected to rise. ${school}'s situation worth watching after Week ${week}. #CFBRankings`},
+    {handle:'@HeimanWatch',tag:'awards',time:'1h',text:`Heisman frontrunners through Week ${week}: three QBs, one RB in the conversation. Wide open race. #Heisman`},
+    {handle:'@TransferWire',tag:'transfer',time:'2h',text:`${r(stars)} ${r(pos)} from ${rival2} has entered the portal. ${school} among programs expected to show interest. #TransferPortal`},
+    {handle:'@NILReport',tag:'nil',time:'2h',text:`NIL collectives at ${rival} and ${rival2} expanding war chests ahead of ${phase}. Arms race continues. #NIL`},
+    {handle:'@CFBInsider',tag:'coaching',time:'3h',text:`${school} building momentum in the ${conf} during ${phase}. Staff making noise on the recruiting trail. #CFB`},
+    {handle:'@ConfidentialCFB',tag:'recruiting',time:'4h',text:`${r(stars)} ${r(pos)} ${r(names)} announcing decision date soon. ${school}, ${rival}, and ${rival2} all in the mix. #Recruiting`},
   ];
 }
 
 function renderFeed() {
-  const el=document.getElementById('feed-list');
-  const filtered=feedTab==='all'?allArticles:allArticles.filter(a=>a.tag===feedTab);
-  if(!filtered.length){el.innerHTML='<div class="feed-loading">No posts in this category</div>';return;}
-  el.innerHTML=filtered.map(a=>`
+  const el = document.getElementById('feed-list');
+  const filtered = feedTab==='all' ? allArticles : allArticles.filter(a=>a.tag===feedTab);
+  if(!filtered.length){el.innerHTML='<div class="feed-loading">No posts in this category.</div>';return;}
+  el.innerHTML = filtered.map(a=>`
     <div class="feed-item">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+      <div class="feed-header-row">
         <span class="feed-handle">${a.handle}</span>
         <span class="feed-tag ${FEED_TAGS[a.tag]||'ftag-coaching'}">${a.tag}</span>
-        <span class="feed-time" style="margin-left:auto;">${a.time}</span>
+        <span class="feed-time">${a.time} ago</span>
       </div>
       <div class="feed-text">${a.text}</div>
     </div>`).join('');
 }
 
-function switchFeedTab(tab) {
-  feedTab=tab.dataset.tab;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  tab.classList.add('active');
+function switchFeedTab(tab, el) {
+  feedTab = tab;
+  document.querySelectorAll('.feed-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
   renderFeed();
 }
 
 function comingSoon(name){ alert(`${name} — coming soon.`); }
 
-// ═══ SIMULATION ═══
-let activePollTab = 'AP';
-
-function initOrLoadSim() {
-  if(!window.DYNASTY_SCHOOLS || !window.DynastySimulation) return;
-  const simRaw = sessionStorage.getItem('dynastySim');
-  if(simRaw) {
-    try {
-      const simData = JSON.parse(simRaw);
-      updateHubFromSim(simData);
-    } catch(e) {}
-  }
-}
-
-function updateHubFromSim(simData) {
-  if(!simData) return;
-
-  // Update record
-  const rec = simData.playerRecord || {w:0,l:0};
-  document.getElementById('rec-wins').textContent = rec.w;
-  document.getElementById('rec-losses').textContent = rec.l;
-
-  // Update ranking
-  const polls = simData.polls || {};
-  const apPoll = polls.AP || [];
-  const myRank = apPoll.find(t=>t.name===career.school?.name);
-  document.getElementById('rec-rank').textContent = myRank ? `#${myRank.rank}` : '—';
-
-  // Update standings widget
-  updateStandingsWidget(simData);
-
-  // Update polls widget
-  updatePollsWidget(simData, activePollTab);
-}
-
-function updateStandingsWidget(simData) {
-  const el = document.getElementById('hub-standings');
-  if(!simData?.gamePool?.filter(g=>g.played).length) {
-    el.innerHTML = '<span style="color:var(--text-5);">Standings update during season</span>';
-    return;
-  }
-  const schools = window.DYNASTY_SCHOOLS || [];
-  const myConf = career.school?.conf;
-  const standings = calcStandings(schools, simData.gamePool, myConf);
-  el.innerHTML = standings.slice(0,6).map((s,i)=>`
-    <div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border-1);">
-      <span style="font-size:0.75rem;font-weight:${s.name===career.school?.name?'700':'400'};color:${s.name===career.school?.name?'var(--accent)':'var(--text-2)'};">${i+1}. ${s.name}</span>
-      <span style="font-family:var(--font-mono);font-size:0.6875rem;color:var(--text-4);">${s.confW}-${s.confL}</span>
-    </div>`).join('');
-}
-
-function updatePollsWidget(simData, pollType) {
-  const el = document.getElementById('hub-polls');
-  const polls = simData?.polls || {};
-  const poll = polls[pollType] || [];
-
-  // Update tab styles
-  ['AP','Coaches','CFP'].forEach(p=>{
-    const tab = document.getElementById(`poll-tab-${p.toLowerCase()}`);
-    if(tab) {
-      const isActive = p===pollType;
-      tab.style.color = isActive?'var(--accent)':'var(--text-4)';
-      tab.style.borderBottom = isActive?'1px solid var(--accent)':'none';
-    }
-  });
-
-  if(!poll.length) {
-    el.innerHTML = `<span style="color:var(--text-5);">${pollType==='CFP'?'CFP releases Week 33':'Polls release Week 22'}</span>`;
-    return;
-  }
-
-  el.innerHTML = poll.slice(0,10).map((t,i)=>`
-    <div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border-1);">
-      <span style="display:flex;gap:5px;align-items:center;">
-        <span style="font-family:var(--font-mono);font-size:0.5625rem;color:var(--text-4);width:16px;text-align:right;">${t.rank}</span>
-        <span style="font-size:0.75rem;font-weight:${t.name===career.school?.name?'700':'400'};color:${t.name===career.school?.name?'var(--accent)':'var(--text-2)'};">${t.name}</span>
-      </span>
-      <span style="font-family:var(--font-mono);font-size:0.6875rem;color:var(--text-4);">${t.record}</span>
-    </div>`).join('');
-}
-
-function switchPollTab(pollType) {
-  activePollTab = pollType;
-  const simRaw = sessionStorage.getItem('dynastySim');
-  if(simRaw) {
-    try { updatePollsWidget(JSON.parse(simRaw), pollType); } catch(e) {}
-  }
-}
-
 // ═══ INIT ═══
-updateTopBar(); updateCalendar(); updateTasks(); updateHours(); updateGreeting(); loadFeed();
-initOrLoadSim();
-</script>
-<script src="schools.js"></script>
-<script src="simulation.js"></script>
-<script>
-// Wire simulation after schools.js and simulation.js load
+render();
+loadFeed();
+
+// Init simulation if needed
 window.addEventListener('load', ()=>{
-  // Initialize simulation if not already done
-  if(window.DYNASTY_SCHOOLS && window.DynastySimulation) {
-    const simRaw = sessionStorage.getItem('dynastySim');
-    if(!simRaw && career.school) {
-      // First time — initialize sim
-      const sim = new DynastySimulation(window.DYNASTY_SCHOOLS, career.school.name, career.year||2026);
+  if(window.DYNASTY_SCHOOLS && window.DynastySimulation && !simData) {
+    try {
+      const sim = new DynastySimulation(window.DYNASTY_SCHOOLS, mySchool?.name, year);
       sim.init();
       sessionStorage.setItem('dynastySim', JSON.stringify(sim.toJSON()));
-      updateHubFromSim(sim.toJSON());
-    } else if(simRaw) {
-      updateHubFromSim(JSON.parse(simRaw));
-    }
+      render();
+    } catch(e){ console.error('Sim init error:', e); }
   }
 });
 </script>
+<script src="sidebar.js"></script>
 </body>
 </html>
