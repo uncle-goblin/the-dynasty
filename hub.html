@@ -6,341 +6,559 @@
 <title>The Dynasty — Dashboard</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.dash-layout {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  height: calc(100vh - 44px);
-  overflow: hidden;
-}
-.dash-center { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-.dash-right  { border-left: 1px solid var(--border-1); background: var(--surface-2); display: flex; flex-direction: column; overflow: hidden; }
+/* Hub-specific layout */
+.hub-body { display: flex; min-height: 100vh; }
 
-/* Week tasks */
-.task-list { padding: 4px 0; }
-.task-row {
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  min-width: 200px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 50;
+}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--sidebar-border);}
+
+.sb-logo-word {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.sb-school-block {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.sb-school-mark-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 14px;
-  border-bottom: 1px solid var(--border-1);
-  cursor: pointer;
-  transition: background 0.07s;
+  padding: 6px 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  margin-bottom: 6px;
 }
-.task-row:hover { background: var(--surface-1); }
-.task-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-.task-dot.done { background: var(--green); }
-.task-label { font-size: 0.8125rem; color: var(--text-2); flex: 1; }
-.task-cost  { font-family: var(--font-mono); font-size: 0.5625rem; color: var(--text-5); }
-.task-cost.free { color: var(--green-bg); }
 
-/* Next game card */
-.next-game-card {
-  background: var(--surface-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-lg);
-  padding: 14px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 12px;
-  align-items: center;
+.sb-logo-circle {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  font-weight: 500;
+  color: white;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
 }
-.ng-vs { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); }
-.ng-opp { font-size: 0.9375rem; font-weight: 700; color: var(--text-1); }
-.ng-meta { font-size: 0.6875rem; color: var(--text-4); margin-top: 2px; }
 
-/* Record row */
-.record-row {
+.sb-school-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #E8E3DC;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+.sb-school-conf {
+  font-family: var(--font-mono);
+  font-size: 0.45rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sidebar-section);
+  margin-top: 1px;
+}
+
+.sb-season-row {
   display: flex;
   align-items: center;
-  gap: 0;
-  background: var(--surface-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-lg);
-  overflow: hidden;
+  gap: 5px;
+  margin-bottom: 4px;
 }
-.record-cell {
-  flex: 1;
-  padding: 12px 14px;
-  text-align: center;
-  border-right: 1px solid var(--border-1);
-}
-.record-cell:last-child { border-right: none; }
-.record-num {
+.sb-week-badge {
   font-family: var(--font-mono);
-  font-size: 1.625rem;
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: var(--accent);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+.sb-year-label {
+  font-family: var(--font-mono);
+  font-size: 0.45rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sidebar-section);
+}
+.sb-rank-label {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 500;
+  color: var(--accent);
+  margin-left: auto;
+}
+
+.sb-record-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.sb-rec-num {
+  font-family: var(--font-mono);
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1;
 }
-.record-label {
+.sb-rec-w { color: #1A7F4B; }
+.sb-rec-l { color: #B91C1C; }
+.sb-rec-sep { color: var(--sidebar-section); font-family: var(--font-mono); font-size: 0.875rem; }
+
+.sb-nav { flex: 1; padding: 4px 0; }
+
+.sb-section {
   font-family: var(--font-mono);
   font-size: 0.45rem;
-  letter-spacing: 0.12em;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--text-4);
-  margin-top: 3px;
+  color: var(--sidebar-section);
+  padding: 10px 14px 3px;
 }
 
-/* Actions grid */
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-.action-btn {
-  background: var(--surface-2);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-lg);
-  padding: 12px;
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  font-size: 0.8125rem;
+  color: var(--sidebar-text);
   cursor: pointer;
   transition: all 0.1s;
+  border-left: 2px solid transparent;
+  text-decoration: none;
+}
+.sb-item:hover { color: #E8E3DC; background: rgba(255,255,255,0.04); }
+.sb-item.active { color: white; background: rgba(255,255,255,0.08); border-left-color: var(--accent); font-weight: 500; }
+.sb-dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; flex-shrink: 0; opacity: 0.4; }
+.sb-item.active .sb-dot { opacity: 1; background: var(--accent); }
+.sb-soon { font-family: var(--font-mono); font-size: 0.4rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sidebar-section); margin-left: auto; }
+
+.sb-footer {
+  padding: 10px 12px;
+  border-top: 1px solid var(--sidebar-border);
+  flex-shrink: 0;
+}
+.sb-hours-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+.sb-hours-label-txt {
+  font-family: var(--font-mono);
+  font-size: 0.45rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sidebar-section);
+}
+.sb-hours-val { font-family: var(--font-mono); font-size: 0.45rem; color: var(--accent); }
+.sb-hours-track { height: 3px; background: var(--sidebar-border); border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
+.sb-hours-bar   { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.3s; }
+.sb-advance-btn {
+  width: 100%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 7px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.1s;
+}
+.sb-advance-btn:hover { opacity: 0.88; }
+.sb-advance-sub {
+  font-family: var(--font-mono);
+  font-size: 0.45rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sidebar-section);
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* Main content */
+.main-content { margin-left: 200px; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* Topbar */
+.topbar { background: #fff; border-bottom: 1px solid var(--border-1); height: 44px; padding: 0 20px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 40; }
+.tb-title { font-size: 0.9375rem; font-weight: 700; color: var(--text-1); }
+.tb-sep { width: 1px; height: 18px; background: var(--border-1); }
+.tb-breadcrumb { font-size: 0.75rem; color: var(--text-4); }
+.tb-spacer { flex: 1; }
+.tb-stat { display: flex; flex-direction: column; align-items: flex-end; }
+.tb-stat-label { font-family: var(--font-mono); font-size: 0.45rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-5); line-height: 1; }
+.tb-stat-val { font-family: var(--font-mono); font-size: 0.8125rem; font-weight: 500; color: var(--accent); line-height: 1.2; }
+
+/* Dashboard layout */
+.dash-layout { display: grid; grid-template-columns: 1fr 288px; flex: 1; overflow: hidden; }
+.dash-center { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--bg); }
+.dash-right  { border-left: 1px solid var(--border-1); background: #fff; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Record bar */
+.record-row { display: flex; background: #fff; border: 1px solid var(--border-1); border-radius: 6px; overflow: hidden; }
+.record-cell { flex: 1; padding: 11px 12px; text-align: center; border-right: 1px solid var(--border-1); }
+.record-cell:last-child { border-right: none; flex: 2; text-align: left; }
+.record-num { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 500; line-height: 1; }
+.record-lbl { font-family: var(--font-mono); font-size: 0.45rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); margin-top: 2px; }
+
+/* Task list */
+.task-row { display: flex; align-items: center; gap: 8px; padding: 7px 14px; border-bottom: 1px solid var(--border-1); }
+.task-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.task-label { font-size: 0.8125rem; color: var(--text-2); flex: 1; }
+.task-cost  { font-family: var(--font-mono); font-size: 0.5625rem; color: var(--text-5); }
+
+/* Action grid */
+.actions-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
+.action-btn {
+  background: #fff;
+  border: 1px solid var(--border-1);
+  border-radius: 6px;
+  padding: 11px 12px;
+  cursor: pointer;
+  transition: border-color 0.1s, background 0.1s;
   text-align: left;
   text-decoration: none;
   display: block;
 }
 .action-btn:hover { border-color: var(--accent); background: var(--accent-light); }
-.action-btn.primary-action { border-color: var(--accent); }
+.action-btn.primary { border-color: var(--accent); }
 .ab-label { font-size: 0.8125rem; font-weight: 600; color: var(--text-1); margin-bottom: 2px; }
-.ab-meta  { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.06em; text-transform: uppercase; }
-.ab-meta.hours { color: var(--blue); }
-.ab-meta.nil   { color: var(--green); }
-.ab-meta.free  { color: var(--text-5); }
+.ab-meta  { font-family: var(--font-mono); font-size: 0.45rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.ab-hours { color: var(--blue); } .ab-nil { color: var(--green); } .ab-free { color: var(--text-5); }
+
+/* Section label */
+.sec-label { font-family: var(--font-mono); font-size: 0.5rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-4); margin-bottom: 7px; margin-top: 4px; padding-bottom: 5px; border-bottom: 1px solid var(--border-1); }
+
+/* Card */
+.card { background: #fff; border: 1px solid var(--border-1); border-radius: 6px; overflow: hidden; }
+.card-head { padding: 8px 12px; border-bottom: 1px solid var(--border-1); display: flex; align-items: center; justify-content: space-between; }
+.card-head-label { font-family: var(--font-mono); font-size: 0.45rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); }
+
+/* Standings */
+.standings-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+.standings-table th { font-family: var(--font-mono); font-size: 0.45rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); padding: 5px 8px; border-bottom: 1px solid var(--border-1); text-align: center; }
+.standings-table th:first-child { text-align: left; }
+.standings-table td { padding: 5px 8px; border-bottom: 1px solid var(--border-1); text-align: center; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-2); }
+.standings-table td:first-child { text-align: left; font-family: var(--font-body); font-weight: 500; color: var(--text-1); }
+.standings-table tr.my-team td { background: var(--accent-light); font-weight: 600; }
+.standings-table tr.my-team td:first-child { border-left: 2px solid var(--accent); }
+
+/* Polls */
+.poll-tabs { display: flex; border-bottom: 1px solid var(--border-1); }
+.poll-tab { flex: 1; text-align: center; font-family: var(--font-mono); font-size: 0.45rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 7px 4px; color: var(--text-4); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.1s; }
+.poll-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.poll-row { display: flex; align-items: center; gap: 7px; padding: 5px 12px; border-bottom: 1px solid var(--border-1); }
+.poll-row.my-school { background: var(--accent-light); border-left: 2px solid var(--accent); }
+.poll-rank { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--text-4); width: 18px; text-align: right; }
+.poll-name { flex: 1; font-size: 0.8125rem; font-weight: 500; color: var(--text-1); }
+.poll-record { font-family: var(--font-mono); font-size: 0.5625rem; color: var(--text-4); }
 
 /* Feed */
+.feed-header { padding: 8px 12px; border-bottom: 1px solid var(--border-1); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.feed-section-label { font-family: var(--font-mono); font-size: 0.45rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); }
 .feed-tabs { display: flex; border-bottom: 1px solid var(--border-1); flex-shrink: 0; }
-.feed-tab  {
-  flex: 1;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: 0.5rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 8px 4px;
-  color: var(--text-4);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all 0.1s;
-}
+.feed-tab { flex: 1; text-align: center; font-family: var(--font-mono); font-size: 0.45rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 7px 4px; color: var(--text-4); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.1s; }
 .feed-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.feed-refresh { font-family: var(--font-mono); font-size: 0.45rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-4); cursor: pointer; border: 1px solid var(--border-1); border-radius: 2px; padding: 2px 6px; transition: all 0.1s; background: none; }
+.feed-refresh:hover { color: var(--accent); border-color: var(--accent); }
 .feed-list { flex: 1; overflow-y: auto; }
-.feed-refresh-btn {
-  background: none;
-  border: none;
-  font-family: var(--font-mono);
-  font-size: 0.5rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-4);
-  cursor: pointer;
-  padding: 6px 12px;
-  border-bottom: 1px solid var(--border-1);
-  width: 100%;
-  text-align: center;
-  transition: color 0.1s;
-  flex-shrink: 0;
-}
-.feed-refresh-btn:hover { color: var(--accent); }
+.feed-item { padding: 9px 12px; border-bottom: 1px solid var(--border-1); cursor: pointer; transition: background 0.07s; }
+.feed-item:hover { background: var(--surface-1); }
+.feed-item-header { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
+.feed-handle { font-family: var(--font-mono); font-size: 0.5625rem; font-weight: 500; color: var(--accent); }
+.feed-time { font-family: var(--font-mono); font-size: 0.45rem; color: var(--text-5); margin-left: auto; }
+.feed-tag { font-family: var(--font-mono); font-size: 0.4rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; padding: 1px 4px; border-radius: 2px; }
+.feed-text { font-size: 0.8125rem; color: var(--text-2); line-height: 1.45; }
+.ftag-recruiting{background:#E8F5EE;color:#1A7F4B;} .ftag-coaching{background:#E6EFF9;color:#1B4E8A;}
+.ftag-rankings{background:#FEF5E0;color:#92620A;} .ftag-awards{background:#F3E8FF;color:#6B21A8;}
+.ftag-transfer{background:#E8F5F5;color:#1B6B6B;} .ftag-nil{background:#FEE8E8;color:#B91C1C;}
 .feed-loading { padding: 20px; text-align: center; font-size: 0.8125rem; color: var(--text-4); }
-
-/* Dot loading */
-.dot-pulse { display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--text-4); margin: 0 2px; animation: dp 1.2s infinite; }
-.dot-pulse:nth-child(2){animation-delay:.2s} .dot-pulse:nth-child(3){animation-delay:.4s}
+.dot{display:inline-block;width:3px;height:3px;border-radius:50%;background:var(--text-4);margin:0 2px;animation:dp 1.2s infinite;}
+.dot:nth-child(2){animation-delay:.2s;} .dot:nth-child(3){animation-delay:.4s;}
 @keyframes dp{0%,100%{opacity:.2}50%{opacity:1}}
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.phase-pill{display:inline-block;font-family:var(--font-mono);font-size:0.45rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;padding:1px 6px;border-radius:2px;}
+.phase-signing{background:#E8F5EE;color:#1A7F4B;} .phase-spring{background:#E6EFF9;color:#1B4E8A;}
+.phase-summer{background:#FEF5E0;color:#92620A;} .phase-camp{background:#F3E8FF;color:#6B21A8;}
+.phase-season{background:#FEE8E8;color:#B91C1C;} .phase-bowl{background:#FFF7ED;color:#C2410C;}
+.phase-portal{background:#E8F5EE;color:#1A7F4B;}
 </style>
 </head>
 <body>
+<div class="hub-body">
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <span class="tb-title" id="tb-phase">Dashboard</span>
-  <div class="tb-sep"></div>
-  <span class="tb-breadcrumb" id="tb-sub">2026 Season</span>
-  <div class="tb-spacer"></div>
-  <div class="tb-stat">
-    <span class="tb-stat-label">NIL Budget</span>
-    <span class="tb-stat-val" id="tb-nil">—</span>
-  </div>
-</div>
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar" id="dynasty-sidebar">
+  <div class="sb-logo-word">The Dynasty</div>
 
-<div class="dash-layout">
-
-<!-- CENTER -->
-<div class="dash-center">
-
-  <!-- Record -->
-  <div class="record-row" id="record-row">
-    <div class="record-cell">
-      <div class="record-num text-green" id="rc-wins">0</div>
-      <div class="record-label">Wins</div>
-    </div>
-    <div class="record-cell">
-      <div class="record-num text-red" id="rc-losses">0</div>
-      <div class="record-label">Losses</div>
-    </div>
-    <div class="record-cell">
-      <div class="record-num text-accent" id="rc-rank">—</div>
-      <div class="record-label">AP Rank</div>
-    </div>
-    <div class="record-cell" style="flex:2;text-align:left;">
-      <div style="font-family:var(--font-mono);font-size:0.45rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-4);margin-bottom:3px;">Next Game</div>
-      <div style="font-weight:600;font-size:0.875rem;" id="rc-next-game">—</div>
-      <div style="font-size:0.6875rem;color:var(--text-4);" id="rc-next-detail">Season begins Week 28</div>
-    </div>
-  </div>
-
-  <!-- This Week Tasks -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">This Week</span>
-      <span class="phase-pill" id="phase-pill" style="font-size:0.45rem;padding:1px 6px;">Early Signing Period</span>
-    </div>
-    <div class="task-list" id="task-list"></div>
-  </div>
-
-  <!-- Primary Actions -->
-  <div>
-    <div class="section-label">Primary Actions</div>
-    <div class="actions-grid">
-      <a class="action-btn primary-action" href="recruiting.html">
-        <div class="ab-label">Recruiting</div>
-        <div class="ab-meta hours">Staff Hours</div>
-      </a>
-      <div class="action-btn" onclick="comingSoon('Game Plan')">
-        <div class="ab-label">Game Plan</div>
-        <div class="ab-meta hours">Staff Hours</div>
-      </div>
-      <a class="action-btn" href="schedule.html">
-        <div class="ab-label">Schedule</div>
-        <div class="ab-meta free">Free Action</div>
-      </a>
-    </div>
-  </div>
-
-  <!-- Program Actions -->
-  <div>
-    <div class="section-label">Program</div>
-    <div class="actions-grid">
-      <a class="action-btn" href="roster.html">
-        <div class="ab-label">Depth Chart</div>
-        <div class="ab-meta free">Free Action</div>
-      </a>
-      <a class="action-btn" href="goals.html">
-        <div class="ab-label">Goals & Events</div>
-        <div class="ab-meta free">Free Action</div>
-      </a>
-      <a class="action-btn" href="nil.html">
-        <div class="ab-label">Collective & NIL</div>
-        <div class="ab-meta nil">NIL Currency</div>
-      </a>
-      <a class="action-btn" href="budget.html">
-        <div class="ab-label">Budget</div>
-        <div class="ab-meta free">Free Action</div>
-      </a>
-      <div class="action-btn" onclick="comingSoon('Facilities')">
-        <div class="ab-label">Facilities</div>
-        <div class="ab-meta nil">NIL Currency</div>
-      </div>
-      <div class="action-btn" onclick="comingSoon('Scouting')">
-        <div class="ab-label">Scouting</div>
-        <div class="ab-meta hours">Staff Hours</div>
+  <div class="sb-school-block">
+    <div class="sb-school-mark-row">
+      <div class="sb-logo-circle" id="sb-abbr">—</div>
+      <div>
+        <div class="sb-school-name" id="sb-school-name">Loading...</div>
+        <div class="sb-school-conf" id="sb-school-conf">—</div>
       </div>
     </div>
-  </div>
-
-  <!-- Standings + Polls -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Conference Standings</span>
-        <span id="conf-name" style="font-family:var(--font-mono);font-size:0.5rem;color:var(--text-4);">—</span>
-      </div>
-      <div id="standings-panel" style="font-size:0.8125rem;color:var(--text-4);padding:12px 14px;">
-        Standings update during season.
-      </div>
+    <div class="sb-season-row">
+      <span class="sb-week-badge" id="sb-week">Week 1</span>
+      <span class="sb-year-label" id="sb-year">2026</span>
+      <span class="sb-rank-label" id="sb-rank" style="display:none;"></span>
     </div>
-    <div class="card">
-      <div class="poll-tabs" id="poll-tabs">
-        <div class="poll-tab active" onclick="switchPoll('AP',this)">AP Poll</div>
-        <div class="poll-tab" onclick="switchPoll('Coaches',this)">Coaches</div>
-        <div class="poll-tab" onclick="switchPoll('CFP',this)">CFP</div>
-      </div>
-      <div id="poll-panel" style="font-size:0.8125rem;color:var(--text-4);padding:12px 14px;">
-        Polls release Week 22.
-      </div>
+    <div class="sb-record-row">
+      <span class="sb-rec-num sb-rec-w" id="sb-wins">0</span>
+      <span class="sb-rec-sep">–</span>
+      <span class="sb-rec-num sb-rec-l" id="sb-losses">0</span>
+      <span id="sb-phase" class="phase-pill phase-signing" style="margin-left:auto;">Signing</span>
     </div>
   </div>
 
-</div>
+  <nav class="sb-nav">
+    <div class="sb-section">Program</div>
+    <a class="sb-item active" href="hub.html" data-page="hub.html"><div class="sb-dot"></div>Dashboard</a>
+    <a class="sb-item" href="schedule.html" data-page="schedule.html"><div class="sb-dot"></div>Schedule</a>
+    <a class="sb-item" href="roster.html" data-page="roster.html"><div class="sb-dot"></div>Depth Chart</a>
+    <a class="sb-item" href="goals.html" data-page="goals.html"><div class="sb-dot"></div>Goals & Events</a>
 
-<!-- RIGHT: Feed -->
-<div class="dash-right">
-  <div style="padding:10px 12px;border-bottom:1px solid var(--border-1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-    <span style="font-family:var(--font-mono);font-size:0.5rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);">CFB Feed</span>
+    <div class="sb-section">Season</div>
+    <a class="sb-item" href="recruiting.html" data-page="recruiting.html"><div class="sb-dot"></div>Recruiting</a>
+    <a class="sb-item" href="#" data-page="portal.html"><div class="sb-dot"></div>Transfer Portal<span class="sb-soon">soon</span></a>
+    <a class="sb-item" href="schedule.html" data-page="standings"><div class="sb-dot"></div>Standings</a>
+
+    <div class="sb-section">Staff & Money</div>
+    <a class="sb-item" href="#" data-page="coaching.html"><div class="sb-dot"></div>Coaching Staff<span class="sb-soon">soon</span></a>
+    <a class="sb-item" href="nil.html" data-page="nil.html"><div class="sb-dot"></div>Collective & NIL</a>
+    <a class="sb-item" href="budget.html" data-page="budget.html"><div class="sb-dot"></div>Budget</a>
+
+    <div class="sb-section">Coach</div>
+    <a class="sb-item" href="#" data-page="skills.html"><div class="sb-dot"></div>Skill Trees<span class="sb-soon">soon</span></a>
+    <a class="sb-item" href="#" data-page="profile.html"><div class="sb-dot"></div>Coach Profile<span class="sb-soon">soon</span></a>
+  </nav>
+
+  <div class="sb-footer">
+    <div class="sb-hours-header">
+      <span class="sb-hours-label-txt">Staff Hours</span>
+      <span class="sb-hours-val" id="sb-hours-val">100/100</span>
+    </div>
+    <div class="sb-hours-track">
+      <div class="sb-hours-bar" id="sb-hours-bar" style="width:100%;"></div>
+    </div>
+    <button class="sb-advance-btn" onclick="dynastyAdvanceWeek()">
+      Advance to Week <span id="sb-next-week">2</span>
+    </button>
+    <div class="sb-advance-sub" id="sb-advance-sub">No hours spent</div>
   </div>
-  <div class="feed-tabs" id="feed-tabs">
-    <div class="feed-tab active" onclick="switchFeedTab('all',this)">All</div>
-    <div class="feed-tab" onclick="switchFeedTab('recruiting',this)">Recruiting</div>
-    <div class="feed-tab" onclick="switchFeedTab('coaching',this)">Coaching</div>
-    <div class="feed-tab" onclick="switchFeedTab('rankings',this)">Rankings</div>
-  </div>
-  <button class="feed-refresh-btn" onclick="loadFeed()">↻ Refresh Feed</button>
-  <div class="feed-list" id="feed-list">
-    <div class="feed-loading">
-      Loading<span class="dot-pulse"></span><span class="dot-pulse"></span><span class="dot-pulse"></span>
+</aside>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="main-content">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <span class="tb-title" id="tb-phase">Dashboard</span>
+    <div class="tb-sep"></div>
+    <span class="tb-breadcrumb" id="tb-sub">2026 Season</span>
+    <div class="tb-spacer"></div>
+    <div class="tb-stat">
+      <span class="tb-stat-label">NIL Budget</span>
+      <span class="tb-stat-val" id="tb-nil">—</span>
     </div>
   </div>
-</div>
 
-</div>
+  <!-- Dash body -->
+  <div class="dash-layout">
+
+    <!-- Center -->
+    <div class="dash-center">
+
+      <!-- Record -->
+      <div class="record-row">
+        <div class="record-cell">
+          <div class="record-num" style="color:#1A7F4B;" id="rc-wins">0</div>
+          <div class="record-lbl">Wins</div>
+        </div>
+        <div class="record-cell">
+          <div class="record-num" style="color:#B91C1C;" id="rc-losses">0</div>
+          <div class="record-lbl">Losses</div>
+        </div>
+        <div class="record-cell">
+          <div class="record-num" style="color:var(--accent);" id="rc-rank">—</div>
+          <div class="record-lbl">AP Rank</div>
+        </div>
+        <div class="record-cell">
+          <div style="font-family:var(--font-mono);font-size:0.45rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-4);margin-bottom:2px;">Next Game</div>
+          <div style="font-weight:600;font-size:0.875rem;color:var(--text-1);" id="rc-next">—</div>
+          <div style="font-size:0.6875rem;color:var(--text-4);" id="rc-next-detail">Season begins Week 28</div>
+        </div>
+      </div>
+
+      <!-- This Week -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-head-label">This Week</span>
+          <span class="phase-pill" id="phase-pill">Early Signing Period</span>
+        </div>
+        <div id="task-list"></div>
+      </div>
+
+      <!-- Primary Actions -->
+      <div>
+        <div class="sec-label">Primary Actions</div>
+        <div class="actions-grid">
+          <a class="action-btn primary" href="recruiting.html">
+            <div class="ab-label">Recruiting</div>
+            <div class="ab-meta ab-hours">Staff Hours</div>
+          </a>
+          <div class="action-btn" onclick="alert('Game Plan — coming soon.')">
+            <div class="ab-label">Game Plan</div>
+            <div class="ab-meta ab-hours">Staff Hours</div>
+          </div>
+          <a class="action-btn" href="schedule.html">
+            <div class="ab-label">Schedule</div>
+            <div class="ab-meta ab-free">Free Action</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Program -->
+      <div>
+        <div class="sec-label">Program</div>
+        <div class="actions-grid">
+          <a class="action-btn" href="roster.html">
+            <div class="ab-label">Depth Chart</div>
+            <div class="ab-meta ab-free">Free Action</div>
+          </a>
+          <a class="action-btn" href="goals.html">
+            <div class="ab-label">Goals & Events</div>
+            <div class="ab-meta ab-free">Free Action</div>
+          </a>
+          <a class="action-btn" href="nil.html">
+            <div class="ab-label">Collective & NIL</div>
+            <div class="ab-meta ab-nil">NIL Currency</div>
+          </a>
+          <a class="action-btn" href="budget.html">
+            <div class="ab-label">Budget</div>
+            <div class="ab-meta ab-free">Free Action</div>
+          </a>
+          <div class="action-btn" onclick="alert('Facilities — coming soon.')">
+            <div class="ab-label">Facilities</div>
+            <div class="ab-meta ab-nil">NIL Currency</div>
+          </div>
+          <div class="action-btn" onclick="alert('Scouting — coming soon.')">
+            <div class="ab-label">Scouting</div>
+            <div class="ab-meta ab-hours">Staff Hours</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Standings + Polls -->
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-head-label">Conference Standings</span>
+            <span id="conf-name" style="font-family:var(--font-mono);font-size:0.45rem;color:var(--text-4);"></span>
+          </div>
+          <div id="standings-panel" style="padding:10px 12px;font-size:0.8125rem;color:var(--text-4);">Standings update during season.</div>
+        </div>
+        <div class="card">
+          <div class="poll-tabs">
+            <div class="poll-tab active" onclick="switchPoll('AP',this)">AP Poll</div>
+            <div class="poll-tab" onclick="switchPoll('Coaches',this)">Coaches</div>
+            <div class="poll-tab" onclick="switchPoll('CFP',this)">CFP</div>
+          </div>
+          <div id="poll-panel" style="padding:10px 12px;font-size:0.75rem;color:var(--text-4);">Polls release Week 22.</div>
+        </div>
+      </div>
+
+    </div><!-- end dash-center -->
+
+    <!-- Right: Feed -->
+    <div class="dash-right">
+      <div class="feed-header">
+        <span class="feed-section-label">CFB Feed</span>
+        <button class="feed-refresh" onclick="loadFeed()">↻ Refresh</button>
+      </div>
+      <div class="feed-tabs">
+        <div class="feed-tab active" onclick="switchFeedTab('all',this)">All</div>
+        <div class="feed-tab" onclick="switchFeedTab('recruiting',this)">Recruiting</div>
+        <div class="feed-tab" onclick="switchFeedTab('coaching',this)">Coaching</div>
+        <div class="feed-tab" onclick="switchFeedTab('rankings',this)">Rankings</div>
+      </div>
+      <div class="feed-list" id="feed-list">
+        <div class="feed-loading">Loading<span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      </div>
+    </div>
+
+  </div><!-- end dash-layout -->
+</div><!-- end main-content -->
+</div><!-- end hub-body -->
 
 <script src="schools.js"></script>
 <script src="simulation.js"></script>
 <script>
-// ═══ CAREER ═══
 const careerRaw = sessionStorage.getItem('dynastyCareer');
 const career = careerRaw ? JSON.parse(careerRaw) : null;
-if(!career){ window.location.href='setup.html'; }
+if (!career) { window.location.href = 'setup.html'; }
 
 const simRaw = sessionStorage.getItem('dynastySim');
 const simData = simRaw ? JSON.parse(simRaw) : null;
+const mySchool = career?.school || {};
+const week = career?.week || 1;
+const year = career?.year || 2026;
 
-const mySchool = career.school;
-const week = career.week || 1;
-const year = career.year || 2026;
+function nilLabel(v){ if(!v)return'—'; if(v>=1e6)return'$'+(v/1e6).toFixed(1)+'M'; if(v>=1000)return'$'+(v/1000).toFixed(0)+'K'; return'$'+v; }
+function getNil(g){ return g>=90?10e6:g>=80?7e6:g>=70?4.5e6:g>=60?2.5e6:g>=50?1.2e6:500000; }
 
-// Nil label
-function nilLabel(v){
-  if(!v) return '—';
-  if(v>=1000000) return '$'+(v/1000000).toFixed(1)+'M';
-  if(v>=1000) return '$'+(v/1000).toFixed(0)+'K';
-  return '$'+v;
-}
-
-function getNilBudget(grade){
-  return grade>=90?10000000:grade>=80?7000000:grade>=70?4500000:grade>=60?2500000:grade>=50?1200000:500000;
-}
-
-// ═══ WEEK DATA ═══
+// Week data
 const TASK_COSTS={'Set weekly game plan':15,'Scout opponent':20,'Recruit calls':10,'Host official visits':25,'Fundraise':15,'Bowl game prep':20,'Playoff game prep':25};
-const WEEK_DATA=[
+const WD=[
   {w:1,month:'January',phase:'Early Signing Period',cls:'phase-signing',tasks:['Sign recruiting class','Review transfer portal','Renew staff contracts'],game:false},
   {w:2,month:'January',phase:'Early Signing Period',cls:'phase-signing',tasks:['Sign recruiting class','Contact unsigned commits','Evaluate portal additions'],game:false},
   {w:3,month:'January',phase:'Transfer Portal',cls:'phase-portal',tasks:['Recruit transfer portal','Evaluate portal fits','NIL outreach'],game:false},
   {w:4,month:'January',phase:'Transfer Portal',cls:'phase-portal',tasks:['Recruit transfer portal','Finalize portal offers','Coaching staff review'],game:false},
-  {w:5,month:'February',phase:'Coaching Carousel',cls:'phase-signing',tasks:['Review assistant staff','Evaluate open positions','Scout spring recruits'],game:false},
+  {w:5,month:'February',phase:'Coaching Carousel',cls:'phase-signing',tasks:['Review assistant staff','Evaluate open positions','Scout recruits'],game:false},
   {w:6,month:'February',phase:'Coaching Carousel',cls:'phase-signing',tasks:['Finalize coaching staff','Spring recruit outreach','Fundraise'],game:false},
-  {w:7,month:'February',phase:'Spring Prep',cls:'phase-spring',tasks:['Install spring playbook','Set spring depth chart','Spring recruit outreach'],game:false},
-  {w:8,month:'February',phase:'Spring Prep',cls:'phase-spring',tasks:['Spring practice prep','Evaluate returning roster','Contact spring recruits'],game:false},
+  {w:7,month:'February',phase:'Spring Prep',cls:'phase-spring',tasks:['Install spring playbook','Set spring depth chart','Recruit outreach'],game:false},
+  {w:8,month:'February',phase:'Spring Prep',cls:'phase-spring',tasks:['Spring practice prep','Evaluate returning roster','Contact recruits'],game:false},
   {w:9,month:'March',phase:'Spring Practice',cls:'phase-spring',tasks:['Spring practice','Evaluate position battles','Official visits'],game:false},
   {w:10,month:'March',phase:'Spring Practice',cls:'phase-spring',tasks:['Spring practice','Host official visits','Scout junior class'],game:false},
   {w:11,month:'March',phase:'Spring Practice',cls:'phase-spring',tasks:['Spring practice','Recruiting calls','Fundraise'],game:false},
-  {w:12,month:'March',phase:'Spring Practice',cls:'phase-spring',tasks:['Spring practice','Host official visits','Evaluate portal options'],game:false},
-  {w:13,month:'April',phase:'Spring Game',cls:'phase-spring',tasks:['Spring game roster','Host spring game','Contact recruits post-spring'],game:false},
+  {w:12,month:'March',phase:'Spring Practice',cls:'phase-spring',tasks:['Spring practice','Host official visits','Evaluate portal'],game:false},
+  {w:13,month:'April',phase:'Spring Game',cls:'phase-spring',tasks:['Spring game roster','Host spring game','Contact recruits'],game:false},
   {w:14,month:'April',phase:'Post Spring',cls:'phase-spring',tasks:['Debrief spring game','Facility planning','Recruit calls'],game:false},
   {w:15,month:'May',phase:'Summer Recruiting',cls:'phase-summer',tasks:['Schedule 7-on-7 camp','Recruit calls','Host unofficial visits'],game:false},
   {w:16,month:'May',phase:'Summer Recruiting',cls:'phase-summer',tasks:['Host 7-on-7 camp','Recruit calls','Fundraise'],game:false},
   {w:17,month:'May',phase:'Summer Recruiting',cls:'phase-summer',tasks:['Recruit calls','Host unofficial visits','Coaching clinic'],game:false},
   {w:18,month:'June',phase:'Summer Recruiting',cls:'phase-summer',tasks:['Host 7-on-7 camp','Recruit calls','Fundraise'],game:false},
-  {w:19,month:'June',phase:'Summer Recruiting',cls:'phase-summer',tasks:['Recruit calls','Host unofficial visits','Scout junior class'],game:false},
+  {w:19,month:'June',phase:'Summer Recruiting',cls:'phase-summer',tasks:['Recruit calls','Host unofficial visits','Scout juniors'],game:false},
   {w:20,month:'June',phase:'Dead Period',cls:'phase-summer',tasks:['Fundraise','Facility upgrades','Review roster'],game:false},
   {w:21,month:'July',phase:'Dead Period',cls:'phase-summer',tasks:['Fundraise','Facility upgrades','Staff development'],game:false},
   {w:22,month:'July',phase:'Preseason Prep',cls:'phase-camp',tasks:['Finalize depth chart','Install fall playbook','Recruit calls'],game:false},
@@ -362,90 +580,62 @@ const WEEK_DATA=[
   {w:38,month:'November',phase:'Regular Season Wk 10',cls:'phase-season',tasks:['Set weekly game plan','Scout opponent','Recruit calls'],game:true},
   {w:39,month:'November',phase:'Regular Season Wk 11',cls:'phase-season',tasks:['Set weekly game plan','Scout opponent','Recruit calls'],game:true},
   {w:40,month:'November',phase:'Regular Season Wk 12',cls:'phase-season',tasks:['Set weekly game plan','Scout opponent','Early signing prep'],game:true},
-  {w:41,month:'November',phase:'Conference Championship',cls:'phase-bowl',tasks:['Set weekly game plan','Scout opponent','Recruit calls'],game:true},
-  {w:42,month:'December',phase:'Bowl Season',cls:'phase-bowl',tasks:['Bowl game prep','Recruit calls','Evaluate transfer portal'],game:true},
+  {w:41,month:'November',phase:'Conference Championship',cls:'phase-bowl',tasks:['Set game plan','Scout opponent','Recruit calls'],game:true},
+  {w:42,month:'December',phase:'Bowl Season',cls:'phase-bowl',tasks:['Bowl game prep','Recruit calls','Evaluate portal'],game:true},
   {w:43,month:'December',phase:'Bowl Season',cls:'phase-bowl',tasks:['Bowl game prep','Recruit calls','NIL retention'],game:true},
   {w:44,month:'December',phase:'Playoff',cls:'phase-bowl',tasks:['Playoff game prep','Recruit calls','Portal watch'],game:true},
   {w:45,month:'December',phase:'Early Signing Period',cls:'phase-signing',tasks:['Sign recruiting class','Contact unsigned commits','Portal opens soon'],game:false},
   {w:46,month:'December',phase:'Early Signing Period',cls:'phase-signing',tasks:['Sign recruiting class','Finalize portal list','Coaching staff review'],game:false},
-  {w:47,month:'December',phase:'Transfer Portal',cls:'phase-portal',tasks:['Recruit transfer portal','NIL outreach','Coaching carousel watch'],game:false},
-  {w:48,month:'December',phase:'Transfer Portal',cls:'phase-portal',tasks:['Recruit transfer portal','Finalize portal targets','Fundraise'],game:false},
+  {w:47,month:'December',phase:'Transfer Portal',cls:'phase-portal',tasks:['Recruit transfer portal','NIL outreach','Carousel watch'],game:false},
+  {w:48,month:'December',phase:'Transfer Portal',cls:'phase-portal',tasks:['Recruit portal','Finalize targets','Fundraise'],game:false},
   {w:49,month:'January',phase:'National Championship',cls:'phase-bowl',tasks:['Championship prep','Recruit calls','Portal evaluation'],game:true},
   {w:50,month:'January',phase:'Offseason Review',cls:'phase-signing',tasks:['Review season','Set offseason goals','Fundraise'],game:false},
   {w:51,month:'January',phase:'Offseason',cls:'phase-signing',tasks:['Coaching staff review','Recruit calls','Facility planning'],game:false},
   {w:52,month:'January',phase:'Season End',cls:'phase-signing',tasks:['Prepare for new season','Final portal review','Set program goals'],game:false},
 ];
+function getWd(w){ return WD.find(d=>d.w===w)||WD[0]; }
 
-function getWd(w){ return WEEK_DATA.find(d=>d.w===w)||WEEK_DATA[0]; }
-
-// ═══ RENDER ═══
 function render() {
   const wd = getWd(week);
   const wins = simData?.playerRecord?.w || 0;
   const losses = simData?.playerRecord?.l || 0;
-  const nilBudget = getNilBudget(mySchool?.nilBudget||50);
+  const nil = getNil(mySchool?.nilBudget||50);
   const apPoll = simData?.polls?.AP || [];
   const myRank = apPoll.find(t=>t.name===mySchool?.name)?.rank;
 
-  // Topbar
   document.getElementById('tb-phase').textContent = wd.phase;
   document.getElementById('tb-sub').textContent = `${wd.month} · ${year} Season`;
-  document.getElementById('tb-nil').textContent = nilLabel(nilBudget);
-
-  // Record
+  document.getElementById('tb-nil').textContent = nilLabel(nil);
   document.getElementById('rc-wins').textContent = wins;
   document.getElementById('rc-losses').textContent = losses;
   document.getElementById('rc-rank').textContent = myRank ? `#${myRank}` : '—';
-  document.getElementById('rc-next-game').textContent = wd.game ? 'This Saturday' : 'No game this week';
+  document.getElementById('rc-next').textContent = wd.game ? 'This Saturday' : 'No game';
   document.getElementById('rc-next-detail').textContent = wd.game ? wd.phase : 'Regular season begins Week 28';
 
-  // Phase pill
   const pp = document.getElementById('phase-pill');
-  pp.textContent = wd.phase;
-  pp.className = 'phase-pill '+wd.cls;
-  pp.style.fontSize = '0.45rem';
-  pp.style.padding = '1px 6px';
+  pp.textContent = wd.phase; pp.className = 'phase-pill '+wd.cls;
 
-  // Tasks
   document.getElementById('task-list').innerHTML = wd.tasks.map(t=>{
-    const cost = TASK_COSTS[t]||0;
-    return `<div class="task-row">
-      <div class="task-dot"></div>
-      <span class="task-label">${t}</span>
-      <span class="task-cost">${cost>0?cost+'h':'free'}</span>
-    </div>`;
+    const c = TASK_COSTS[t]||0;
+    return `<div class="task-row"><div class="task-dot"></div><span class="task-label">${t}</span><span class="task-cost">${c>0?c+'h':'free'}</span></div>`;
   }).join('');
 
-  // Standings
   renderStandings();
   renderPoll('AP');
 }
 
 function renderStandings() {
   const el = document.getElementById('standings-panel');
-  if(!simData?.gamePool?.filter(g=>g.played).length) {
-    el.innerHTML = '<div style="padding:10px 0;font-size:0.75rem;color:var(--text-5);">Standings update during season.</div>';
-    return;
-  }
-  const schools = window.DYNASTY_SCHOOLS || [];
+  const played = simData?.gamePool?.filter(g=>g.played).length || 0;
+  if (!played) { el.innerHTML = '<div style="padding:8px 0;font-size:0.75rem;color:var(--text-5);">Standings update during season.</div>'; return; }
   const conf = mySchool?.conf;
   document.getElementById('conf-name').textContent = conf || '';
   try {
-    const standings = calcStandings(schools, simData.gamePool, conf);
-    el.innerHTML = `<table class="standings-table">
-      <thead><tr><th>Team</th><th>Conf</th><th>W</th><th>L</th></tr></thead>
-      <tbody>${standings.slice(0,8).map(s=>`
-        <tr class="${s.name===mySchool?.name?'my-team':''}">
-          <td>${s.name}</td>
-          <td>${s.confW}-${s.confL}</td>
-          <td>${s.w}</td>
-          <td>${s.l}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
-  } catch(e) {
-    el.innerHTML = '<div style="padding:10px 0;font-size:0.75rem;color:var(--text-5);">Loading standings...</div>';
-  }
+    const standings = calcStandings(window.DYNASTY_SCHOOLS||[], simData.gamePool, conf);
+    el.innerHTML = `<table class="standings-table"><thead><tr><th>Team</th><th>Conf</th><th>W</th><th>L</th></tr></thead><tbody>
+      ${standings.slice(0,8).map(s=>`<tr class="${s.name===mySchool?.name?'my-team':''}"><td>${s.name}</td><td>${s.confW}-${s.confL}</td><td>${s.w}</td><td>${s.l}</td></tr>`).join('')}
+    </tbody></table>`;
+  } catch(e) { el.innerHTML = '<div style="padding:8px 0;font-size:0.75rem;color:var(--text-5);">Loading...</div>'; }
 }
 
 let activePoll = 'AP';
@@ -455,14 +645,10 @@ function switchPoll(type, tab) {
   if(tab) tab.classList.add('active');
   renderPoll(type);
 }
-
 function renderPoll(type) {
   const el = document.getElementById('poll-panel');
   const poll = simData?.polls?.[type] || [];
-  if(!poll.length) {
-    el.innerHTML = `<div style="padding:10px 0;font-size:0.75rem;color:var(--text-5);">${type==='CFP'?'CFP releases Week 33.':'Polls release Week 22.'}</div>`;
-    return;
-  }
+  if (!poll.length) { el.innerHTML = `<div style="padding:8px 0;font-size:0.75rem;color:var(--text-5);">${type==='CFP'?'CFP releases Week 33.':'Polls release Week 22.'}</div>`; return; }
   el.innerHTML = poll.slice(0,10).map(t=>`
     <div class="poll-row ${t.name===mySchool?.name?'my-school':''}">
       <span class="poll-rank">${t.rank}</span>
@@ -471,62 +657,51 @@ function renderPoll(type) {
     </div>`).join('');
 }
 
-// ═══ FEED ═══
+// Feed
 const GEMINI_KEY = '';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
-const REPORTERS = ['@CFBInsider','@RecruitingBeat','@CoachingCarousel','@HeimanWatch','@TransferWire','@NILReport','@ConfidentialCFB','@RankingsDesk'];
+const REPORTERS = ['@CFBInsider','@RecruitingBeat','@CoachingCarousel','@HeimanWatch','@TransferWire','@NILReport','@ConfidentialCFB'];
 const FEED_TAGS = {recruiting:'ftag-recruiting',coaching:'ftag-coaching',rankings:'ftag-rankings',awards:'ftag-awards',transfer:'ftag-transfer',nil:'ftag-nil'};
 let allArticles = [], feedTab = 'all';
 
 async function loadFeed() {
-  document.getElementById('feed-list').innerHTML = '<div class="feed-loading">Loading<span class="dot-pulse"></span><span class="dot-pulse"></span><span class="dot-pulse"></span></div>';
+  document.getElementById('feed-list').innerHTML = '<div class="feed-loading">Loading<span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
   const wd = getWd(week);
   const school = mySchool?.name||'your school';
   const conf = mySchool?.conf||'your conference';
-  if(!GEMINI_KEY) { allArticles = proceduralFeed(school,conf,wd.phase,week,year); renderFeed(); return; }
-  const prompt = `Generate 8 college football social media posts for a coaching sim. Each under 256 chars. Mix: recruiting, coaching rumors, rankings, awards, transfer portal, NIL. Context: Week ${week} ${year}, phase "${wd.phase}", coach at ${school} ${conf}. Reference ${school} in 2-3 posts. Return JSON only: [{"handle":"@x","tag":"recruiting|coaching|rankings|awards|transfer|nil","text":"...","time":"Xm ago"}]. Handles: ${REPORTERS.join(', ')}`;
+  if (!GEMINI_KEY) { allArticles = proceduralFeed(school,conf,wd.phase); renderFeed(); return; }
   try {
-    const res = await fetch(GEMINI_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:1500}})});
+    const prompt = `Generate 8 college football social media posts for a coaching sim. Under 256 chars each. Mix: recruiting, coaching rumors, rankings, awards, transfer portal, NIL. Context: Week ${week} ${year}, phase "${wd.phase}", coach at ${school} ${conf}. Reference ${school} in 2-3. Return JSON only: [{"handle":"@x","tag":"recruiting|coaching|rankings|awards|transfer|nil","text":"...","time":"Xm ago"}]`;
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:1500}})});
     const data = await res.json();
     const raw = data.candidates?.[0]?.content?.parts?.[0]?.text||'[]';
     allArticles = JSON.parse(raw.replace(/```json|```/g,'').trim());
-  } catch(e) { allArticles = proceduralFeed(school,conf,wd.phase,week,year); }
+  } catch(e) { allArticles = proceduralFeed(school,conf,wd.phase); }
   renderFeed();
 }
 
-function proceduralFeed(school,conf,phase,week,year) {
+function proceduralFeed(school,conf,phase) {
   const schools=['Alabama','Georgia','Ohio State','Texas','Michigan','LSU','Notre Dame','Oregon','Clemson'];
   const r=a=>a[Math.floor(Math.random()*a.length)];
-  const rival=r(schools.filter(s=>s!==school));
-  const rival2=r(schools.filter(s=>s!==school&&s!==rival));
-  const names=['Malik Johnson','Darius Williams','Jordan Thomas','Marcus Davis','Tyrese Brown'];
-  const pos=['QB','WR','EDGE','OT','CB','RB'];
-  const stars=['5-star','4-star','3-star'];
+  const rival=r(schools.filter(s=>s!==school)), rival2=r(schools.filter(s=>s!==school&&s!==rival));
+  const names=['Malik Johnson','Darius Williams','Jordan Thomas','Marcus Davis'];
+  const pos=['QB','WR','EDGE','OT','CB','RB'], stars=['5-star','4-star','3-star'];
   return [
-    {handle:'@RecruitingBeat',tag:'recruiting',time:'12m',text:`${r(stars)} ${r(pos)} ${r(names)} drops ${school} from top schools. NIL gap reportedly a factor. #Recruiting`},
+    {handle:'@RecruitingBeat',tag:'recruiting',time:'12m',text:`${r(stars)} ${r(pos)} ${r(names)} drops ${school} from top schools. NIL gap reportedly a factor.`},
     {handle:'@CoachingCarousel',tag:'coaching',time:'34m',text:`Sources: multiple P4 programs monitoring ${rival2}'s coordinator situation heading into ${phase}. #CoachingCarousel`},
-    {handle:'@RankingsDesk',tag:'rankings',time:'1h',text:`New poll drops Tuesday. ${rival} expected to rise. ${school}'s situation worth watching after Week ${week}. #CFBRankings`},
-    {handle:'@HeimanWatch',tag:'awards',time:'1h',text:`Heisman frontrunners through Week ${week}: three QBs, one RB in the conversation. Wide open race. #Heisman`},
-    {handle:'@TransferWire',tag:'transfer',time:'2h',text:`${r(stars)} ${r(pos)} from ${rival2} has entered the portal. ${school} among programs expected to show interest. #TransferPortal`},
-    {handle:'@NILReport',tag:'nil',time:'2h',text:`NIL collectives at ${rival} and ${rival2} expanding war chests ahead of ${phase}. Arms race continues. #NIL`},
-    {handle:'@CFBInsider',tag:'coaching',time:'3h',text:`${school} building momentum in the ${conf} during ${phase}. Staff making noise on the recruiting trail. #CFB`},
-    {handle:'@ConfidentialCFB',tag:'recruiting',time:'4h',text:`${r(stars)} ${r(pos)} ${r(names)} announcing decision date soon. ${school}, ${rival}, and ${rival2} all in the mix. #Recruiting`},
+    {handle:'@RankingsDesk',tag:'rankings',time:'1h',text:`New poll drops Tuesday. ${rival} expected to rise. ${school}'s situation worth watching. #CFBRankings`},
+    {handle:'@HeimanWatch',tag:'awards',time:'1h',text:`Heisman frontrunners: three QBs, one RB in the conversation. Wide open race heading into November. #Heisman`},
+    {handle:'@TransferWire',tag:'transfer',time:'2h',text:`${r(stars)} ${r(pos)} from ${rival2} has entered the portal. ${school} among programs expected to show interest.`},
+    {handle:'@NILReport',tag:'nil',time:'2h',text:`NIL collectives at ${rival} and ${rival2} expanding ahead of ${phase}. Arms race continues. #NIL`},
+    {handle:'@CFBInsider',tag:'coaching',time:'3h',text:`${school} building momentum in ${conf} during ${phase}. Staff making noise on the trail. #CFB`},
+    {handle:'@ConfidentialCFB',tag:'recruiting',time:'4h',text:`${r(stars)} ${r(pos)} ${r(names)} announcing decision date soon. ${school}, ${rival}, and ${rival2} all in the mix.`},
   ];
 }
 
 function renderFeed() {
-  const el = document.getElementById('feed-list');
   const filtered = feedTab==='all' ? allArticles : allArticles.filter(a=>a.tag===feedTab);
-  if(!filtered.length){el.innerHTML='<div class="feed-loading">No posts in this category.</div>';return;}
-  el.innerHTML = filtered.map(a=>`
-    <div class="feed-item">
-      <div class="feed-header-row">
-        <span class="feed-handle">${a.handle}</span>
-        <span class="feed-tag ${FEED_TAGS[a.tag]||'ftag-coaching'}">${a.tag}</span>
-        <span class="feed-time">${a.time} ago</span>
-      </div>
-      <div class="feed-text">${a.text}</div>
-    </div>`).join('');
+  document.getElementById('feed-list').innerHTML = filtered.length
+    ? filtered.map(a=>`<div class="feed-item"><div class="feed-item-header"><span class="feed-handle">${a.handle}</span><span class="feed-tag ${FEED_TAGS[a.tag]||'ftag-coaching'}">${a.tag}</span><span class="feed-time">${a.time} ago</span></div><div class="feed-text">${a.text}</div></div>`).join('')
+    : '<div class="feed-loading">No posts in this category.</div>';
 }
 
 function switchFeedTab(tab, el) {
@@ -536,24 +711,134 @@ function switchFeedTab(tab, el) {
   renderFeed();
 }
 
-function comingSoon(name){ alert(`${name} — coming soon.`); }
+// Init sim if needed
+function initSim() {
+  if (!window.DynastySimulation || !window.DYNASTY_SCHOOLS) return;
+  if (!simData && mySchool?.name) {
+    try {
+      const s = new DynastySimulation(window.DYNASTY_SCHOOLS, mySchool.name, year);
+      s.init();
+      sessionStorage.setItem('dynastySim', JSON.stringify(s.toJSON()));
+    } catch(e) { console.error(e); }
+  }
+}
 
-// ═══ INIT ═══
+// ═══ ADVANCE WEEK ═══
+function dynastyAdvanceWeek() {
+  career.week = week < 52 ? week + 1 : 1;
+  if (career.week === 1) career.year = (career.year||2026)+1;
+  career.hoursRemaining = 100;
+  delete career.fundraisingUsed;
+  sessionStorage.setItem('dynastyCareer', JSON.stringify(career));
+
+  if (simData && window.DynastySimulation && window.DYNASTY_SCHOOLS) {
+    try {
+      const s = new DynastySimulation(window.DYNASTY_SCHOOLS, mySchool?.name, career.year);
+      s.gamePool     = simData.gamePool     || [];
+      s.schedules    = simData.schedules    || {};
+      s.polls        = simData.polls        || {};
+      s.playerRecord = simData.playerRecord || {w:0,l:0,confW:0,confL:0};
+      s.currentWeek  = simData.currentWeek  || 1;
+      s.initialized  = true;
+      s.advanceToWeek(career.week);
+      const nd = s.toJSON();
+      sessionStorage.setItem('dynastySim', JSON.stringify(nd));
+      if (nd.lastGameResult) {
+        sessionStorage.setItem('lastGameResult', JSON.stringify(nd.lastGameResult));
+        window.location.href = 'gameresult.html';
+        return;
+      }
+    } catch(e) { console.error('Advance error:', e); }
+  }
+  window.location.reload();
+}
+
 render();
 loadFeed();
+initSim();
 
-// Init simulation if needed
-window.addEventListener('load', ()=>{
-  if(window.DYNASTY_SCHOOLS && window.DynastySimulation && !simData) {
-    try {
-      const sim = new DynastySimulation(window.DYNASTY_SCHOOLS, mySchool?.name, year);
-      sim.init();
-      sessionStorage.setItem('dynastySim', JSON.stringify(sim.toJSON()));
-      render();
-    } catch(e){ console.error('Sim init error:', e); }
+// ═══ POPULATE SIDEBAR ═══
+(function populateSidebar() {
+  const hex = mySchool?.primary || '#C8102E';
+  const rv=parseInt(hex.slice(1,3),16)||200,gv=parseInt(hex.slice(3,5),16)||16,bv=parseInt(hex.slice(5,7),16)||46;
+  document.documentElement.style.setProperty('--accent', hex);
+  document.documentElement.style.setProperty('--accent-2', mySchool?.secondary||'#8B0000');
+  document.documentElement.style.setProperty('--accent-mid', `rgba(${rv},${gv},${bv},0.18)`);
+  document.documentElement.style.setProperty('--accent-light', `rgba(${rv},${gv},${bv},0.08)`);
+
+  function abbr(name) {
+    if (!name) return '??';
+    const skip = new Set(['the','and','of','at','a','in']);
+    const words = name.split(/[\s&]+/).filter(w=>w.length>1&&!skip.has(w.toLowerCase()));
+    if (!words.length) return name.slice(0,2).toUpperCase();
+    if (words.length===1) return words[0].slice(0,3).toUpperCase();
+    if (words.length===2) return (words[0][0]+words[1].slice(0,2)).toUpperCase();
+    return words.slice(0,3).map(w=>w[0]).join('').toUpperCase();
   }
-});
+
+  const wins = simData?.playerRecord?.w || 0;
+  const losses = simData?.playerRecord?.l || 0;
+  const hoursRem = career.hoursRemaining ?? 100;
+  const hPct = Math.max(0, Math.min(100, hoursRem));
+  const apPoll = simData?.polls?.AP || [];
+  const myRankEntry = apPoll.find(t=>t.name===mySchool?.name);
+
+  // Abbreviation circle
+  const abbrEl = document.getElementById('sb-abbr');
+  if (abbrEl) { abbrEl.textContent = abbr(mySchool?.name); abbrEl.style.background = hex; }
+
+  // School name / conf
+  const snEl = document.getElementById('sb-school-name');
+  if (snEl) snEl.textContent = mySchool?.name || 'Your School';
+  const scEl = document.getElementById('sb-school-conf');
+  if (scEl) scEl.textContent = `${mySchool?.conf||'—'} · ${career.role||'HC'}`;
+
+  // Week badge
+  const wkEl = document.getElementById('sb-week');
+  if (wkEl) { wkEl.textContent = `Week ${week}`; wkEl.style.background = hex; }
+  const yrEl = document.getElementById('sb-year');
+  if (yrEl) yrEl.textContent = year;
+
+  // Rank
+  const rnkEl = document.getElementById('sb-rank');
+  if (rnkEl && myRankEntry) { rnkEl.textContent = `#${myRankEntry.rank}`; rnkEl.style.display=''; rnkEl.style.color=hex; }
+
+  // Record
+  const wEl = document.getElementById('sb-wins'), lEl = document.getElementById('sb-losses');
+  if (wEl) wEl.textContent = wins;
+  if (lEl) lEl.textContent = losses;
+
+  // Phase
+  function getPhase(w) {
+    if(w<=2)  return {label:'Signing',    cls:'phase-signing'};
+    if(w<=4)  return {label:'Portal',     cls:'phase-portal'};
+    if(w<=6)  return {label:'Carousel',   cls:'phase-signing'};
+    if(w<=14) return {label:'Spring',     cls:'phase-spring'};
+    if(w<=21) return {label:'Recruiting', cls:'phase-summer'};
+    if(w<=27) return {label:'Camp',       cls:'phase-camp'};
+    if(w<=40) return {label:'Season',     cls:'phase-season'};
+    if(w<=44) return {label:'Bowl/Playoff',cls:'phase-bowl'};
+    return     {label:'Offseason',        cls:'phase-signing'};
+  }
+  const ph = getPhase(week);
+  const phEl = document.getElementById('sb-phase');
+  if (phEl) { phEl.textContent = ph.label; phEl.className = 'phase-pill '+ph.cls; }
+
+  // Hours
+  const hvEl = document.getElementById('sb-hours-val');
+  if (hvEl) hvEl.textContent = `${hoursRem}/100`;
+  const hbEl = document.getElementById('sb-hours-bar');
+  if (hbEl) { hbEl.style.width = hPct+'%'; hbEl.style.background = hPct<20?'#B91C1C':hex; }
+
+  // Next week
+  const nwEl = document.getElementById('sb-next-week');
+  if (nwEl) nwEl.textContent = week<52?week+1:1;
+
+  // Sub text
+  const asEl = document.getElementById('sb-advance-sub');
+  if (asEl) asEl.textContent = hoursRem===100?'No hours spent':100-hoursRem+' hrs used';
+})();
 </script>
-<script src="sidebar.js"></script>
+<!-- sidebar.js not needed — hub has inline sidebar -->
 </body>
 </html>
